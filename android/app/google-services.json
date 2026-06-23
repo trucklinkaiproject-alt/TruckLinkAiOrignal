@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "848099422906",
+    "project_id": "trucklink-ai-orignal",
+    "storage_bucket": "trucklink-ai-orignal.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:848099422906:android:54dd19dfe50cfeaf060883",
+        "android_client_info": {
+          "package_name": "com.example.trucklinkai_orignal"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA6bI782ro5XDh043x_9Bd-JcaD-G-pMIY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
