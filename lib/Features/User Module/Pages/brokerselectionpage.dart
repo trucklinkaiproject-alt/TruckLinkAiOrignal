@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/Pages/brokerDetailpage.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/Widgets/appBar.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/Widgets/brokerdetailcontainer.dart';
+import 'package:trucklinkai_orignal/Features/User%20Module/bloc/getBrokerBloc/getBrokerCubit.dart';
+import 'package:trucklinkai_orignal/Features/User%20Module/bloc/getBrokerBloc/getBrokerState.dart';
 
 class BrokerSelectionPage extends StatefulWidget {
   const BrokerSelectionPage({super.key});
@@ -12,6 +15,13 @@ class BrokerSelectionPage extends StatefulWidget {
 }
 
 class _BrokerSelectionPageState extends State<BrokerSelectionPage> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    context.read<GetBrokerCubit>().fetchAllBroker();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,50 +45,47 @@ class _BrokerSelectionPageState extends State<BrokerSelectionPage> {
                   ),
                 ),
                 SizedBox(height: 10),
-                Brokerdetailcontainer(
-                  name: "John Doe",
-                  Location: "Delhi, India",
-                  rating: "4.5",
-                  reviews: "200",
-                  estTime: "2 hours",
-                  ontap: () {
-                    String brokerID = getBrokerUserId();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => BrokerDetailPage(),
-                      ),
-                    );
+
+                BlocBuilder<GetBrokerCubit, GetBrokerState>(
+                  builder: (context, state) {
+                    if (state is GetBrokerLoadingState) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    if (state is GetBrokerLoadedState) {
+                      final brokers = context.read<GetBrokerCubit>().brokers;
+
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: brokers.length,
+                        itemBuilder: (context, index) {
+                          final broker = brokers[index];
+
+                          return Brokerdetailcontainer(
+                            name: broker["name"] ?? "",
+                            Location: broker["location"] ?? "Not Specify by broker",
+                            rating: broker["rating"]?.toString() ?? "0",
+                            reviews: broker["reviews"]?.toString() ?? "0",
+                            estTime: broker["estimatedTime"] ?? "0",
+                            ontap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => BrokerDetailPage(),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      );
+                    }
+
+                    return const Center(child: Text("No Broker Available"));
                   },
                 ),
-                Brokerdetailcontainer(
-                  name: "John Doe",
-                  Location: "Delhi, India",
-                  rating: "4.5",
-                  reviews: "200",
-                  estTime: "2 hours",
-                ),
-                Brokerdetailcontainer(
-                  name: "John Doe",
-                  Location: "Delhi, India",
-                  rating: "4.5",
-                  reviews: "200",
-                  estTime: "2 hours",
-                ),
-                Brokerdetailcontainer(
-                  name: "John Doe",
-                  Location: "Delhi, India",
-                  rating: "4.5",
-                  reviews: "200",
-                  estTime: "2 hours",
-                ),
-                Brokerdetailcontainer(
-                  name: "John Doe",
-                  Location: "Delhi, India",
-                  rating: "4.5",
-                  reviews: "200",
-                  estTime: "2 hours",
-                ),
+                
+                
                 SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -93,6 +100,7 @@ class _BrokerSelectionPageState extends State<BrokerSelectionPage> {
                     ),
                     SizedBox(width: 5),
                     Icon(Icons.arrow_downward, color: Colors.blue, size: 16),
+                    SizedBox(width: 20),
                   ],
                 ),
               ],

@@ -803,9 +803,9 @@ class _BrokerChatPageState extends State<BrokerChatPage> {
 //   }
 // }
 
-// // ══════════════════════════════════════════════════════════════════════════════
-// // BROKER AVATAR WIDGET (reusable)
-// // ══════════════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════════
+// BROKER AVATAR WIDGET (reusable)
+// ══════════════════════════════════════════════════════════════════════════════
 
 // class _BrokerAvatar extends StatelessWidget {
 //   final String? avatarUrl;

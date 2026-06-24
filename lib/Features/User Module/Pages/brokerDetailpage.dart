@@ -6,6 +6,7 @@ import 'package:trucklinkai_orignal/Features/User%20Module/Pages/brokerchatpage.
 import 'package:trucklinkai_orignal/Features/User%20Module/Widgets/appBar.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/Widgets/heading.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/bloc/CreateReqBloc/createReqcubit.dart';
+import 'package:trucklinkai_orignal/Features/User%20Module/bloc/getBrokerBloc/getBrokerCubit.dart';
 
 class BrokerDetailPage extends StatefulWidget {
   const BrokerDetailPage({super.key});
@@ -289,7 +290,7 @@ class _BrokerDetailPageState extends State<BrokerDetailPage> {
                   clr: Appcolors.primaryBlue,
                   onTap: () {
                     context.read<CreateReqCubit>().createRequestToBroker(
-                      '12345',
+                      "12345"
                     );
                   },
                 ),

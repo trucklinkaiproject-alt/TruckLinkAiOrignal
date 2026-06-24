@@ -7,6 +7,7 @@ import 'package:trucklinkai_orignal/Features/Auth/AuthBloc/authCubit.dart';
 import 'package:trucklinkai_orignal/Features/Auth/Pages/splashScreenPage.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerBloc/brokerCubit.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/bloc/CreateReqBloc/createReqcubit.dart';
+import 'package:trucklinkai_orignal/Features/User%20Module/bloc/getBrokerBloc/getBrokerCubit.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/bloc/userBloc/usercubit.dart';
 import 'Core/Constants/firebase_options.dart';
 
@@ -20,6 +21,7 @@ void main() async {
           BlocProvider(create: (context) => UserCubit()),
           BlocProvider(create: (context) => CreateReqCubit()),
           BlocProvider(create: (context) => BrokerCubit()),
+          BlocProvider(create: (context) => GetBrokerCubit()),
 
           
         ],
@@ -35,8 +37,8 @@ class TruckLinkApp extends StatelessWidget {
     return MaterialApp(
       title: "TruckLink AI",
       debugShowCheckedModeBanner: false,
-       theme: ThemeData(
-    textTheme: GoogleFonts.poppinsTextTheme(),
+       theme:ThemeData(
+    fontFamily: 'Poppins',
   ),
       home: const SplashPage(),
     );

@@ -61,6 +61,13 @@ class CreateReqCubit extends Cubit<CreateReqState> {
             .collection('Requests')
             .doc(currentRequest!.orderId)
             .set(currentRequest!.toMap());
+
+            await _firestore
+            .collection('Broker')
+            .doc(currentRequest!.brokerId)
+            .collection('IncomingRequests')
+            .doc(currentRequest!.orderId)
+            .set(currentRequest!.toMap());
       } else {
         emit(CreateReqErrorState("No data available from user"));
       }
