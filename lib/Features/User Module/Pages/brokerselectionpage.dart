@@ -25,6 +25,7 @@ class _BrokerSelectionPageState extends State<BrokerSelectionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Appcolors.background,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Container(
@@ -34,7 +35,7 @@ class _BrokerSelectionPageState extends State<BrokerSelectionPage> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                AppBarContainer(title: "Choose Broker"),
+                AppBarContainer(title: "Choose Broker", backArrow: true),
                 SizedBox(height: 20),
                 Text(
                   "Recommended For You",
@@ -45,34 +46,37 @@ class _BrokerSelectionPageState extends State<BrokerSelectionPage> {
                   ),
                 ),
                 SizedBox(height: 10),
-
+          
                 BlocBuilder<GetBrokerCubit, GetBrokerState>(
                   builder: (context, state) {
                     if (state is GetBrokerLoadingState) {
                       return const Center(child: CircularProgressIndicator());
                     }
-
+          
                     if (state is GetBrokerLoadedState) {
                       final brokers = context.read<GetBrokerCubit>().brokers;
-
+                      Map<String,dynamic> broker;
                       return ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: brokers.length,
                         itemBuilder: (context, index) {
-                          final broker = brokers[index];
-
+                          broker = brokers[index];
+                         
+          
                           return Brokerdetailcontainer(
                             name: broker["name"] ?? "",
-                            Location: broker["location"] ?? "Not Specify by broker",
+                            Location:
+                                broker["location"] ?? "Not Specify by broker",
                             rating: broker["rating"]?.toString() ?? "0",
                             reviews: broker["reviews"]?.toString() ?? "0",
                             estTime: broker["estimatedTime"] ?? "0",
+                            brokerUid: broker["uid"],
                             ontap: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => BrokerDetailPage(),
+                                  builder: (_) => BrokerDetailPage(brokerData: brokers[index],),
                                 ),
                               );
                             },
@@ -80,12 +84,11 @@ class _BrokerSelectionPageState extends State<BrokerSelectionPage> {
                         },
                       );
                     }
-
+          
                     return const Center(child: Text("No Broker Available"));
                   },
                 ),
-                
-                
+          
                 SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -100,9 +103,9 @@ class _BrokerSelectionPageState extends State<BrokerSelectionPage> {
                     ),
                     SizedBox(width: 5),
                     Icon(Icons.arrow_downward, color: Colors.blue, size: 16),
-                    SizedBox(width: 20),
                   ],
                 ),
+                SizedBox(height: 20),
               ],
             ),
           ),

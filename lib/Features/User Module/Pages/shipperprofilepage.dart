@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
 import 'package:trucklinkai_orignal/Features/Auth/AuthBloc/authCubit.dart';
+import 'package:trucklinkai_orignal/Features/Auth/Pages/logInPage.dart';
 import 'package:trucklinkai_orignal/Features/Auth/Pages/roleSelectionPage.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/Widgets/appBar.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/bloc/userBloc/usercubit.dart';
@@ -88,8 +89,9 @@ class _ShipperProfilePageState extends State<ShipperProfilePage> {
 
                   BlocBuilder<UserCubit, UserState>(
                     builder: (context, state) {
+                      
                       return Text(
-                        state is UserLoadedState ? state.userData : "Unknown",
+                        state is UserLoadedState ? state.userName : "Unknown",
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
@@ -116,7 +118,7 @@ class _ShipperProfilePageState extends State<ShipperProfilePage> {
               Divider(height: 1, color: Colors.grey.shade300),
               buildProfileOption(
                 icon: Icons.business_center_outlined,
-                title: 'Business Details',
+                title: 'Change Your Role',
               ),
               Divider(height: 1, color: Colors.grey.shade300),
               buildProfileOption(icon: Icons.payment, title: 'Payment Methods'),
@@ -151,7 +153,7 @@ class _ShipperProfilePageState extends State<ShipperProfilePage> {
                 title: 'Log Out',
                 isDestructive: true,
                 onTap: () {
-                  context.read<AuthCubit>().logOut();
+                  context.read<AuthCubit>().logOut( context);
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(

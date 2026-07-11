@@ -6,7 +6,8 @@ class SelectionPageButton extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.clr,
-    required this.icn, required this.onTap,
+    required this.icn,
+    required this.onTap,
   });
   final String title;
   final String subtitle;
@@ -37,13 +38,23 @@ class SelectionPageButton extends StatelessWidget {
           ),
         ),
         leading: Container(
-          width: 50,
-          height: 50,
+          width: MediaQuery.of(context).size.width * 0.07,
+          height: MediaQuery.of(context).size.width * 0.07,
+          constraints: const BoxConstraints(
+            minWidth: 45,
+            minHeight: 45,
+            maxWidth: 60,
+            maxHeight: 60,
+          ),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(25),
             border: Border.all(color: Colors.white, width: 1.5),
           ),
-          child: Icon(icn.icon, color: Colors.white, size: 30),
+          child: Icon(
+            icn.icon,
+            color: Colors.white,
+            size: 30,
+          ),
         ),
       ),
     );

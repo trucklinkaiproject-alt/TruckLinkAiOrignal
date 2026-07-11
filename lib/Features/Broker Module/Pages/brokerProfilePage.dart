@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
 import 'package:trucklinkai_orignal/Features/Auth/AuthBloc/authCubit.dart';
+import 'package:trucklinkai_orignal/Features/Auth/Pages/logInPage.dart';
 import 'package:trucklinkai_orignal/Features/Auth/Pages/roleSelectionPage.dart';
+import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerBloc/brokerCubit.dart';
+import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerBloc/brokerStates.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/Widgets/appBar.dart';
 
 class BrokerProfilePage extends StatelessWidget {
@@ -78,11 +81,24 @@ class BrokerProfilePage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-
-                  const Text(
-                    'John Doe',
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  BlocBuilder<BrokerCubit, BrokerState>(
+                    builder: (context, state) {
+                      return Text(
+                        state is BrokerLoadedState
+                            ? state.userData?? "Unknown User"
+                            : "Unknown User",
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      );
+                    },
                   ),
+
+                  // const Text(
+                  //   'John Doe',
+                  //   style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  // ),
 
                   const SizedBox(height: 4),
 
@@ -102,7 +118,7 @@ class BrokerProfilePage extends StatelessWidget {
               Divider(height: 1, color: Colors.grey.shade300),
               buildProfileOption(
                 icon: Icons.business_center_outlined,
-                title: 'Business Details',
+                title: 'Change Your Role',
               ),
               Divider(height: 1, color: Colors.grey.shade300),
               buildProfileOption(icon: Icons.payment, title: 'Payment Methods'),
@@ -137,7 +153,7 @@ class BrokerProfilePage extends StatelessWidget {
                 title: 'Log Out',
                 isDestructive: true,
                 onTap: () {
-                  context.read<AuthCubit>().logOut();
+                  context.read<AuthCubit>().logOut(context);
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(

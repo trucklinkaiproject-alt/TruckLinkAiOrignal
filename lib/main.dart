@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:trucklinkai_orignal/Core/Widgets/noscrollbehaviour.dart';
 import 'package:trucklinkai_orignal/Features/Auth/AuthBloc/authCubit.dart';
 import 'package:trucklinkai_orignal/Features/Auth/Pages/splashScreenPage.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerBloc/brokerCubit.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/bloc/CreateReqBloc/createReqcubit.dart';
+import 'package:trucklinkai_orignal/Features/User%20Module/bloc/OrderDetailBloc/orderDetialCubit.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/bloc/getBrokerBloc/getBrokerCubit.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/bloc/userBloc/usercubit.dart';
 import 'Core/Constants/firebase_options.dart';
@@ -22,6 +22,7 @@ void main() async {
           BlocProvider(create: (context) => CreateReqCubit()),
           BlocProvider(create: (context) => BrokerCubit()),
           BlocProvider(create: (context) => GetBrokerCubit()),
+          BlocProvider(create: (context) => OrderDetailCubit()),
 
           
         ],
@@ -35,6 +36,7 @@ class TruckLinkApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: NoScrollbarBehavior(),
       title: "TruckLink AI",
       debugShowCheckedModeBanner: false,
        theme:ThemeData(

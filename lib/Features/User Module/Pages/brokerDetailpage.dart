@@ -5,11 +5,13 @@ import 'package:trucklinkai_orignal/Features/Auth/Widgets/continueButton.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/Pages/brokerchatpage.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/Widgets/appBar.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/Widgets/heading.dart';
+import 'package:trucklinkai_orignal/Features/User%20Module/Widgets/shipperbottomnavbar.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/bloc/CreateReqBloc/createReqcubit.dart';
-import 'package:trucklinkai_orignal/Features/User%20Module/bloc/getBrokerBloc/getBrokerCubit.dart';
+import 'package:trucklinkai_orignal/Features/User%20Module/bloc/CreateReqBloc/createReqstate.dart';
 
 class BrokerDetailPage extends StatefulWidget {
-  const BrokerDetailPage({super.key});
+  const BrokerDetailPage({super.key, required this.brokerData});
+  final Map<String, dynamic> brokerData;
 
   @override
   State<BrokerDetailPage> createState() => _BrokerDetailPageState();
@@ -23,20 +25,23 @@ class _BrokerDetailPageState extends State<BrokerDetailPage> {
         child: SingleChildScrollView(
           physics: BouncingScrollPhysics(),
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 20),
+            padding: EdgeInsets.symmetric(horizontal: 35),
             color: Appcolors.background,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                AppBarContainer(title: "Moeez Khan"),
+                AppBarContainer(
+                  title: widget.brokerData["name"],
+                  backArrow: true,
+                ),
 
                 SizedBox(height: 20),
                 Heading(text: "Broker Details"),
                 SizedBox(height: 10),
                 Container(
                   width: double.infinity,
-                  height: 160,
+
                   padding: EdgeInsets.all(15),
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -49,7 +54,7 @@ class _BrokerDetailPageState extends State<BrokerDetailPage> {
                       Row(
                         children: [
                           Text(
-                            "Broker ID #",
+                            "Broker ID #  ",
                             style: TextStyle(
                               color: Colors.black,
                               fontSize: 12,
@@ -57,7 +62,7 @@ class _BrokerDetailPageState extends State<BrokerDetailPage> {
                             ),
                           ),
                           Text(
-                            "12345",
+                            widget.brokerData["uid"],
                             style: TextStyle(
                               color: const Color.fromARGB(255, 45, 45, 45),
                               fontSize: 10,
@@ -77,7 +82,8 @@ class _BrokerDetailPageState extends State<BrokerDetailPage> {
                             ),
                           ),
                           Text(
-                            "Delhi, India",
+                            widget.brokerData["location"] ??
+                                "Not specify by broker",
                             style: TextStyle(
                               color: const Color.fromARGB(255, 45, 45, 45),
                               fontSize: 10,
@@ -97,7 +103,7 @@ class _BrokerDetailPageState extends State<BrokerDetailPage> {
                             ),
                           ),
                           Text(
-                            "03234738205",
+                            widget.brokerData["phone"],
                             style: TextStyle(
                               color: const Color.fromARGB(255, 45, 45, 45),
                               fontSize: 10,
@@ -117,7 +123,7 @@ class _BrokerDetailPageState extends State<BrokerDetailPage> {
                             ),
                           ),
                           Text(
-                            "mr.kamrankhan4@gmail.com",
+                            widget.brokerData["email"],
                             style: TextStyle(
                               color: const Color.fromARGB(255, 45, 45, 45),
                               fontSize: 10,
@@ -137,7 +143,7 @@ class _BrokerDetailPageState extends State<BrokerDetailPage> {
                             ),
                           ),
                           Text(
-                            "4.5 (200 reviews)",
+                            widget.brokerData["rating"] ?? "4.5 (200 reviews)",
                             style: TextStyle(
                               color: const Color.fromARGB(255, 45, 45, 45),
                               fontSize: 10,
@@ -157,7 +163,7 @@ class _BrokerDetailPageState extends State<BrokerDetailPage> {
                             ),
                           ),
                           Text(
-                            "2 hours",
+                            widget.brokerData["estimatedTime"] ?? "2 hours",
                             style: TextStyle(
                               color: const Color.fromARGB(255, 45, 45, 45),
                               fontSize: 10,
@@ -170,80 +176,88 @@ class _BrokerDetailPageState extends State<BrokerDetailPage> {
                 ),
                 SizedBox(height: 20),
 
-                Container(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Fare Demanded: ",
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Container(
-                        width: 150,
-                        padding: EdgeInsets.all(15),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        child: Center(
-                          child: Text(
-                            " PKR 5000",
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 20),
-                Container(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Your Offer: ",
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Container(
-                        width: 150,
-                        height: 50,
-                        padding: EdgeInsets.all(15),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        child: TextField(
-                          decoration: InputDecoration(
-                            hintText: "Enter your offer",
-                            hintStyle: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 13,
-                            ),
-                            border: InputBorder.none,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                // Container(
+                //   child: Row(
+                //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //     children: [
+                //       Text(
+                //         "Fare Demanded: ",
+                //         style: TextStyle(
+                //           color: Colors.black,
+                //           fontSize: 12,
+                //           fontWeight: FontWeight.bold,
+                //         ),
+                //       ),
+                //       Container(
+                //         width: 150,
+                //         padding: EdgeInsets.all(15),
+                //         decoration: BoxDecoration(
+                //           color: Colors.white,
+                //           borderRadius: BorderRadius.circular(5),
+                //         ),
+                //         child: Center(
+                //           child: Text(
+                //             " Not Accepted yet",
+                //             style: TextStyle(
+                //               color: Colors.black,
+                //               fontSize: 12,
+                //               fontWeight: FontWeight.bold,
+                //             ),
+                //           ),
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+                // ),
+                // SizedBox(height: 20),
+                // Container(
+                //   child: Row(
+                //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //     children: [
+                //       Text(
+                //         "Your Offer: ",
+                //         style: TextStyle(
+                //           color: Colors.black,
+                //           fontSize: 12,
+                //           fontWeight: FontWeight.bold,
+                //         ),
+                //       ),
+                //       Container(
+                //         width: 150,
+                //         height: 50,
+
+                //         decoration: BoxDecoration(
+                //           color: Colors.white,
+
+                //           borderRadius: BorderRadius.circular(5),
+                //         ),
+                //         child: TextField(
+                //           textAlign: TextAlign.center,
+                //           decoration: InputDecoration(
+                //             hintText: "Enter your offer",
+                //             hintStyle: TextStyle(
+                //               color: Colors.grey,
+                //               fontSize: 13,
+                //             ),
+                //             border: InputBorder.none,
+                //           ),
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+                // ),
                 SizedBox(height: 20),
                 InkWell(
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => BrokerChatPage()),
+                      MaterialPageRoute(
+                        builder: (context) => BrokerChatPage(
+                          brokerId: widget.brokerData["uid"],
+                          brokerName: widget.brokerData["name"],
+                          chatId: "12345678",
+                        ),
+                      ),
                     );
                   },
                   child: Container(
@@ -285,12 +299,25 @@ class _BrokerDetailPageState extends State<BrokerDetailPage> {
                   ),
                 ),
                 SizedBox(height: 30),
-                ContinueButton(
-                  text: "Send Request",
-                  clr: Appcolors.primaryBlue,
-                  onTap: () {
-                    context.read<CreateReqCubit>().createRequestToBroker(
-                      "12345"
+
+                BlocBuilder<CreateReqCubit, CreateReqState>(
+                  builder: (context, state) {
+                    return ContinueButton(
+                      text: state is CreateReqLoadingState
+                          ? "Sending ..."
+                          : "Send Request",
+                      clr: Appcolors.primaryBlue,
+                      onTap: () {
+                        context.read<CreateReqCubit>().createRequestToBroker(
+                          widget.brokerData["uid"],
+                        );
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ShipperBottomNavBar(),
+                          ),
+                        );
+                      },
                     );
                   },
                 ),

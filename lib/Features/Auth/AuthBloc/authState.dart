@@ -9,10 +9,18 @@ class AuthSuccess extends AuthState {
   AuthSuccess({this.role});
 }
 
+class AuthEmailNotVerified extends AuthState {
+  final String email;
+  AuthEmailNotVerified(this.email);
+}
+
+class AuthVerificationEmailSent extends AuthState {}
+
 class AuthFailure extends AuthState {
   final String error;
   AuthFailure(this.error);
 }
+class AuthPasswordResetEmailSent extends AuthState {}
 
 class AuthRoleName extends AuthState {
   final String role;

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
 
 class LocationContainer extends StatelessWidget {
   const LocationContainer({
@@ -21,7 +20,8 @@ class LocationContainer extends StatelessWidget {
       child: Container(
         width: double.infinity,
         height: 70,
-        padding: EdgeInsets.symmetric(horizontal: 10),
+        padding: EdgeInsets.symmetric(horizontal:15),
+        margin: EdgeInsets.symmetric(horizontal:15),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10),

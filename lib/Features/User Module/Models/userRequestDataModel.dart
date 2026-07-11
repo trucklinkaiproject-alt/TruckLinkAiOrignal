@@ -12,6 +12,7 @@ class UserRequestDataModel {
   String orderNo;
   String brokerId;
   String status;
+  String date;
 
   UserRequestDataModel({
     required this.userUid,
@@ -27,6 +28,7 @@ class UserRequestDataModel {
     required this.orderNo,
     this.brokerId = '',
     required this.status,
+    required this.date,
   });
 
   Map<String, dynamic> toMap() {
@@ -43,7 +45,8 @@ class UserRequestDataModel {
       'orderId': orderId,
       'orderNo': orderNo,
       'brokerId': brokerId,
-      'status':status
+      'status': status,
+      'date': date,
     };
   }
 }

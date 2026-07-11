@@ -7,6 +7,8 @@ class GetBrokerCubit extends Cubit<GetBrokerState> {
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   List<Map<String,dynamic>> brokers = [];
+  Map<String,dynamic> selectedBroker ={};
+
   Future<void> fetchAllBroker() async {
     try {
       emit(GetBrokerLoadingState());
@@ -16,10 +18,12 @@ class GetBrokerCubit extends Cubit<GetBrokerState> {
       brokers = await snapshot.docs
           .map((doc) => {"id": doc.id, ...doc.data() as Map<String, dynamic>})
           .toList();
-      print(brokers);
+      
       emit(GetBrokerLoadedState());
     } catch (e) {
       emit(GetBrokerErrorState(e.toString()));
     }
   }
+
+  
 }

@@ -5,11 +5,11 @@ import 'package:trucklinkai_orignal/Features/User%20Module/bloc/CreateReqBloc/cr
 
 class CreateReqCubit extends Cubit<CreateReqState> {
   CreateReqCubit() : super(CreateReqInitialState());
-  final String orderNo = "1234";
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   UserRequestDataModel? currentRequest;
   String orderStatus = "Pending";
+  String orderNo='notKnown';
 
   Future<void> createInitialRequest(
     String userUid,
@@ -24,6 +24,13 @@ class CreateReqCubit extends Cubit<CreateReqState> {
   ) async {
     try {
       emit(CreateReqLoadingState());
+      await _firestore.collection("AppData").doc("appVariables").get().then((
+        doc,
+      ) {
+        if (doc.exists) {
+          orderNo = doc.data()?['orderNo'] ?? "1";
+        } 
+      });
       // Simulate a network request or any asynchronous operation
       String orderId = DateTime.now().millisecondsSinceEpoch.toString();
       //
@@ -40,9 +47,14 @@ class CreateReqCubit extends Cubit<CreateReqState> {
         orderId: orderId,
         orderNo: orderNo,
         status: orderStatus,
+        date: DateTime.now().toIso8601String(),
       );
       // If the request is successful, emit the success state
       emit(CreateReqSuccessState("Request created successfully!"));
+      await _firestore.collection("AppData").doc("appVariables").update({
+        'orderNo': (int.parse(orderNo) + 1)
+            .toString(), // Increment order number for next request
+      });
     } catch (e) {
       // If there's an error, emit the error state with the error message
       emit(CreateReqErrorState("Failed to create request: ${e.toString()}"));
@@ -62,7 +74,7 @@ class CreateReqCubit extends Cubit<CreateReqState> {
             .doc(currentRequest!.orderId)
             .set(currentRequest!.toMap());
 
-            await _firestore
+        await _firestore
             .collection('Broker')
             .doc(currentRequest!.brokerId)
             .collection('IncomingRequests')

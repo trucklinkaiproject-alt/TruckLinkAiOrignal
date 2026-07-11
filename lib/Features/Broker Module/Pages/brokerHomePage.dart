@@ -16,8 +16,12 @@ class BrokerHomePage extends StatefulWidget {
 class _BrokerHomePageState extends State<BrokerHomePage> {
   @override
   void initState() {
-    context.read<BrokerCubit>().fetchUserData();
     super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<BrokerCubit>().fetchUserData();
+      context.read<BrokerCubit>().fetchIncomingReq();
+    });
   }
 
   @override
@@ -131,49 +135,45 @@ class _BrokerHomePageState extends State<BrokerHomePage> {
                       ],
                     ),
                     SizedBox(height: 15),
-                    BrokerIcomingReqContainer(
-                      orderNumber: "12345",
-                      pickupLocation: "Mumbai",
-                      dropLocation: "Delhi",
-                      date: "20-04-2026",
-                      status: "In Transit",
-                      weight: "120",
-                      itemType: "Electronics",
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => OrderDetailsPage(),
-                          ),
-                        );
+                    BlocBuilder<BrokerCubit, BrokerState>(
+                      builder: (context, state) {
+                        state is BrokerLoadingState
+                            ? CircularProgressIndicator()
+                            : Container();
+                        return state is BrokerLoadedState
+                            ? ListView.builder(
+                                shrinkWrap: true,
+                                physics: NeverScrollableScrollPhysics(),
+                                itemCount: state.incomingRequests!.length,
+                                itemBuilder: (context, index) {
+                                  index = state.incomingRequests!.length-1-index;
+                                  final request = state.incomingRequests![index];
+                                  return BrokerIcomingReqContainer(
+                                    orderNumber: request["orderNo"] ?? "",
+                                    pickupLocation: request["pickupCity"] ?? "",
+                                    dropLocation: request["dropCity"] ?? "",
+                                    date: request["createdAt"] ?? "",
+                                    status: request["status"] ?? "",
+                                    weight: request["weight"] ?? 0,
+                                    itemType: request["itemType"] ?? "",
+                                    orderId: request["orderId"],
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              OrderDetailsPage(
+                                                orderReqData: state
+                                                    .incomingRequests![index],
+                                              ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                              )
+                            : Center(child: Text("No Request yet"));
                       },
-                    ),
-                    BrokerIcomingReqContainer(
-                      orderNumber: "12340",
-                      pickupLocation: "Lahore",
-                      dropLocation: "Karachi",
-                      date: "18-03-2026",
-                      status: "Delivered",
-                      weight: "120",
-                      itemType: "Electronics",
-                    ),
-                    BrokerIcomingReqContainer(
-                      orderNumber: "12340",
-                      pickupLocation: "Lahore",
-                      dropLocation: "Karachi",
-                      date: "18-03-2026",
-                      status: "Delivered",
-                      weight: "120",
-                      itemType: "Electronics",
-                    ),
-                    BrokerIcomingReqContainer(
-                      orderNumber: "12340",
-                      pickupLocation: "Lahore",
-                      dropLocation: "Karachi",
-                      date: "18-03-2026",
-                      status: "Delivered",
-                      weight: "120",
-                      itemType: "Electronics",
                     ),
                   ],
                 ),
@@ -193,7 +193,7 @@ class _BrokerHomePageState extends State<BrokerHomePage> {
     Color? txtClr,
   ) {
     return Container(
-      width: 100,
+      width: MediaQuery.of(context).size.width * 0.28,
       height: 100,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),

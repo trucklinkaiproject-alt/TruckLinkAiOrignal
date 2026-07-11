@@ -7,7 +7,7 @@ class TransporterHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    context.read <AuthCubit>().logOut();
+    context.read <AuthCubit>().logOut(context);
     return const Placeholder();
   }
 }

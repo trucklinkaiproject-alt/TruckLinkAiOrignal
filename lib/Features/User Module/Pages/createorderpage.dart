@@ -75,7 +75,7 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                AppBarContainer(title: "Create Order",backArrow: false,),
+                AppBarContainer(title: "Create Order", backArrow: false),
                 SizedBox(height: 20),
                 Heading(text: "Pickup Location"),
                 SizedBox(height: 10),
@@ -84,74 +84,7 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
                   clr: Appcolors.primaryBlue,
                   city: pickupCity.isEmpty ? "City" : pickupCity,
                   address: pickupComp.isEmpty ? "Street" : pickupComp,
-                  // onTap: () {
-                  //   showModalBottomSheet(
-                  //     context: context,
-                  //     isScrollControlled: true,
-                  //     shape: const RoundedRectangleBorder(
-                  //       borderRadius: BorderRadius.vertical(
-                  //         top: Radius.circular(20),
-                  //       ),
-                  //     ),
-                  //     builder: (context) {
-                  //       return Padding(
-                  //         padding: EdgeInsets.only(
-                  //           left: 20,
-                  //           right: 20,
-                  //           top: 20,
-                  //           bottom:
-                  //               MediaQuery.of(context).viewInsets.bottom + 20,
-                  //         ),
-                  //         child: Column(
-                  //           mainAxisSize: MainAxisSize.min,
-                  //           children: [
-                  //             const Text(
-                  //               "Enter Address",
-                  //               style: TextStyle(
-                  //                 fontSize: 20,
-                  //                 fontWeight: FontWeight.bold,
-                  //               ),
-                  //             ),
-                  //             const SizedBox(height: 20),
-
-                  //             TextField(
-                  //               controller: pickupCityLocation,
-                  //               decoration: const InputDecoration(
-                  //                 labelText: "City , Province",
-                  //                 hintText: "e.g : Lahore , Punjab",
-                  //                 border: OutlineInputBorder(),
-                  //               ),
-                  //             ),
-
-                  //             const SizedBox(height: 20),
-                  //             TextField(
-                  //               controller: pickupCompLocation,
-                  //               decoration: const InputDecoration(
-                  //                 labelText: "Complete Address",
-                  //                 hintText:
-                  //                     "e.g : House no 43,Street no 1, Al Rehman Garden",
-                  //                 border: OutlineInputBorder(),
-                  //               ),
-                  //             ),
-                  //             const SizedBox(height: 20),
-
-                  //             ContinueButton(
-                  //               text: 'Save',
-                  //               clr: Appcolors.primaryBlue,
-                  //               onTap: () {
-                  //                 setState(() {
-                  //                   pickupCity = pickupCityLocation.text;
-                  //                   pickupComp = pickupCompLocation.text;
-                  //                 });
-                  //                 Navigator.pop(context);
-                  //               },
-                  //             ),
-                  //           ],
-                  //         ),
-                  //       );
-                  //     },
-                  //   );
-                  // },
+                 
                   onTap: () async {
                     final result = await Navigator.push(
                       context,
@@ -203,7 +136,7 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
                 SizedBox(height: 20),
 
                 Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 10),
+                  margin: const EdgeInsets.symmetric(horizontal: 15),
                   child: DropdownButtonFormField<String>(
                     value: selectedItemType.isEmpty ? null : selectedItemType,
                     decoration: InputDecoration(
@@ -259,76 +192,73 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
                   ),
                 ),
                 SizedBox(height: 20),
-                Row(
-                  children: [
-                    Column(
-                      children: [
-                        Container(
-                          width: 100,
-                          height: 50,
-                          margin: EdgeInsets.symmetric(horizontal: 10),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: TextField(
-                            maxLines: null,
-                            expands: true,
-                            keyboardType: TextInputType.number,
-                            controller: weightController,
-                            decoration: InputDecoration(
-                              labelText: "Weight",
-                              labelStyle: TextStyle(
-                                color: Colors.black,
-                                fontSize: 14,
-                              ),
-                              hintText: "kg",
-                              contentPadding: EdgeInsets.only(
-                                left: 10,
-                                right: 10,
-                                top: 10,
-                              ),
-                              border: InputBorder.none,
+                Padding(
+                  padding: EdgeInsetsGeometry.symmetric(horizontal: 30),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 100,
+                        height: 50,
+
+                        margin: EdgeInsets.symmetric(horizontal: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: TextField(
+                          maxLines: null,
+                          expands: true,
+                          textAlign: TextAlign.center,
+                          keyboardType: TextInputType.number,
+                          controller: weightController,
+                          decoration: InputDecoration(
+                            labelText: "Weight",
+                            labelStyle: TextStyle(
+                              color: Colors.black,
+                              fontSize: 14,
                             ),
+                            hintText: "kg",
+                            contentPadding: EdgeInsets.only(
+                              left: 10,
+                              right: 10,
+                              top: 10,
+                            ),
+                            border: InputBorder.none,
                           ),
                         ),
-                      ],
-                    ),
-                    Spacer(),
-                    Column(
-                      children: [
-                        Container(
-                          width: 100,
-                          height: 50,
-                          margin: EdgeInsets.symmetric(horizontal: 10),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: TextField(
-                            maxLines: null,
-                            expands: true,
-                            controller: quantityController,
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              labelText: "Quantity",
-                              labelStyle: TextStyle(
-                                color: Colors.black,
-                                fontSize: 14,
-                              ),
-                              hintText: "Units",
-                              contentPadding: EdgeInsets.only(
-                                left: 10,
-                                right: 10,
-                                top: 10,
-                              ),
-                              border: InputBorder.none,
+                      ),
+                      Spacer(),
+                      Container(
+                        width: 100,
+                        height: 50,
+                        margin: EdgeInsets.symmetric(horizontal: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: TextField(
+                          maxLines: null,
+                          expands: true,
+                          controller: quantityController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            labelText: "Quantity",
+                            labelStyle: TextStyle(
+                              color: Colors.black,
+                              fontSize: 14,
                             ),
+                            hintText: "Units",
+                            contentPadding: EdgeInsets.only(
+                              left: 10,
+                              right: 10,
+                              top: 10,
+                            ),
+                            border: InputBorder.none,
                           ),
                         ),
-                      ],
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
                 SizedBox(height: 30),
                 Heading(text: "Additional Details"),
@@ -336,7 +266,7 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
                 Container(
                   width: double.infinity,
                   height: 100,
-                  margin: EdgeInsets.symmetric(horizontal: 10),
+                  margin: EdgeInsets.symmetric(horizontal: 15),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(10),
@@ -382,6 +312,7 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
                               additionalDetailsController.text,
                               int.tryParse(weightController.text) ?? 0,
                               int.tryParse(quantityController.text) ?? 0,
+                            
                             );
 
                         if (!mounted) return;
