@@ -388,97 +388,98 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
   // ---------------------------------------------------------------------------
   // Get the device's current GPS location and move the map to it
   // ---------------------------------------------------------------------------
-  Future<void> getCurrentLocation() async {
-    try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) return;
+ Future<void> getCurrentLocation() async {
+  try {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) return;
 
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
-
-      if (permission == LocationPermission.deniedForever) return;
-
-      Position position = await Geolocator.getCurrentPosition();
-
-      final current = LatLng(position.latitude, position.longitude);
-
-      setState(() {
-        selectedLocation = current;
-      });
-
-      mapController.move(current, 16);
-
-      await reverseGeocode(current);
-    } catch (e) {
-      debugPrint("getCurrentLocation error: $e");
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
     }
-  }
 
-  // ---------------------------------------------------------------------------
-  // Update the address label for a given map point
-  // ---------------------------------------------------------------------------
-  Future<void> reverseGeocode(LatLng point) async {
-    final result = await _reverseGeocodeNominatim(point);
+    if (permission == LocationPermission.deniedForever) return;
 
-    if (result == null) return;
+    Position position = await Geolocator.getCurrentPosition();
 
-    final street = result["street"] ?? "";
-    final city = result["city"] ?? "";
-    final state = result["state"] ?? "";
+    if (!mounted) return; // <-- guard before setState
 
-    // Build a readable one-liner, skipping empty segments
-    final parts = [street, city, state].where((s) => s.isNotEmpty).toList();
+    final current = LatLng(position.latitude, position.longitude);
 
     setState(() {
-      address = parts.isNotEmpty ? parts.join(", ") : result["display_name"] ?? "Unknown";
+      selectedLocation = current;
     });
+
+    mapController.move(current, 16);
+
+    await reverseGeocode(current);
+  } catch (e) {
+    debugPrint("getCurrentLocation error: $e");
   }
+}
 
-  // ---------------------------------------------------------------------------
-  // Forward geocode a text query via Nominatim and fly the map to the result
-  // ---------------------------------------------------------------------------
-  Future<void> searchLocation() async {
-    if (searchController.text.trim().isEmpty) return;
+Future<void> reverseGeocode(LatLng point) async {
+  final result = await _reverseGeocodeNominatim(point);
 
-    try {
+  if (!mounted) return; // <-- guard before setState
+  if (result == null) return;
+
+  final street = result["street"] ?? "";
+  final city = result["city"] ?? "";
+  final state = result["state"] ?? "";
+
+  final parts = [street, city, state].where((s) => s.isNotEmpty).toList();
+
+  setState(() {
+    address = parts.isNotEmpty ? parts.join(", ") : result["display_name"] ?? "Unknown";
+  });
+}
+
+Future<void> searchLocation() async {
+  if (searchController.text.trim().isEmpty) return;
+
+  try {
+    if (!mounted) return;
+    setState(() {
+      loading = true;
+    });
+
+    final response = await http.get(
+      Uri.parse(
+        "https://nominatim.openstreetmap.org/search"
+        "?q=${Uri.encodeComponent(searchController.text)}&format=json&limit=1",
+      ),
+      headers: {"User-Agent": "TruckLinkAI"},
+    );
+
+    if (!mounted) return; // <-- guard before parsing/setState
+
+    final data = jsonDecode(response.body) as List<dynamic>;
+
+    if (data.isNotEmpty) {
+      final double lat = double.parse(data[0]["lat"] as String);
+      final double lon = double.parse(data[0]["lon"] as String);
+
+      final point = LatLng(lat, lon);
+
       setState(() {
-        loading = true;
+        selectedLocation = point;
       });
 
-      final response = await http.get(
-        Uri.parse(
-          "https://nominatim.openstreetmap.org/search"
-          "?q=${Uri.encodeComponent(searchController.text)}&format=json&limit=1",
-        ),
-        headers: {"User-Agent": "TruckLinkAI"},
-      );
+      mapController.move(point, 16);
 
-      final data = jsonDecode(response.body) as List<dynamic>;
-
-      if (data.isNotEmpty) {
-        final double lat = double.parse(data[0]["lat"] as String);
-        final double lon = double.parse(data[0]["lon"] as String);
-
-        final point = LatLng(lat, lon);
-
-        setState(() {
-          selectedLocation = point;
-        });
-
-        mapController.move(point, 16);
-
-        await reverseGeocode(point);
-      }
-    } catch (e) {
-      debugPrint("searchLocation error: $e");
-    } finally {
+      await reverseGeocode(point);
+    }
+  } catch (e) {
+    debugPrint("searchLocation error: $e");
+  } finally {
+    if (mounted) {
       setState(() {
         loading = false;
       });
     }
   }
+}
 
   // ---------------------------------------------------------------------------
   // Confirm the selected location and pop back with a LocationModel

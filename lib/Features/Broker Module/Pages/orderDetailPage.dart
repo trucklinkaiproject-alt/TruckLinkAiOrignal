@@ -250,7 +250,6 @@
 // }
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
 import 'package:trucklinkai_orignal/Features/Auth/Widgets/continueButton.dart';

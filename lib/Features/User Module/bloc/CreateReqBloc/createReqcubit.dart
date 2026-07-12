@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/Models/userRequestDataModel.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/bloc/CreateReqBloc/createReqstate.dart';
 
@@ -47,7 +48,7 @@ class CreateReqCubit extends Cubit<CreateReqState> {
         orderId: orderId,
         orderNo: orderNo,
         status: orderStatus,
-        date: DateTime.now().toIso8601String(),
+        date: DateFormat('dd-MM-yyyy, hh:mm a').format(DateTime.now()),
       );
       // If the request is successful, emit the success state
       emit(CreateReqSuccessState("Request created successfully!"));

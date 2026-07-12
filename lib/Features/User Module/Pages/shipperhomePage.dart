@@ -20,73 +20,24 @@ class ShipperHomePage extends StatefulWidget {
 
 class _ShipperHomePageState extends State<ShipperHomePage> {
   bool _dialogShowing = false;
-
-  @override
-  void initState() {
-    context.read<UserCubit>().fetchUserData();
+@override
+void initState() {
+  super.initState();
+  context.read<UserCubit>().fetchUserData().then((_) {
+    if (!mounted) return;
     context.read<OrderDetailCubit>().fetchOrderDetails(
       context.read<UserCubit>().userId,
-    );
-    super.initState();
-  }
+    ); // no longer returns a Future, so nothing to chain off here
+  });
+}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // body: BlocListener<UserCubit, UserState>(
-      //   listener: (context, state) {
-      //     if (state is BrokerOfferState) {
-            // showDialog(
-            //   context: context,
-            //   barrierDismissible: false,
-            //   builder: (_) {
-            //     return AlertDialog(
-            //       title: const Text("Broker Offer"),
-
-            //       content: Column(
-            //         mainAxisSize: MainAxisSize.min,
-            //         children: [
-            //           Text(
-            //             "Broker offered PKR ${state.requestData["brokerOffer"]}",
-            //           ),
-
-            //           const SizedBox(height: 10),
-
-            //           Text("Do you want to accept this offer?"),
-            //         ],
-            //       ),
-
-            //       actions: [
-            //         TextButton(
-            //           onPressed: () {
-            //             context.read<UserCubit>().acceptOffer(
-            //               state.requestData["requestId"],
-            //             );
-
-            //             Navigator.pop(context);
-            //           },
-
-            //           child: const Text("Accept"),
-            //         ),
-
-            //         TextButton(
-            //           onPressed: () {
-            //             context.read<UserCubit>().rejectOffer(
-            //               state.requestData["requestId"],
-            //             );
-
-            //             Navigator.pop(context);
-            //           },
-
-            //           child: const Text("Reject"),
-            //         ),
-            //       ],
-            //     );
-            //   },
-            // );
-            body: BlocListener<UserCubit, UserState>(
+          body: BlocListener<UserCubit, UserState>(
   listener: (context, state) async {
     if (state is BrokerOfferState && !_dialogShowing) {
+      if (!context.mounted) return; 
       _dialogShowing = true;
 
       await showDialog(
@@ -118,85 +69,14 @@ class _ShipperHomePageState extends State<ShipperHomePage> {
         },
       );
 
-      _dialogShowing = false;
+      if (mounted) {          
+        _dialogShowing = false;
+      }
     }
   },
   child: SafeArea(
-          //   @override
-          // void initState() {
-          //   super.initState();
 
-          //   context.read<UserCubit>().fetchUserData();
-          // }
-
-          // @override
-          // Widget build(BuildContext context) {
-          //   return Scaffold(
-          //     body: BlocListener<UserCubit, UserState>(
-          //       listener: (context, state) async {
-          //         // Fetch orders after user data is loaded
-          //         if (state is UserLoadedState) {
-          //           context.read<OrderDetailCubit>().fetchOrderDetails(state.uid);
-          //         }
-
-          //         // Show broker offer dialog
-          //         if (state is BrokerOfferState &&
-          //             !_dialogShowing &&
-          //             mounted) {
-          //           _dialogShowing = true;
-
-          //           await showDialog(
-          //             context: context,
-          //             barrierDismissible: false,
-          //             builder: (dialogContext) {
-          //               return AlertDialog(
-          //                 title: const Text("Broker Offer"),
-          //                 content: Column(
-          //                   mainAxisSize: MainAxisSize.min,
-          //                   children: [
-          //                     Text(
-          //                       "Broker offered PKR ${state.requestData["brokerOffer"]}",
-          //                     ),
-          //                     const SizedBox(height: 10),
-          //                     const Text("Do you want to accept this offer?"),
-          //                   ],
-          //                 ),
-          //                 actions: [
-          //                   TextButton(
-          //                     onPressed: () async {
-          //                       await context.read<UserCubit>().acceptOffer(
-          //                             state.requestData["requestId"],
-          //                           );
-
-          //                       if (dialogContext.mounted) {
-          //                         Navigator.of(dialogContext).pop();
-          //                       }
-          //                     },
-          //                     child: const Text("Accept"),
-          //                   ),
-          //                   TextButton(
-          //                     onPressed: () async {
-          //                       await context.read<UserCubit>().rejectOffer(
-          //                             state.requestData["requestId"],
-          //                           );
-
-          //                       if (dialogContext.mounted) {
-          //                         Navigator.of(dialogContext).pop();
-          //                       }
-          //                     },
-          //                     child: const Text("Reject"),
-          //                   ),
-          //                 ],
-          //               );
-          //             },
-          //           );
-
-          //           if (mounted) {
-          //             _dialogShowing = false;
-          //           }
-          //         }
-          //       },
-          //       child: SafeArea(
+        
           child: Stack(
             children: [
               Container(
@@ -205,7 +85,7 @@ class _ShipperHomePageState extends State<ShipperHomePage> {
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 decoration: BoxDecoration(color: Appcolors.primaryBlue),
                 child: Row(
-                  //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     BlocBuilder<UserCubit, UserState>(

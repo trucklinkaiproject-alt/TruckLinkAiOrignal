@@ -1,122 +1,4 @@
-// // import 'package:cloud_firestore/cloud_firestore.dart';
-// // import 'package:firebase_auth/firebase_auth.dart';
-// // import 'package:flutter_bloc/flutter_bloc.dart';
-// // import 'package:trucklinkai_orignal/Features/User%20Module/bloc/userBloc/userstate.dart';
-
-// // class UserCubit extends Cubit<UserState> {
-// //   UserCubit() : super(UserInitialState());
-
-// //   final FirebaseAuth _auth = FirebaseAuth.instance;
-// //   final FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
-// //   String userName = '';
-// //   String userId ='';
-// //   Future<void> fetchUserData() async {
-// //     try {
-// //       emit(UserLoadingState());
-// //       userId= _auth.currentUser!.uid;
-// //       DocumentSnapshot userDoc = await firebaseFirestore
-// //           .collection('User')
-// //           .doc(userId)
-// //           .get();
-// //        userName = userDoc['name'];
-
-// //       emit(UserLoadedState(userName,userId));
-// //     } catch (e) {
-// //       emit(UserErrorState("Failed to fetch user data"));
-// //     }
-// //   }
-// // }
-
-// import 'dart:async';
-
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:flutter_bloc/flutter_bloc.dart';
-// import 'package:trucklinkai_orignal/Features/User Module/bloc/userBloc/userstate.dart';
-
-// class UserCubit extends Cubit<UserState> {
-//   UserCubit() : super(UserInitialState());
-
-//   final FirebaseAuth _auth = FirebaseAuth.instance;
-//   final FirebaseFirestore firestore = FirebaseFirestore.instance;
-
-//   String userName = "";
-//   String userId = "";
-
-//   StreamSubscription<QuerySnapshot>? _offerListener;
-
-//   Future<void> fetchUserData() async {
-//     try {
-//       emit(UserLoadingState());
-
-//       userId = _auth.currentUser!.uid;
-
-//       final userDoc =
-//           await firestore.collection("User").doc(userId).get();
-
-//       userName = userDoc["name"];
-
-//       emit(UserLoadedState(userName, userId));
-
-//       listenBrokerOffers();
-//     } catch (e) {
-//       emit(UserErrorState(e.toString()));
-//     }
-//   }
-
-//   /// Listen all offers made to this user
-//   void listenBrokerOffers() {
-//     _offerListener?.cancel();
-
-//     _offerListener = firestore
-//         .collection("User")
-//       .doc(userId)
-//       .collection("Requests")
-//       .where("status", isEqualTo: "fare_offered")
-//       .snapshots()
-//         .listen((snapshot) {
-//       if (snapshot.docs.isEmpty) return;
-
-//       final data = snapshot.docs.first.data();
-
-//       emit(BrokerOfferState({
-//         ...data,
-//         "requestId": snapshot.docs.first.id,
-//       }));
-//     });
-//   }
-
-//   Future<void> acceptOffer(String requestId) async {
-//     await firestore.collection("User").doc(userId).collection("Requests").doc(requestId).update({
-//       "status": "accepted",
-//     });
-
-//     emit(UserLoadedState(userName, userId));
-//   }
-
-//   Future<void> rejectOffer(String requestId) async {
-//     await firestore.collection("User").doc(userId).collection("Requests").doc(requestId).update({
-//       "status": "rejected",
-//     });
-//     // await  firestore
-//     //     .collection("Broker")
-//     //     .doc(brokerId)
-//     //     .collection("IncomingRequests")
-//     //     .doc(widget.orderReqData["orderId"])
-//     //     .update({"brokerOffer": amount, "status": "fare_offered"});
-
-//     emit(UserLoadedState(userName, userId));
-//   }
-
-//   @override
-//   Future<void> close() {
-//     _offerListener?.cancel();
-//     return super.close();
-//   }
-// }
-
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -130,6 +12,7 @@ class UserCubit extends Cubit<UserState> {
 
   String userName = "";
   String userId = "";
+
 
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _offerListener;
 
@@ -154,6 +37,8 @@ class UserCubit extends Cubit<UserState> {
       userId = currentUser.uid;
 
       final userDoc = await firestore.collection("User").doc(userId).get();
+      
+      
 
       if (!userDoc.exists) {
         if (!isClosed) {
@@ -181,7 +66,6 @@ class UserCubit extends Cubit<UserState> {
     }
   }
 
-  /// Listen for broker offers
   void _listenBrokerOffers() {
     _offerListener?.cancel();
 
@@ -209,9 +93,17 @@ class UserCubit extends Cubit<UserState> {
         );
   }
 
-  /// Accept broker offer
   Future<void> acceptOffer(String requestId) async {
     try {
+      final requestDoc = await firestore
+          .collection("User")
+          .doc(userId)
+          .collection("Requests")
+          .doc(requestId)
+          .get();
+
+      final String brokerId = requestDoc["brokerId"] as String;
+
       await firestore
           .collection("User")
           .doc(userId)
@@ -219,16 +111,12 @@ class UserCubit extends Cubit<UserState> {
           .doc(requestId)
           .update({"status": "accepted"});
 
-
-          await firestore
-          .collectionGroup("IncomingRequests")
-          .where(FieldPath.documentId, isEqualTo: requestId)
-          .get()
-          .then((querySnapshot) {
-            for (var doc in querySnapshot.docs) {
-              doc.reference.update({"status": "accepted"});
-            }
-          });
+      await firestore
+          .collection("Broker")
+          .doc(brokerId)
+          .collection("IncomingRequests")
+          .doc(requestId)
+          .update({"status": "accepted"});
 
       if (!isClosed) {
         emit(UserLoadedState(userName, userId));
@@ -240,7 +128,6 @@ class UserCubit extends Cubit<UserState> {
     }
   }
 
-  /// Reject broker offer
   Future<void> rejectOffer(String requestId) async {
     try {
       await firestore
@@ -250,16 +137,22 @@ class UserCubit extends Cubit<UserState> {
           .doc(requestId)
           .update({"status": "rejected"});
 
-      await firestore
-          .collectionGroup("IncomingRequests")
-          .where(FieldPath.documentId, isEqualTo: requestId)
-          .get()
-          .then((querySnapshot) {
-            for (var doc in querySnapshot.docs) {
-              doc.reference.update({"status": "rejected"});
-            }
-          });
+          final requestDoc = await firestore
+          .collection("User")
+          .doc(userId)
+          .collection("Requests")
+          .doc(requestId)
+          .get();
 
+      final String brokerId = requestDoc["brokerId"] as String;
+       await firestore
+          .collection("Broker")
+          .doc(brokerId)
+          .collection("IncomingRequests")
+          .doc(requestId)
+          .update({"status": "rejected"});
+
+     
       if (!isClosed) {
         emit(UserLoadedState(userName, userId));
       }

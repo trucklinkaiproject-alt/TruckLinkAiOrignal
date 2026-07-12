@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
 import 'package:trucklinkai_orignal/Features/Auth/AuthBloc/authCubit.dart';
-import 'package:trucklinkai_orignal/Features/Auth/Pages/logInPage.dart';
 import 'package:trucklinkai_orignal/Features/Auth/Pages/roleSelectionPage.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/Widgets/appBar.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/bloc/userBloc/usercubit.dart';

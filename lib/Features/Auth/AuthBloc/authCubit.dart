@@ -90,19 +90,19 @@ class AuthCubit extends Cubit<AuthState> {
         return;
       }
 
-      final userCredential = await _auth.signInWithEmailAndPassword(
+       await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      await userCredential.user?.reload();
-      final refreshedUser = _auth.currentUser;
+      // await userCredential.user?.reload();
+      // final refreshedUser = _auth.currentUser;
 
-      if (refreshedUser != null && !refreshedUser.emailVerified) {
-        await _auth.signOut();
-        emit(AuthEmailNotVerified(email));
-        return;
-      }
+      // if (refreshedUser != null && !refreshedUser.emailVerified) {
+      //   await _auth.signOut();
+      //   emit(AuthEmailNotVerified(email));
+      //   return;
+      // }
 
       emit(AuthSuccess(role: role));
     } on FirebaseAuthException catch (e) {

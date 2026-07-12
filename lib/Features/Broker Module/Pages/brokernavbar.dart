@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
-import 'package:trucklinkai_orignal/Features/Broker%20Module/Pages/brokerDocumentPage.dart';
+import 'package:trucklinkai_orignal/Features/Broker%20Module/Pages/brokerDriverNetworkPage.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/Pages/brokerHomePage.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/Pages/brokerOrderPage.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/Pages/brokerProfilePage.dart';
@@ -18,7 +18,7 @@ class _BrokerBottomNavBarState extends State<BrokerBottomNavBar> {
   final List<Widget> _pages = [
     BrokerHomePage(),
     BrokerOrderPage(),
-    BrokerDocumentPage(),
+    BrokerDriversNetworkPage(),
     BrokerProfilePage(),
   ];
 
@@ -48,8 +48,8 @@ class _BrokerBottomNavBarState extends State<BrokerBottomNavBar> {
               BottomNavigationBarItem(icon: Icon(Icons.list), label: "Orders"),
 
               BottomNavigationBarItem(
-                icon: Icon(Icons.edit_document),
-                label: "Documents",
+                icon: Icon(Icons.drive_eta_rounded),
+                label: "Drivers",
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.person_outline),

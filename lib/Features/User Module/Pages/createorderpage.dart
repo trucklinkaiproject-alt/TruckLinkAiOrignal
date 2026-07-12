@@ -84,7 +84,7 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
                   clr: Appcolors.primaryBlue,
                   city: pickupCity.isEmpty ? "City" : pickupCity,
                   address: pickupComp.isEmpty ? "Street" : pickupComp,
-                 
+
                   onTap: () async {
                     final result = await Navigator.push(
                       context,
@@ -300,6 +300,34 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
                           : "Continue",
                       clr: Appcolors.primaryBlue,
                       onTap: () async {
+                        final isWeightValid =
+                            int.tryParse(weightController.text.trim()) !=
+                                null &&
+                            int.tryParse(weightController.text.trim())! > 0;
+
+                        final isQuantityValid =
+                            int.tryParse(quantityController.text.trim()) !=
+                                null &&
+                            int.tryParse(quantityController.text.trim())! > 0;
+
+                        if (uid.isEmpty ||
+                            pickupCity.isEmpty ||
+                            pickupComp.isEmpty ||
+                            dropCity.isEmpty ||
+                            dropComp.isEmpty ||
+                            selectedItemType.isEmpty ||
+                            weightController.text.trim().isEmpty ||
+                            quantityController.text.trim().isEmpty ||
+                            !isWeightValid ||
+                            !isQuantityValid) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Please fill all the fields"),
+                            ),
+                          );
+                          return;
+                        }
+
                         await context
                             .read<CreateReqCubit>()
                             .createInitialRequest(
@@ -312,7 +340,6 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
                               additionalDetailsController.text,
                               int.tryParse(weightController.text) ?? 0,
                               int.tryParse(quantityController.text) ?? 0,
-                            
                             );
 
                         if (!mounted) return;
