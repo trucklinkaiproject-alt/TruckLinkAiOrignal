@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/Widgets/ordercontainer.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/bloc/OrderDetailBloc/orderDetailState.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/bloc/OrderDetailBloc/orderDetialCubit.dart';
@@ -134,11 +135,11 @@ class _ShipperOrderPageState extends State<ShipperOrderPage>
       child: TabBar(
         controller: _tabController,
         indicator: BoxDecoration(
-          color: Colors.blue.shade600,
+          color: Appcolors.primaryBlue,
           borderRadius: BorderRadius.circular(30),
           boxShadow: [
             BoxShadow(
-              color: Colors.blue.withOpacity(0.3),
+              color: Appcolors.primaryBlue.withOpacity(0.3),
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),

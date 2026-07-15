@@ -8,8 +8,7 @@ import 'package:trucklinkai_orignal/Features/Transporter%20Module/Pages/transpor
 
 import '../../Auth/Pages/logInPage.dart';
 import '../../User Module/Widgets/shipperbottomnavbar.dart';
-// import BrokerHomePage
-// import DriverHomePage
+
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -43,7 +42,6 @@ class _SplashPageState extends State<SplashPage> {
 
     final uid = user.uid;
 
-    // Check User Collection
     final userDoc = await FirebaseFirestore.instance
         .collection("User")
         .doc(uid)
@@ -59,7 +57,6 @@ class _SplashPageState extends State<SplashPage> {
       return;
     }
 
-    // Check Broker Collection
     final brokerDoc = await FirebaseFirestore.instance
         .collection("Broker")
         .doc(uid)
@@ -75,7 +72,7 @@ class _SplashPageState extends State<SplashPage> {
       return;
     }
 
-    // Check Driver Collection
+
     final driverDoc = await FirebaseFirestore.instance
         .collection("Driver")
         .doc(uid)
@@ -91,7 +88,6 @@ class _SplashPageState extends State<SplashPage> {
       return;
     }
 
-    // User authenticated but not found in Firestore
     await FirebaseAuth.instance.signOut();
 
     Navigator.pushReplacement(

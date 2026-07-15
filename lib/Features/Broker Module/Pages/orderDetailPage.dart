@@ -1,258 +1,9 @@
-// import 'package:flutter/material.dart';
-// import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
-// import 'package:trucklinkai_orignal/Features/Auth/Widgets/continueButton.dart';
-
-// class OrderDetailsPage extends StatefulWidget {
-//   final Map<String, dynamic> orderReqData;
-//   const OrderDetailsPage({super.key, required this.orderReqData});
-
-//   @override
-//   State<OrderDetailsPage> createState() => _OrderDetailsPageState();
-// }
-
-// class _OrderDetailsPageState extends State<OrderDetailsPage> {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       backgroundColor: Colors.grey.shade100,
-//       body: SafeArea(
-//         child: Container(
-//           width: double.infinity,
-//           height: double.infinity,
-//           child: Padding(
-//             padding: const EdgeInsets.all(16),
-//             child: Container(
-//               decoration: BoxDecoration(
-//                 color: Colors.white,
-//                 borderRadius: BorderRadius.circular(24),
-//               ),
-//               child: Padding(
-//                 padding: const EdgeInsets.symmetric(
-//                   horizontal: 20,
-//                   vertical: 16,
-//                 ),
-//                 child: SingleChildScrollView(
-//                   child: Column(
-//                     crossAxisAlignment: CrossAxisAlignment.start,
-//                     children: [
-//                       /// Header
-//                       Row(
-//                         children: [
-//                           IconButton(
-//                             onPressed: () => Navigator.pop(context),
-//                             icon: const Icon(Icons.arrow_back_ios_new),
-//                           ),
-//                           const Expanded(
-//                             child: Center(
-//                               child: Text(
-//                                 "Request Details",
-//                                 style: TextStyle(
-//                                   fontSize: 20,
-//                                   fontWeight: FontWeight.bold,
-//                                 ),
-//                               ),
-//                             ),
-//                           ),
-//                           IconButton(
-//                             onPressed: () {},
-//                             icon: const Icon(Icons.notifications_none),
-//                           ),
-//                         ],
-//                       ),
-
-//                       const SizedBox(height: 20),
-
-//                       /// Request ID
-//                       const Text(
-//                         "REQ12345",
-//                         style: TextStyle(
-//                           fontSize: 18,
-//                           fontWeight: FontWeight.bold,
-//                         ),
-//                       ),
-
-//                       const SizedBox(height: 4),
-
-//                       Text(
-//                         widget.orderReqData["createdAt"]??"Not Entered",
-//                         style: TextStyle(
-//                           color: Colors.grey.shade500,
-//                           fontSize: 12,
-//                         ),
-//                       ),
-
-//                       const SizedBox(height: 20),
-
-//                       /// Customer Information
-//                       const Text(
-//                         "Customer Information",
-//                         style: TextStyle(
-//                           fontSize: 18,
-//                           fontWeight: FontWeight.w600,
-//                         ),
-//                       ),
-
-//                       const SizedBox(height: 16),
-
-//                       Row(
-//                         crossAxisAlignment: CrossAxisAlignment.start,
-
-//                         children: [
-//                           const Icon(
-//                             Icons.location_on,
-//                             color: Colors.blue,
-//                             size: 22,
-//                           ),
-//                           const SizedBox(width: 12),
-//                           Column(
-//                             crossAxisAlignment: CrossAxisAlignment.start,
-//                             children:  [
-//                               Text(
-//                              widget.orderReqData["name"]??"Not Entered",
-//                                 style: TextStyle(
-//                                   fontWeight: FontWeight.w600,
-//                                   fontSize: 16,
-//                                 ),
-//                               ),
-//                               SizedBox(height: 4),
-//                               Text(
-//                                 widget.orderReqData["phone"]??"Not Entered",
-//                                 style: TextStyle(fontSize: 14),
-//                               ),
-//                             ],
-//                           ),
-//                         ],
-//                       ),
-
-//                       const SizedBox(height: 20),
-
-//                       /// Route
-//                       const Text(
-//                         "Route",
-//                         style: TextStyle(
-//                           fontSize: 18,
-//                           fontWeight: FontWeight.w600,
-//                         ),
-//                       ),
-
-//                       const SizedBox(height: 16),
-
-//                       Row(
-//                         children: [
-//                           Icon(
-//                             Icons.circle,
-//                             color: Colors.deepPurple,
-//                             size: 10,
-//                           ),
-//                           SizedBox(width: 12),
-//                           Expanded(
-//                             child: Text(
-//                               "${widget.orderReqData["pickupCity"]??"Not Entered"} ➜ ${widget.orderReqData["dropCity"]??"Not Entered"}",
-//                               style: TextStyle(fontSize: 12),
-//                             ),
-//                           ),
-//                         ],
-//                       ),
-
-//                       const SizedBox(height: 36),
-
-//                       /// Item Details
-//                       const Text(
-//                         "Item Details",
-//                         style: TextStyle(
-//                           fontSize: 18,
-//                           fontWeight: FontWeight.w600,
-//                         ),
-//                       ),
-
-//                       const SizedBox(height: 16),
-
-//                       Row(
-//                         crossAxisAlignment: CrossAxisAlignment.start,
-//                         children: [
-//                           const Icon(
-//                             Icons.inventory_2,
-//                             color: Colors.green,
-//                             size: 20,
-//                           ),
-//                           const SizedBox(width: 12),
-//                           Expanded(
-//                             child: Column(
-//                               crossAxisAlignment: CrossAxisAlignment.start,
-//                               children: [
-//                                 Text(
-//                                   "${widget.orderReqData["itemType"]??"Null"}, ${widget.orderReqData["weight"]??0}, ${widget.orderReqData["quantity"]??0} Units",
-//                                   style: TextStyle(
-//                                     fontSize: 15,
-//                                     fontWeight: FontWeight.w500,
-//                                   ),
-//                                 ),
-//                                 SizedBox(height: 8),
-//                                 Text(
-//                                   widget.orderReqData["description"],
-//                                   style: TextStyle(fontSize: 14),
-//                                 ),
-//                               ],
-//                             ),
-//                           ),
-//                         ],
-//                       ),
-
-//                       const SizedBox(height: 26),
-
-//                       /// Quote
-//                       const Text(
-//                         "Your Quote (Pkr)",
-//                         style: TextStyle(
-//                           fontSize: 18,
-//                           fontWeight: FontWeight.w600,
-//                         ),
-//                       ),
-
-//                       const SizedBox(height: 10),
-
-//                       Container(
-//                         width: double.infinity,
-//                         height: 50,
-//                         decoration: BoxDecoration(
-//                           borderRadius: BorderRadius.circular(10),
-//                           border: Border.all(width: 1),
-//                         ),
-//                         child: TextField(
-//                           textAlign: TextAlign.center,
-//                           keyboardType: TextInputType.number,
-//                           decoration: const InputDecoration(
-//                             border: InputBorder.none,
-//                             hintText: "Enter Your Amount",
-//                             contentPadding: EdgeInsets.symmetric(vertical: 15),
-//                           ),
-//                         ),
-//                       ),
-//                       SizedBox(height: 20),
-
-//                       ContinueButton(
-//                         text: "Submit Quote",
-//                         clr: Appcolors.secondaryPurple,
-//                         onTap: () {},
-//                       ),
-
-//                       const SizedBox(height: 10),
-//                     ],
-//                   ),
-//                 ),
-//               ),
-//             ),
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
-import 'package:trucklinkai_orignal/Features/Auth/Widgets/continueButton.dart';
+import 'package:trucklinkai_orignal/Core/Widgets/backArrowButton.dart';
+import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerQuoteBloc/brokerQuoteCubit.dart';
+import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerQuoteBloc/brokerQuoteStates.dart';
 
 class OrderDetailsPage extends StatefulWidget {
   final Map<String, dynamic> orderReqData;
@@ -272,7 +23,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     super.dispose();
   }
 
-  void submitQuote() async {
+  void submitQuote() {
     final quote = quoteController.text.trim();
 
     if (quote.isEmpty) {
@@ -291,29 +42,11 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       return;
     }
 
-    /// TODO :
-    /// Upload amount to Firestore here.
-    ///
-    await FirebaseFirestore.instance
-        .collection("User")
-        .doc(widget.orderReqData["userUid"])
-        .collection("Requests")
-        .doc(widget.orderReqData["orderId"])
-        .update({"brokerOffer": amount, "status": "fare_offered"});
-
-    await FirebaseFirestore.instance
-        .collection("Broker")
-        .doc(widget.orderReqData["brokerId"])
-        .collection("IncomingRequests")
-        .doc(widget.orderReqData["orderId"])
-        .update({"brokerOffer": amount, "status": "fare_offered"});
-
-    Navigator.pop(context);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("Quote Submitted: PKR ${amount.toStringAsFixed(0)}"),
-      ),
+    context.read<BrokerQuoteCubit>().submitQuote(
+      userUid: widget.orderReqData["userUid"],
+      orderId: widget.orderReqData["orderId"],
+      brokerId: widget.orderReqData["brokerId"],
+      amount: amount,
     );
   }
 
@@ -322,7 +55,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     final data = widget.orderReqData;
 
     final requestId = "Order No # " + data["orderNo"];
-    
+
     final createdAt = data["createdAt"] ?? "Time not available";
 
     final customerName = data["userUid"] ?? "userId not available";
@@ -337,208 +70,352 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     final description = data["additionalInfo"] ?? "No description available.";
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: const Color(0xFFF5F6FA),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final width = constraints.maxWidth;
+            final bool isMobile = width < 600;
+            final double horizontalPadding = isMobile ? 22 : width * 0.12;
+
+            return SingleChildScrollView(
+              padding: EdgeInsets.symmetric(
+                horizontal: horizontalPadding,
+                vertical: 15,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // -------- Header --------
                   Row(
                     children: [
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.arrow_back_ios_new),
+                      BackArrowButton(onTap: () => Navigator.pop(context)),
+                      const Spacer(),
+                      const Text(
+                        "Request Details",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.black87,
+                        ),
                       ),
-                      const Expanded(
-                        child: Center(
-                          child: Text(
-                            "Request Details",
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
+                      const Spacer(),
+                      InkWell(
+                        borderRadius: BorderRadius.circular(14),
+                        onTap: () {},
+                        child: Container(
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.06),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.notifications_none_rounded,
+                            color: Colors.black87,
+                            size: 20,
                           ),
                         ),
                       ),
-                      IconButton(
-                        onPressed: () {},
-                        icon: const Icon(Icons.notifications_none),
-                      ),
                     ],
                   ),
 
-                  const SizedBox(height: 25),
+                  SizedBox(height: isMobile ? 24 : 30),
 
+                  // -------- Order # + time --------
                   Text(
                     requestId,
                     style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 21,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    createdAt.toString(),
+                    style: TextStyle(color: Colors.grey[500], fontSize: 12.5),
+                  ),
+
+                  SizedBox(height: isMobile ? 24 : 30),
+
+                  // -------- Customer Information --------
+                  const _SectionLabel("Customer Information"),
+                  const SizedBox(height: 10),
+                  _InfoCard(
+                    icon: Icons.person_pin_circle_outlined,
+                    iconColor: Appcolors.primaryBlue,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          customerName,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 15,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          phone,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
 
-                  const SizedBox(height: 5),
+                  SizedBox(height: isMobile ? 22 : 26),
 
-                  Text(
-                    createdAt.toString(),
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  const Text(
-                    "Customer Information",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                  ),
-
-                  const SizedBox(height: 15),
-
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.person_pin_circle,
-                        color: Colors.blue,
-                        size: 24,
+                  // -------- Route --------
+                  const _SectionLabel("Route"),
+                  const SizedBox(height: 10),
+                  _InfoCard(
+                    icon: Icons.location_on_outlined,
+                    iconColor: Appcolors.secondaryPurple,
+                    child: Text(
+                      "$pickup  ➜  $drop",
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              customerName,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(phone, style: const TextStyle(fontSize: 14)),
-                          ],
+                    ),
+                  ),
+
+                  SizedBox(height: isMobile ? 22 : 26),
+
+                  // -------- Item Details --------
+                  const _SectionLabel("Item Details"),
+                  const SizedBox(height: 10),
+                  _InfoCard(
+                    icon: Icons.inventory_2_outlined,
+                    iconColor: Appcolors.tertiaryGreen,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          itemType,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.black87,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  const Text(
-                    "Route",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                  ),
-
-                  const SizedBox(height: 15),
-
-                  Row(
-                    children: [
-                      const Icon(Icons.location_on, color: Colors.deepPurple),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          "$pickup  ➜  $drop",
-                          style: const TextStyle(fontSize: 15),
+                        const SizedBox(height: 6),
+                        Text(
+                          "Weight: $weight kg",
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey[700],
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  const Text(
-                    "Item Details",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                  ),
-
-                  const SizedBox(height: 15),
-
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.inventory_2,
-                        color: Colors.green,
-                        size: 24,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              itemType,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              "Weight : $weight kg",
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                            Text(
-                              "Quantity : $quantity",
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              description,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey.shade700,
-                              ),
-                            ),
-                          ],
+                        Text(
+                          "Quantity: $quantity",
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey[700],
+                          ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 8),
+                        Text(
+                          description,
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            color: Colors.grey[500],
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
 
-                  const SizedBox(height: 35),
+                  SizedBox(height: isMobile ? 30 : 36),
 
-                  const Text(
-                    "Your Quote (PKR)",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                  ),
-
-                  const SizedBox(height: 15),
-
+                  // -------- Quote input (same controller) --------
+                  const _SectionLabel("Your Quote (PKR)"),
+                  const SizedBox(height: 10),
                   TextField(
                     controller: quoteController,
                     keyboardType: TextInputType.number,
                     textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
                     decoration: InputDecoration(
                       hintText: "Enter Your Quote",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                      hintStyle: TextStyle(
+                        color: Colors.grey[400],
+                        fontWeight: FontWeight.normal,
+                        fontSize: 15,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 15),
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(
+                          color: Colors.grey.withOpacity(0.2),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(
+                          color: Appcolors.secondaryPurple,
+                          width: 1.6,
+                        ),
+                      ),
                     ),
                   ),
 
-                  const SizedBox(height: 30),
+                  SizedBox(height: isMobile ? 26 : 32),
 
-                  ContinueButton(
-                    text: "Submit Quote",
-                    clr: Appcolors.secondaryPurple,
-                    onTap: submitQuote,
+                  // -------- Submit (same listener/cubit logic) --------
+                  BlocListener<BrokerQuoteCubit, BrokerQuoteState>(
+                    listener: (context, state) {
+                      if (state is BrokerQuoteSuccess) {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              "Quote Submitted: PKR ${state.amount.toStringAsFixed(0)}",
+                            ),
+                          ),
+                        );
+                      } else if (state is BrokerQuoteError) {
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text(state.error)));
+                      }
+                    },
+                    child: BlocBuilder<BrokerQuoteCubit, BrokerQuoteState>(
+                      builder: (context, state) {
+                        final bool loading = state is BrokerQuoteLoading;
+
+                        return SizedBox(
+                          width: double.infinity,
+                          height: 54,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Appcolors.secondaryPurple,
+                              disabledBackgroundColor: Appcolors.secondaryPurple
+                                  .withOpacity(0.6),
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(28),
+                              ),
+                            ),
+                            onPressed: loading ? null : submitQuote,
+                            child: loading
+                                ? const SizedBox(
+                                    width: 22,
+                                    height: 22,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.4,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
+                                    ),
+                                  )
+                                : const Text(
+                                    "Submit Quote",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
 
-                  const SizedBox(height: 15),
+                  SizedBox(height: isMobile ? 15 : 20),
                 ],
               ),
-            ),
-          ),
+            );
+          },
         ),
+      ),
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  final String text;
+  const _SectionLabel(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: const TextStyle(
+        fontSize: 15,
+        fontWeight: FontWeight.w800,
+        color: Colors.black87,
+      ),
+    );
+  }
+}
+
+class _InfoCard extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final Widget child;
+
+  const _InfoCard({
+    required this.icon,
+    required this.iconColor,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: iconColor.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: iconColor, size: 19),
+          ),
+          const SizedBox(width: 14),
+          Expanded(child: child),
+        ],
       ),
     );
   }

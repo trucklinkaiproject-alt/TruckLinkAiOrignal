@@ -5,6 +5,7 @@ import 'package:trucklinkai_orignal/Core/Widgets/noscrollbehaviour.dart';
 import 'package:trucklinkai_orignal/Features/Auth/AuthBloc/authCubit.dart';
 import 'package:trucklinkai_orignal/Features/Auth/Pages/splashScreenPage.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerBloc/brokerCubit.dart';
+import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerQuoteBloc/brokerQuoteCubit.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/bloc/CreateReqBloc/createReqcubit.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/bloc/OrderDetailBloc/orderDetialCubit.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/bloc/getBrokerBloc/getBrokerCubit.dart';
@@ -23,6 +24,7 @@ void main() async {
           BlocProvider(create: (context) => BrokerCubit()),
           BlocProvider(create: (context) => GetBrokerCubit()),
           BlocProvider(create: (context) => OrderDetailCubit()),
+          BlocProvider(create: (context) => BrokerQuoteCubit()),
 
           
         ],

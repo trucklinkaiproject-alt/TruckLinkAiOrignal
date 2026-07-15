@@ -45,7 +45,7 @@ class AuthCubit extends Cubit<AuthState> {
 
       await userCredential.user?.sendEmailVerification();
 
-      print("selected role: $selectedRole");
+     
       await firebaseFirestore
           .collection(selectedRole)
           .doc(userCredential.user!.uid)
@@ -95,14 +95,7 @@ class AuthCubit extends Cubit<AuthState> {
         password: password,
       );
 
-      // await userCredential.user?.reload();
-      // final refreshedUser = _auth.currentUser;
-
-      // if (refreshedUser != null && !refreshedUser.emailVerified) {
-      //   await _auth.signOut();
-      //   emit(AuthEmailNotVerified(email));
-      //   return;
-      // }
+      
 
       emit(AuthSuccess(role: role));
     } on FirebaseAuthException catch (e) {
@@ -153,7 +146,7 @@ class AuthCubit extends Cubit<AuthState> {
       final refreshedUser = _auth.currentUser;
 
       if (refreshedUser != null && refreshedUser.emailVerified) {
-        emit(AuthSuccess(role: role));
+        emit(AuthEmailVerified(email));
       } else {
         await _auth.signOut();
         emit(AuthEmailNotVerified(email));

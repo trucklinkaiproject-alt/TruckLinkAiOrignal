@@ -47,12 +47,12 @@ class _ShipperAdvantagesPageState extends State<ShipperAdvantagesPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // -------- Back button --------
+                    
                     BackArrowButton(onTap: () => Navigator.pop(context)),
 
                     SizedBox(height: isMobile ? 20 : 28),
 
-                    // -------- Logo + role + title (centered) --------
+                    
                     Center(
                       child: Column(
                         children: [
@@ -113,7 +113,7 @@ class _ShipperAdvantagesPageState extends State<ShipperAdvantagesPage> {
 
                     SizedBox(height: isMobile ? 30 : 40),
 
-                    // -------- Feature list (same 4 items, same order) --------
+                   
                     FeatureCard(
                       color: Appcolors.primaryBlue,
                       items: const [
@@ -126,7 +126,7 @@ class _ShipperAdvantagesPageState extends State<ShipperAdvantagesPage> {
 
                     SizedBox(height: isMobile ? 30 : 44),
 
-                    // -------- Continue button (same navigation) --------
+                   
                     SizedBox(
                       width: double.infinity,
                       height: 54,
