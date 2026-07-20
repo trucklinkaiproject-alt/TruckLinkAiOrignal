@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 class OrderContainer extends StatelessWidget {
   const OrderContainer({
     super.key,
+    required this.onTap,
     required this.orderNumber,
     required this.pickupLocation,
     required this.dropLocation,
@@ -13,6 +14,7 @@ class OrderContainer extends StatelessWidget {
   });
 
   final String orderNumber;
+  final VoidCallback onTap;
   final String pickupLocation;
   final String dropLocation;
   final String date;
@@ -68,12 +70,14 @@ class OrderContainer extends StatelessWidget {
         ? 14
         : 16;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12, left: 5, right: 5),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      width: double.infinity,
-      height: containerHeight,
-      decoration: BoxDecoration(
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12, left: 5, right: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        width: double.infinity,
+        height: containerHeight,
+        decoration: BoxDecoration(
         color: const Color.fromARGB(255, 252, 253, 255),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
@@ -142,7 +146,7 @@ class OrderContainer extends StatelessWidget {
             ),
           ),
         ],
-      ),
+      ),)
     );
   }
 }

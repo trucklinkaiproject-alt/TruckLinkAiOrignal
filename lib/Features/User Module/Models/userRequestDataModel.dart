@@ -13,6 +13,7 @@ class UserRequestDataModel {
   String brokerId;
   String status;
   String date;
+  String vehicleType;
 
   UserRequestDataModel({
     required this.userUid,
@@ -26,6 +27,7 @@ class UserRequestDataModel {
     required this.quantity,
     required this.orderId,
     required this.orderNo,
+    required this.vehicleType,
     this.brokerId = '',
     required this.status,
     required this.date,
@@ -39,6 +41,7 @@ class UserRequestDataModel {
       'pickupComp': pickupComp,
       'dropComp': dropComp,
       'itemType': itemType,
+      'vehicleType': vehicleType,
       'additionalInfo': additionalInfo,
       'weight': weight,
       'quantity': quantity,

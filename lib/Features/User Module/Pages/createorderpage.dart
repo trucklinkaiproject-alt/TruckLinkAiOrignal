@@ -392,6 +392,7 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
   TextEditingController dropCityLocation = TextEditingController();
   String uid = '';
   String selectedItemType = '';
+  String selectedVehicleType = '';
   String pickupCity = '';
   String pickupComp = '';
   String dropCity = '';
@@ -407,6 +408,16 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
     "Glass",
     "Iron",
     "Machinery",
+    "Other",
+  ];
+  final List<String> vehicleTypes = [
+    "Truck",
+    "Van",
+    "Trailer",
+    "Container",
+    "PickUp Truck",
+    "Shahzore",
+    "Loader Rickshaw",
     "Other",
   ];
 
@@ -600,6 +611,63 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
                   ),
 
                   SizedBox(height: isMobile ? 24 : 30),
+                  const _SectionLabel("Transportation Details"),
+                  const SizedBox(height: 12),
+
+                  DropdownButtonFormField<String>(
+                    value: selectedVehicleType.isEmpty ? null : selectedVehicleType,
+                    decoration: InputDecoration(
+                      labelText: "Vehicle Type",
+                      hintText: "Select Vehicle Type",
+                      prefixIcon: const Icon(Icons.fire_truck_sharp),
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(
+                          color: Colors.grey.withOpacity(0.2),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(
+                          color: Appcolors.primaryBlue,
+                          width: 1.6,
+                        ),
+                      ),
+                    ),
+                    icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                    borderRadius: BorderRadius.circular(16),
+                    dropdownColor: Colors.white,
+                    isExpanded: true,
+                    items: vehicleTypes.map((type) {
+                      return DropdownMenuItem<String>(
+                        value: type,
+                        child: Text(
+                          type,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        selectedVehicleType = value!;
+                      });
+                    },
+                  ),
+
+                  const SizedBox(height: 14),
 
                   // -------- Additional Details --------
                   const _SectionLabel("Additional Details"),
@@ -685,6 +753,7 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
                                       dropCity.isEmpty ||
                                       dropComp.isEmpty ||
                                       selectedItemType.isEmpty ||
+                                      selectedVehicleType.isEmpty ||
                                       weightController.text.trim().isEmpty ||
                                       quantityController.text
                                           .trim()
@@ -710,6 +779,7 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
                                         pickupComp,
                                         dropComp,
                                         selectedItemType,
+                                        selectedVehicleType,
                                         additionalDetailsController.text,
                                         int.tryParse(weightController.text) ??
                                             0,

@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
+import 'package:trucklinkai_orignal/Features/User%20Module/Pages/shipperOrderDetailPage.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/Widgets/ordercontainer.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/bloc/OrderDetailBloc/orderDetailState.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/bloc/OrderDetailBloc/orderDetialCubit.dart';
@@ -311,6 +312,12 @@ class OrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OrderContainer(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ShipperOrderDetailPage(orderDetails: order,),
+        ),
+      ),
       orderNumber: order["orderNo"] ?? "",
       pickupLocation: order["pickupCity"] ?? "",
       dropLocation: order["dropCity"] ?? "",

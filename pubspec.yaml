@@ -45,7 +45,9 @@ dependencies:
   latlong2: ^0.9.1
   geocoding: ^3.0.0
   http:
-  intl: ^0.20.2 
+  intl: ^0.20.2
+  pdf:
+  printing: 
 dev_dependencies:
   flutter_test:
     sdk: flutter

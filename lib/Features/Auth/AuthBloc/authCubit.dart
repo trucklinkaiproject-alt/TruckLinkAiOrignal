@@ -55,6 +55,12 @@ class AuthCubit extends Cubit<AuthState> {
             'phone': phone,
             'role': selectedRole,
             'uid': userCredential.user!.uid,
+            // 'location':"Broker Location",
+            // 'rating':'0',
+            // 'total_orders_completed':0,
+            // 'response_time':
+            // 'active_orders':0,
+            
           });
 
       await _auth.signOut();

@@ -25,8 +25,6 @@ void main() async {
           BlocProvider(create: (context) => GetBrokerCubit()),
           BlocProvider(create: (context) => OrderDetailCubit()),
           BlocProvider(create: (context) => BrokerQuoteCubit()),
-
-          
         ],
         child: TruckLinkApp(),
       ),);

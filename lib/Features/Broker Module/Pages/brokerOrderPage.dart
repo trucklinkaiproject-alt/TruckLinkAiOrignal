@@ -311,6 +311,7 @@ class OrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OrderContainer(
+      onTap: (){},
       orderNumber: order["orderNo"] ?? "",
       pickupLocation: order["pickupCity"] ?? "",
       dropLocation: order["dropCity"] ?? "",
