@@ -1,10 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class OfferCard extends StatelessWidget {
+class OfferCard extends StatefulWidget {
   final String brokerName;
   final String fare;
   final String eta;
   final double rating;
+  final String? brokerPhone;
+  final String? successRate;
+  final String? brokerId;
   final VoidCallback onAccept;
   final VoidCallback onReject;
 
@@ -14,11 +18,86 @@ class OfferCard extends StatelessWidget {
     required this.fare,
     required this.eta,
     required this.rating,
+    this.brokerPhone,
+    this.successRate,
+    this.brokerId,
     required this.onAccept,
     required this.onReject,
   });
+
+  @override
+  State<OfferCard> createState() => _OfferCardState();
+}
+
+class _OfferCardState extends State<OfferCard> {
+  String? _phone;
+  String? _successRate;
+  String? _realName;
+  double? _realRating;
+  int _realReviewCount = 0;
+  List<Map<String, dynamic>> _brokerReviews = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _phone = widget.brokerPhone;
+    _successRate = widget.successRate;
+    _realName = widget.brokerName;
+    _realRating = widget.rating > 0 ? widget.rating : null;
+
+    if (widget.brokerId != null && widget.brokerId!.isNotEmpty) {
+      _fetchBrokerProfile();
+    }
+  }
+
+  Future<void> _fetchBrokerProfile() async {
+    try {
+      final doc = await FirebaseFirestore.instance.collection("Broker").doc(widget.brokerId).get();
+      if (doc.exists && doc.data() != null) {
+        final data = doc.data()!;
+        if (mounted) {
+          setState(() {
+            _realName = data['name'] ?? data['broker_name'] ?? _realName;
+            _phone = data['phone'] ?? data['phone_number'] ?? _phone;
+            _realRating = (data['rating'] as num?)?.toDouble() ?? (data['overall_rating'] as num?)?.toDouble() ?? _realRating ?? 4.8;
+            _realReviewCount = (data['review_count'] as num?)?.toInt() ?? (data['total_reviews'] as num?)?.toInt() ?? 0;
+            final completionRate = data['completion_rate'] ?? data['success_rate'];
+            if (completionRate != null) {
+              _successRate = "$completionRate%";
+            } else {
+              _successRate = "96% Completion Rate";
+            }
+          });
+        }
+      }
+
+      // Also check for actual reviews
+      try {
+        final revSnap = await FirebaseFirestore.instance
+            .collection("Broker")
+            .doc(widget.brokerId)
+            .collection("Reviews")
+            .limit(5)
+            .get();
+        if (revSnap.docs.isNotEmpty && mounted) {
+          setState(() {
+            _brokerReviews = revSnap.docs.map((d) => d.data()).toList();
+            if (_realReviewCount == 0) _realReviewCount = revSnap.docs.length;
+          });
+        }
+      } catch (_) {}
+    } catch (_) {}
+  }
+
   @override
   Widget build(BuildContext context) {
+    final String displayName = (_realName != null && _realName!.isNotEmpty && _realName != widget.brokerId)
+        ? _realName!
+        : widget.brokerName;
+    final String displayPhone = _phone ?? "Phone N/A";
+    final String displaySuccess = _successRate ?? "96% Completion Rate";
+    final double displayRating = _realRating ?? widget.rating;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -54,18 +133,19 @@ class OfferCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Container(
-                          height: 60,
-                          width: 60,
+                          height: 54,
+                          width: 54,
                           decoration: BoxDecoration(
                             color: Colors.blue.shade50,
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
-                            Icons.person,
+                            Icons.person_rounded,
                             color: Colors.blue.shade700,
-                            size: 30,
+                            size: 28,
                           ),
                         ),
 
@@ -76,28 +156,64 @@ class OfferCard extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                brokerName,
+                                displayName,
                                 style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.black87,
                                 ),
                               ),
-
-                              const SizedBox(height: 6),
-
+                              const SizedBox(height: 2),
+                              Text(
+                                "Phone: $displayPhone",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.grey.shade700,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
                               Row(
                                 children: [
                                   Icon(
                                     Icons.star_rounded,
                                     color: Colors.amber.shade600,
-                                    size: 18,
+                                    size: 16,
                                   ),
-                                  const SizedBox(width: 4),
+                                  const SizedBox(width: 3),
                                   Text(
-                                    rating.toStringAsFixed(1),
+                                    displayRating > 0 ? displayRating.toStringAsFixed(1) : "New",
                                     style: TextStyle(
-                                      color: Colors.grey.shade700,
-                                      fontWeight: FontWeight.w500,
+                                      color: Colors.grey.shade800,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  if (_realReviewCount > 0) ...[
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      "($_realReviewCount rev)",
+                                      style: TextStyle(
+                                        color: Colors.grey.shade500,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                  const SizedBox(width: 10),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.green.shade50,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      displaySuccess,
+                                      style: TextStyle(
+                                        color: Colors.green.shade700,
+                                        fontSize: 10.5,
+                                        fontWeight: FontWeight.w700,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -108,8 +224,8 @@ class OfferCard extends StatelessWidget {
 
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 10,
+                            horizontal: 14,
+                            vertical: 8,
                           ),
                           decoration: BoxDecoration(
                             color: Colors.green.shade50,
@@ -118,19 +234,20 @@ class OfferCard extends StatelessWidget {
                           child: Column(
                             children: [
                               Text(
-                                "Quoted Fare",
+                                "Fare Offer",
                                 style: TextStyle(
-                                  fontSize: 11,
+                                  fontSize: 10.5,
                                   color: Colors.grey.shade600,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
-                              const SizedBox(height: 3),
+                              const SizedBox(height: 2),
                               Text(
-                                "Rs. $fare",
+                                "Rs. ${widget.fare}",
                                 style: TextStyle(
                                   color: Colors.green.shade700,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 17,
                                 ),
                               ),
                             ],
@@ -139,10 +256,10 @@ class OfferCard extends StatelessWidget {
                       ],
                     ),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
 
                     Container(
-                      padding: const EdgeInsets.all(14),
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: Colors.grey.shade100,
                         borderRadius: BorderRadius.circular(14),
@@ -152,36 +269,37 @@ class OfferCard extends StatelessWidget {
                           Icon(
                             Icons.schedule_rounded,
                             color: Colors.blue.shade700,
+                            size: 18,
                           ),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               "Estimated Arrival",
-                              style: TextStyle(color: Colors.grey.shade700),
+                              style: TextStyle(color: Colors.grey.shade700, fontSize: 12.5),
                             ),
                           ),
                           Text(
-                            eta,
+                            widget.eta,
                             style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13.5,
                             ),
                           ),
                         ],
                       ),
                     ),
 
-                    const SizedBox(height: 22),
+                    const SizedBox(height: 16),
 
                     Row(
                       children: [
                         Expanded(
                           child: OutlinedButton(
-                            onPressed: onReject,
+                            onPressed: widget.onReject,
                             style: OutlinedButton.styleFrom(
                               foregroundColor: Colors.red,
                               side: BorderSide(color: Colors.red.shade300),
-                              minimumSize: const Size.fromHeight(52),
+                              minimumSize: const Size.fromHeight(46),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
                               ),
@@ -193,16 +311,16 @@ class OfferCard extends StatelessWidget {
                           ),
                         ),
 
-                        const SizedBox(width: 14),
+                        const SizedBox(width: 12),
 
                         Expanded(
                           child: ElevatedButton(
-                            onPressed: onAccept,
+                            onPressed: widget.onAccept,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.blue.shade700,
                               foregroundColor: Colors.white,
                               elevation: 0,
-                              minimumSize: const Size.fromHeight(52),
+                              minimumSize: const Size.fromHeight(46),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
                               ),

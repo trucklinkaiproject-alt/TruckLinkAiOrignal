@@ -88,8 +88,19 @@ class GetBrokerOrderDetailCubit extends Cubit<GetBrokerOrderDetailState> {
         .collection("IncomingRequests");
 
     // Only filter by status if one was actually provided ("All" tab passes null)
-    if (status != null) {
-      query = query.where("status", isEqualTo: status);
+    if (status != null && status.isNotEmpty) {
+      final s = status.toLowerCase();
+      if (s == 'pending') {
+        query = query.where("status", whereIn: ["pending", "Pending"]);
+      } else if (s == 'accepted') {
+        query = query.where("status", whereIn: ["accepted", "Accepted", "driver_offer_sent", "accepted_by_driver", "in_transit", "in_progress"]);
+      } else if (s == 'completed' || s == 'delivered') {
+        query = query.where("status", whereIn: ["completed", "Completed", "delivered", "Delivered"]);
+      } else if (s == 'rejected' || s == 'cancelled') {
+        query = query.where("status", whereIn: ["rejected", "Rejected", "cancelled", "Cancelled"]);
+      } else {
+        query = query.where("status", isEqualTo: status);
+      }
     }
 
     _subscription = query.snapshots().listen(

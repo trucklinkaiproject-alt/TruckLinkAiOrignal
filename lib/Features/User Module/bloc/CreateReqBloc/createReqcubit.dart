@@ -83,6 +83,70 @@ class CreateReqCubit extends Cubit<CreateReqState> {
             .collection('IncomingRequests')
             .doc(currentRequest!.orderId)
             .set(currentRequest!.toMap());
+
+        // Notify Broker of new shipment request
+        try {
+          final String notifId = "req_new_${currentRequest!.orderId}_${currentRequest!.userUid}";
+          await _firestore
+              .collection('Broker')
+              .doc(currentRequest!.brokerId)
+              .collection('Notifications')
+              .doc(notifId)
+              .set({
+                'id': notifId,
+                'broker_id': currentRequest!.brokerId,
+                'type': 'new_request',
+                'title': 'New Shipment Request',
+                'body': 'New request for Order #${currentRequest!.orderNo}: ${currentRequest!.pickupCity} → ${currentRequest!.dropCity} (${currentRequest!.vehicleType})',
+                'order_id': currentRequest!.orderId,
+                'order_no': currentRequest!.orderNo,
+                'user_uid': currentRequest!.userUid,
+                'timestamp': FieldValue.serverTimestamp(),
+                'is_read': false,
+              }, SetOptions(merge: true));
+        } catch (_) {}
+
+        // ── AI STATS: increment total_requests atomically ──────────────────
+        // Using a transaction guarantees idempotency even if the stream fires
+        // multiple times; the counter only increments once per request write.
+        await _firestore.runTransaction((txn) async {
+          final brokerRef =
+              _firestore.collection('Broker').doc(currentRequest!.brokerId);
+          final snap = await txn.get(brokerRef);
+          final data = snap.data() ?? {};
+
+          final int total = ((data['total_requests'] as num?)?.toInt() ?? 0) + 1;
+          final int accepted =
+              (data['accepted_requests'] as num?)?.toInt() ?? 0;
+          final int cancelled =
+              (data['cancelled_requests'] as num?)?.toInt() ?? 0;
+
+          final double acceptanceRate =
+              total > 0 ? (accepted / total) * 100.0 : 0.0;
+          final double cancellationRate =
+              total > 0 ? (cancelled / total) * 100.0 : 0.0;
+
+          txn.set(
+            brokerRef,
+            {
+              'total_requests': total,
+              'acceptance_rate': acceptanceRate,
+              'cancellation_rate': cancellationRate,
+              // Ensure field exists for new/existing brokers
+              'accepted_requests': accepted,
+              'cancelled_requests': cancelled,
+              'completed_requests':
+                  (data['completed_requests'] as num?)?.toInt() ?? 0,
+              'completion_rate':
+                  (data['completion_rate'] as num?)?.toDouble() ?? 0.0,
+              'broker_rating':
+                  (data['broker_rating'] as num?)?.toDouble() ?? 0.0,
+              'broker_id': currentRequest!.brokerId,
+            },
+            SetOptions(merge: true),
+          );
+        });
+        // ──────────────────────────────────────────────────────────────────
       } else {
         emit(CreateReqErrorState("No data available from user"));
       }

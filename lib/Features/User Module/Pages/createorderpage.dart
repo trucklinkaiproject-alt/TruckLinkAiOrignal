@@ -794,7 +794,9 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) => BrokerSelectionPage(),
+                                      builder: (_) => BrokerSelectionPage(
+                                        requiredVehicleType: selectedVehicleType,
+                                      ),
                                     ),
                                   );
                                 },

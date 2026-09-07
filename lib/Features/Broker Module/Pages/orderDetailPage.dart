@@ -1,9 +1,16 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
+import 'package:trucklinkai_orignal/Core/Services/reviewService.dart';
 import 'package:trucklinkai_orignal/Core/Widgets/backArrowButton.dart';
+import 'package:trucklinkai_orignal/Features/Broker Module/Pages/brokerAssignDriverPage.dart';
+import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerBloc/brokerCubit.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerQuoteBloc/brokerQuoteCubit.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerQuoteBloc/brokerQuoteStates.dart';
+import 'package:trucklinkai_orignal/Features/User%20Module/Pages/brokerchatpage.dart';
+import 'package:trucklinkai_orignal/Features/User%20Module/Pages/orderTrackingPage.dart';
 
 class OrderDetailsPage extends StatefulWidget {
   final Map<String, dynamic> orderReqData;
@@ -21,6 +28,21 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
   void dispose() {
     quoteController.dispose();
     super.dispose();
+  }
+
+  double _parseAmount(dynamic val) {
+    if (val == null) return 0.0;
+    if (val is num) return val.toDouble();
+    if (val is String) {
+      final cleaned = val.replaceAll(RegExp(r'[^0-9.]'), '');
+      return double.tryParse(cleaned) ?? 0.0;
+    }
+    return 0.0;
+  }
+
+  String _formatCurrency(double amount) {
+    final String str = amount.toStringAsFixed(0);
+    return str.replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},');
   }
 
   void submitQuote() {
@@ -43,9 +65,9 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     }
 
     context.read<BrokerQuoteCubit>().submitQuote(
-      userUid: widget.orderReqData["userUid"],
-      orderId: widget.orderReqData["orderId"],
-      brokerId: widget.orderReqData["brokerId"],
+      userUid: widget.orderReqData["userUid"] ?? widget.orderReqData["user_uid"],
+      orderId: widget.orderReqData["orderId"] ?? widget.orderReqData["id"],
+      brokerId: widget.orderReqData["brokerId"] ?? FirebaseAuth.instance.currentUser?.uid,
       amount: amount,
     );
   }
@@ -54,20 +76,22 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
   Widget build(BuildContext context) {
     final data = widget.orderReqData;
 
-    final requestId = "Order No # " + data["orderNo"];
+    final String orderNo = (data["orderNo"] ?? data["order_no"] ?? data["orderId"] ?? "N/A").toString();
+    final requestId = "Order No # $orderNo";
+    final createdAt = (data["createdAt"] ?? data["date"] ?? "Time not available").toString();
 
-    final createdAt = data["createdAt"] ?? "Time not available";
+    final String userUid = (data["userUid"] ?? data["userId"] ?? data["user_uid"] ?? data["shipperId"] ?? "").toString();
 
-    final customerName = data["userUid"] ?? "userId not available";
-    final phone = data["phone"] ?? "Phone not available";
+    final pickup = (data["pickupCity"] ?? data["pickup_city"] ?? "Pickup city not available").toString();
+    final drop = (data["dropCity"] ?? data["drop_city"] ?? "Drop city not available").toString();
 
-    final pickup = data["pickupCity"] ?? "Pickup city not available";
-    final drop = data["dropCity"] ?? "Drop city not available";
+    final itemType = (data["itemType"] ?? data["item_type"] ?? "Unknown").toString();
+    final weight = (data["weight"] ?? "0").toString();
+    final quantity = (data["quantity"] ?? "0").toString();
+    final description = (data["additionalInfo"] ?? data["additional_info"] ?? "No description available.").toString();
 
-    final itemType = data["itemType"] ?? "Unknown";
-    final weight = data["weight"] ?? "0";
-    final quantity = data["quantity"] ?? "0";
-    final description = data["additionalInfo"] ?? "No description available.";
+    final String orderId = (data["orderId"] ?? data["id"] ?? data["orderNo"] ?? "").toString();
+    final String brokerId = (data["brokerId"] ?? FirebaseAuth.instance.currentUser?.uid ?? "").toString();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
@@ -79,6 +103,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
             final double horizontalPadding = isMobile ? 22 : width * 0.12;
 
             return SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
               padding: EdgeInsets.symmetric(
                 horizontal: horizontalPadding,
                 vertical: 15,
@@ -140,39 +165,119 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    createdAt.toString(),
+                    createdAt,
                     style: TextStyle(color: Colors.grey[500], fontSize: 12.5),
                   ),
 
                   SizedBox(height: isMobile ? 24 : 30),
 
-                  // -------- Customer Information --------
+                  // -------- Customer Information (REAL USER PROFILE FETCH) --------
                   const _SectionLabel("Customer Information"),
                   const SizedBox(height: 10),
-                  _InfoCard(
-                    icon: Icons.person_pin_circle_outlined,
-                    iconColor: Appcolors.primaryBlue,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          customerName,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 15,
-                            color: Colors.black87,
-                          ),
+                  FutureBuilder<DocumentSnapshot?>(
+                    future: userUid.isNotEmpty
+                        ? FirebaseFirestore.instance.collection("User").doc(userUid).get()
+                        : Future<DocumentSnapshot?>.value(null),
+                    builder: (context, snapshot) {
+                      String customerName = "Loading...";
+                      String phone = "Loading...";
+
+                      if (snapshot.connectionState == ConnectionState.done) {
+                        final userDoc = snapshot.data;
+                        if (userDoc != null && userDoc.exists) {
+                          final userData = userDoc.data() as Map<String, dynamic>? ?? {};
+                          customerName = (userData['name'] ?? userData['user_name'] ?? userData['userName'] ?? data['userName'] ?? data['name'] ?? 'Customer').toString();
+                          phone = (userData['phone'] ?? userData['phone_number'] ?? userData['phoneNumber'] ?? data['phone'] ?? 'Not Available').toString();
+                        } else {
+                          customerName = (data['userName'] ?? data['name'] ?? (userUid.isNotEmpty ? 'Customer' : 'Not specified')).toString();
+                          phone = (data['phone'] ?? 'Not Available').toString();
+                        }
+                      }
+
+                      return _InfoCard(
+                        icon: Icons.person_pin_circle_outlined,
+                        iconColor: Appcolors.primaryBlue,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Customer Name",
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              customerName,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 15,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              "Phone Number",
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              phone,
+                              style: TextStyle(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.grey[800],
+                              ),
+                            ),
+                            if (userUid.isNotEmpty) ...[
+                              const SizedBox(height: 12),
+                              SizedBox(
+                                width: double.infinity,
+                                height: 42,
+                                child: OutlinedButton.icon(
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: Appcolors.primaryBlue,
+                                    side: BorderSide(
+                                      color: Appcolors.primaryBlue.withOpacity(0.4),
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(21),
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    final String chatId = getDeterministicChatId(brokerId, userUid);
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => BrokerChatPage(
+                                          chatId: chatId,
+                                          receiverId: userUid,
+                                          receiverName: customerName,
+                                          receiverRole: 'User',
+                                          orderId: orderNo,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.chat_bubble_outline_rounded, size: 17),
+                                  label: const Text(
+                                    "Chat with User",
+                                    style: TextStyle(
+                                      fontSize: 13.5,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          phone,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
+                      );
+                    },
                   ),
 
                   SizedBox(height: isMobile ? 22 : 26),
@@ -240,118 +345,1320 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                     ),
                   ),
 
-                  SizedBox(height: isMobile ? 30 : 36),
-
-                  // -------- Quote input (same controller) --------
-                  const _SectionLabel("Your Quote (PKR)"),
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: quoteController,
-                    keyboardType: TextInputType.number,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: "Enter Your Quote",
-                      hintStyle: TextStyle(
-                        color: Colors.grey[400],
-                        fontWeight: FontWeight.normal,
-                        fontSize: 15,
-                      ),
-                      filled: true,
-                      fillColor: Colors.white,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 16),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide.none,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(
-                          color: Colors.grey.withOpacity(0.2),
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(
-                          color: Appcolors.secondaryPurple,
-                          width: 1.6,
-                        ),
-                      ),
-                    ),
-                  ),
-
                   SizedBox(height: isMobile ? 26 : 32),
 
-                  // -------- Submit (same listener/cubit logic) --------
-                  BlocListener<BrokerQuoteCubit, BrokerQuoteState>(
-                    listener: (context, state) {
-                      if (state is BrokerQuoteSuccess) {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              "Quote Submitted: PKR ${state.amount.toStringAsFixed(0)}",
-                            ),
-                          ),
-                        );
-                      } else if (state is BrokerQuoteError) {
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(SnackBar(content: Text(state.error)));
-                      }
-                    },
-                    child: BlocBuilder<BrokerQuoteCubit, BrokerQuoteState>(
-                      builder: (context, state) {
-                        final bool loading = state is BrokerQuoteLoading;
+                  // -------- Real-Time Stream for Status & Actions --------
+                  StreamBuilder<DocumentSnapshot>(
+                    stream: (brokerId.isNotEmpty && orderId.isNotEmpty)
+                        ? FirebaseFirestore.instance
+                            .collection("Broker")
+                            .doc(brokerId)
+                            .collection("IncomingRequests")
+                            .doc(orderId)
+                            .snapshots()
+                        : const Stream.empty(),
+                    builder: (context, streamSnapshot) {
+                      final Map<String, dynamic> docData = (streamSnapshot.hasData && streamSnapshot.data?.data() != null)
+                          ? (streamSnapshot.data!.data() as Map<String, dynamic>)
+                          : data;
 
-                        return SizedBox(
-                          width: double.infinity,
-                          height: 54,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Appcolors.secondaryPurple,
-                              disabledBackgroundColor: Appcolors.secondaryPurple
-                                  .withOpacity(0.6),
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(28),
+                      final String rawStatus = (docData["status"] ?? "pending").toString().toLowerCase();
+                      final bool isPending = rawStatus == "pending";
+
+                      final String? assignedDriverId = docData["assigned_driver_id"] ?? docData["assignedDriverId"] ?? docData["driverId"];
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // -------- "Your Quote" section - ONLY shown when status == pending --------
+                          if (isPending) ...[
+                            const _SectionLabel("Your Quote (PKR)"),
+                            const SizedBox(height: 10),
+                            TextField(
+                              controller: quoteController,
+                              keyboardType: TextInputType.number,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              decoration: InputDecoration(
+                                hintText: "Enter Your Quote",
+                                hintStyle: TextStyle(
+                                  color: Colors.grey[400],
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 15,
+                                ),
+                                filled: true,
+                                fillColor: Colors.white,
+                                contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  borderSide: BorderSide.none,
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  borderSide: BorderSide(
+                                    color: Colors.grey.withOpacity(0.2),
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  borderSide: BorderSide(
+                                    color: Appcolors.secondaryPurple,
+                                    width: 1.6,
+                                  ),
+                                ),
                               ),
                             ),
-                            onPressed: loading ? null : submitQuote,
-                            child: loading
-                                ? const SizedBox(
-                                    width: 22,
-                                    height: 22,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2.4,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white,
+
+                            SizedBox(height: isMobile ? 22 : 26),
+
+                            BlocListener<BrokerQuoteCubit, BrokerQuoteState>(
+                              listener: (context, state) {
+                                if (state is BrokerQuoteSuccess) {
+                                  Navigator.pop(context);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        "Quote Submitted: PKR ${state.amount.toStringAsFixed(0)}",
                                       ),
                                     ),
-                                  )
-                                : const Text(
-                                    "Submit Quote",
+                                  );
+                                } else if (state is BrokerQuoteError) {
+                                  ScaffoldMessenger.of(
+                                    context,
+                                  ).showSnackBar(SnackBar(content: Text(state.error)));
+                                }
+                              },
+                              child: BlocBuilder<BrokerQuoteCubit, BrokerQuoteState>(
+                                builder: (context, state) {
+                                  final bool loading = state is BrokerQuoteLoading;
+
+                                  return SizedBox(
+                                    width: double.infinity,
+                                    height: 54,
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Appcolors.secondaryPurple,
+                                        disabledBackgroundColor: Appcolors.secondaryPurple
+                                            .withOpacity(0.6),
+                                        elevation: 0,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(28),
+                                        ),
+                                      ),
+                                      onPressed: loading ? null : submitQuote,
+                                      child: loading
+                                          ? const SizedBox(
+                                              width: 22,
+                                              height: 22,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2.4,
+                                                valueColor: AlwaysStoppedAnimation<Color>(
+                                                  Colors.white,
+                                                ),
+                                              ),
+                                            )
+                                          : const Text(
+                                              "Submit Quote",
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w700,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+
+                            SizedBox(height: isMobile ? 20 : 24),
+                          ],                          // -------- BROKER REQUEST STATUS SECTION --------
+                          const _SectionLabel("Broker Request Status"),
+                          const SizedBox(height: 10),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: (rawStatus == 'rejected' || rawStatus == 'cancelled')
+                                  ? Colors.red.withOpacity(0.08)
+                                  : isPending
+                                      ? Colors.amber.withOpacity(0.08)
+                                      : Appcolors.secondaryPurple.withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(18),
+                              border: Border.all(
+                                color: (rawStatus == 'rejected' || rawStatus == 'cancelled')
+                                    ? Colors.red.withOpacity(0.3)
+                                    : isPending
+                                        ? Colors.amber.withOpacity(0.3)
+                                        : Appcolors.secondaryPurple.withOpacity(0.3),
+                                width: 1.2,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: (rawStatus == 'rejected' || rawStatus == 'cancelled')
+                                        ? Colors.red
+                                        : isPending
+                                            ? Colors.amber[700]
+                                            : Appcolors.secondaryPurple,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    (rawStatus == 'rejected' || rawStatus == 'cancelled')
+                                        ? Icons.cancel_rounded
+                                        : isPending
+                                            ? Icons.hourglass_top_rounded
+                                            : Icons.check_circle_rounded,
+                                    color: Colors.white,
+                                    size: 18,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        (rawStatus == 'rejected' || rawStatus == 'cancelled')
+                                            ? "Request Rejected"
+                                            : isPending
+                                                ? "Pending Broker Action"
+                                                : "Accepted by Broker",
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w800,
+                                          color: (rawStatus == 'rejected' || rawStatus == 'cancelled')
+                                              ? Colors.red[800]
+                                              : isPending
+                                                  ? Colors.amber[900]
+                                                  : Appcolors.secondaryPurple,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        (rawStatus == 'rejected' || rawStatus == 'cancelled')
+                                            ? "This request was declined."
+                                            : isPending
+                                                ? "Submit a quote or accept the request to proceed."
+                                                : "Order is confirmed and active under your management.",
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey[700],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          SizedBox(height: isMobile ? 22 : 26),
+
+                          // -------- SHIPMENT FINANCIALS (CUSTOMER FARE & DRIVER PAYMENT) --------
+                          if (!isPending) ...[
+                            const _SectionLabel("Shipment Financials"),
+                            const SizedBox(height: 10),
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(18),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.04),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Row(
+                                        children: [
+                                          Icon(Icons.person_outline_rounded, size: 18, color: Appcolors.secondaryPurple),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            "Customer Agreed Fare",
+                                            style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Colors.black87),
+                                          ),
+                                        ],
+                                      ),
+                                      Text(
+                                        "PKR ${_formatCurrency(_parseAmount(docData["customer_fare"] ?? docData["customerFare"] ?? docData["accepted_fare"] ?? docData["quoteAmount"] ?? docData["brokerOffer"] ?? docData["fare"]))}",
+                                        style: const TextStyle(
+                                          fontSize: 15.5,
+                                          fontWeight: FontWeight.w800,
+                                          color: Appcolors.secondaryPurple,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  if (docData["driver_fare"] != null || docData["driverFare"] != null || docData["assigned_fare"] != null) ...[
+                                    const SizedBox(height: 12),
+                                    Divider(height: 1, color: Colors.grey.withOpacity(0.15)),
+                                    const SizedBox(height: 12),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Row(
+                                          children: [
+                                            Icon(Icons.badge_outlined, size: 18, color: Appcolors.tertiaryGreen),
+                                            SizedBox(width: 8),
+                                            Text(
+                                              "Driver Payment / Fare",
+                                              style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Colors.black87),
+                                            ),
+                                          ],
+                                        ),
+                                        Text(
+                                          "PKR ${_formatCurrency(_parseAmount(docData["driver_fare"] ?? docData["driverFare"] ?? docData["assigned_fare"]))}",
+                                          style: const TextStyle(
+                                            fontSize: 15.5,
+                                            fontWeight: FontWeight.w800,
+                                            color: Appcolors.tertiaryGreen,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: isMobile ? 22 : 26),
+                          ],
+
+                          // -------- DRIVER ASSIGNMENT & LIFECYCLE STATUS SECTION --------
+                          const _SectionLabel("Driver Assignment & Status"),
+                          const SizedBox(height: 10),
+                          _buildDriverLifecycleCard(
+                            rawStatus: rawStatus,
+                            assignedDriverId: assignedDriverId,
+                            assignedDriverName: docData["assigned_driver_name"] ?? docData["driverName"] ?? docData["assignedDriverName"],
+                            driverOfferedFare: docData["assigned_fare"] ?? docData["brokerOffer"] ?? docData["fare"],
+                            driverAcceptedFare: docData["driver_accepted_fare"] ?? docData["driver_fare"] ?? docData["assigned_fare"] ?? docData["brokerOffer"],
+                          ),
+
+                          SizedBox(height: isMobile ? 22 : 26),
+
+                          // -------- DRIVER DETAILS CARD (If Driver Assigned) --------
+                          if (assignedDriverId != null && assignedDriverId.toString().isNotEmpty) ...[
+                            const _SectionLabel("Assigned Driver Details"),
+                            const SizedBox(height: 10),
+                            _buildDriverInfoCard(
+                              context: context,
+                              driverId: assignedDriverId.toString(),
+                              fallbackName: (docData["assigned_driver_name"] ?? docData["driverName"] ?? "Driver").toString(),
+                              fallbackPhone: (docData["assigned_driver_phone"] ?? docData["driverPhone"] ?? "").toString(),
+                              fare: docData["driver_accepted_fare"] ?? docData["driver_fare"] ?? docData["assigned_fare"] ?? docData["brokerOffer"],
+                              orderNo: orderNo,
+                              brokerId: brokerId,
+                            ),
+                            SizedBox(height: isMobile ? 22 : 26),
+                          ],
+
+                          // -------- LIVE DRIVER GPS TRACKING (Active rides only - NOT completed) --------
+                          if (assignedDriverId != null &&
+                              assignedDriverId.toString().isNotEmpty &&
+                              rawStatus != 'completed' &&
+                              rawStatus != 'delivered' &&
+                              (rawStatus == 'in_transit' || rawStatus == 'in_progress' || rawStatus == 'accepted_by_driver')) ...[
+                            const _SectionLabel("Live Driver GPS Tracking"),
+                            const SizedBox(height: 10),
+                            StreamBuilder<DocumentSnapshot>(
+                              stream: FirebaseFirestore.instance
+                                  .collection("Driver")
+                                  .doc(assignedDriverId.toString())
+                                  .snapshots(),
+                              builder: (context, locSnapshot) {
+                                double? lat;
+                                double? lng;
+
+                                if (locSnapshot.hasData && locSnapshot.data != null && locSnapshot.data!.exists) {
+                                  final lData = locSnapshot.data!.data() as Map<String, dynamic>? ?? {};
+                                  final numRawLat = lData['driver_latitude'] ?? lData['latitude'] ?? lData['lat'];
+                                  final numRawLng = lData['driver_longitude'] ?? lData['longitude'] ?? lData['lng'];
+                                  if (numRawLat != null && numRawLng != null) {
+                                    lat = (numRawLat as num).toDouble();
+                                    lng = (numRawLng as num).toDouble();
+                                  }
+                                }
+
+                                final bool hasLocation = lat != null && lng != null && (lat != 0.0 || lng != 0.0);
+
+                                return Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(18),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.04),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 3),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 44,
+                                        height: 44,
+                                        decoration: BoxDecoration(
+                                          color: hasLocation
+                                              ? Appcolors.tertiaryGreen.withOpacity(0.12)
+                                              : Colors.grey.withOpacity(0.12),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          hasLocation ? Icons.my_location_rounded : Icons.location_off_outlined,
+                                          color: hasLocation ? Appcolors.tertiaryGreen : Colors.grey[600],
+                                          size: 22,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 14),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  hasLocation ? "Live Driver GPS Active" : "Location Unavailable",
+                                                  style: TextStyle(
+                                                    fontSize: 14.5,
+                                                    fontWeight: FontWeight.w800,
+                                                    color: hasLocation ? Colors.black87 : Colors.grey[700],
+                                                  ),
+                                                ),
+                                                if (hasLocation) ...[
+                                                  const SizedBox(width: 6),
+                                                  Container(
+                                                    width: 8,
+                                                    height: 8,
+                                                    decoration: const BoxDecoration(
+                                                      color: Appcolors.tertiaryGreen,
+                                                      shape: BoxShape.circle,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ],
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              hasLocation
+                                                  ? "Latitude: ${lat.toStringAsFixed(5)}°, Longitude: ${lng.toStringAsFixed(5)}°"
+                                                  : "Driver location not yet received / GPS disabled",
+                                              style: TextStyle(
+                                                fontSize: 12.5,
+                                                color: hasLocation ? Colors.grey[800] : Colors.grey[500],
+                                                fontWeight: hasLocation ? FontWeight.w600 : FontWeight.normal,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 10),
+                                            SizedBox(
+                                              width: double.infinity,
+                                              height: 38,
+                                              child: OutlinedButton.icon(
+                                                style: OutlinedButton.styleFrom(
+                                                  foregroundColor: Appcolors.primaryBlue,
+                                                  side: BorderSide(
+                                                    color: Appcolors.primaryBlue.withOpacity(0.35),
+                                                  ),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(19),
+                                                  ),
+                                                ),
+                                                onPressed: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (_) => OrderTrackingPage(
+                                                        orderStatusDetail: docData,
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                                icon: const Icon(Icons.map_outlined, size: 16),
+                                                label: const Text(
+                                                  "Live Map Tracking",
+                                                  style: TextStyle(
+                                                    fontSize: 12.5,
+                                                    fontWeight: FontWeight.w700,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                            SizedBox(height: isMobile ? 22 : 26),
+                          ],
+
+                          // -------- Reject / Assign Driver Action Buttons --------
+                          if (rawStatus == "pending")
+                            SizedBox(
+                              width: double.infinity,
+                              height: 50,
+                              child: OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: Colors.red[700],
+                                  side: BorderSide(color: Colors.red.withOpacity(0.4)),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(25),
+                                  ),
+                                ),
+                                onPressed: () async {
+                                  await context.read<BrokerCubit>().rejectRequest(docData);
+                                  if (context.mounted) {
+                                    Navigator.pop(context);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text("Request Rejected"),
+                                        backgroundColor: Colors.redAccent,
+                                      ),
+                                    );
+                                  }
+                                },
+                                icon: const Icon(Icons.cancel_outlined, size: 18),
+                                label: const Text(
+                                  "Reject",
+                                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                                ),
+                              ),
+                            )
+                          else if (rawStatus == "accepted" && (assignedDriverId == null || assignedDriverId.toString().isEmpty))
+                            SizedBox(
+                              width: double.infinity,
+                              height: 52,
+                              child: ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Appcolors.tertiaryGreen,
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(26),
+                                  ),
+                                ),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => BrokerAssignDriverPage(
+                                        orderData: docData,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                icon: const Icon(Icons.person_add_alt_1_rounded, color: Colors.white, size: 20),
+                                label: const Text(
+                                  "Assign Driver to Order",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            )
+                          else if (rawStatus == "accepted_by_driver" || rawStatus == "in_progress")
+                            SizedBox(
+                              width: double.infinity,
+                              height: 52,
+                              child: ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF1565C0),
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(26),
+                                  ),
+                                ),
+                                onPressed: () async {
+                                  final confirm = await showDialog<bool>(
+                                    context: context,
+                                    builder: (ctx) => AlertDialog(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(18),
+                                      ),
+                                      title: const Text(
+                                        "Mark Order as Completed?",
+                                        style: TextStyle(fontWeight: FontWeight.w800),
+                                      ),
+                                      content: const Text(
+                                        "This will mark the order as successfully completed and update all records. This action cannot be undone.",
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(ctx, false),
+                                          child: const Text("Cancel"),
+                                        ),
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: const Color(0xFF1565C0),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(12),
+                                            ),
+                                          ),
+                                          onPressed: () => Navigator.pop(ctx, true),
+                                          child: const Text(
+                                            "Confirm",
+                                            style: TextStyle(color: Colors.white),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                  if (confirm == true && context.mounted) {
+                                    await context.read<BrokerCubit>().completeOrder(docData);
+                                    if (context.mounted) {
+                                      Navigator.pop(context);
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text("Order marked as Completed ✓"),
+                                          backgroundColor: Color(0xFF1565C0),
+                                        ),
+                                      );
+                                    }
+                                  }
+                                },
+                                icon: const Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
+                                label: const Text(
+                                  "Mark as Completed",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            )
+                          else if (rawStatus == "completed" || rawStatus == "delivered") ...[
+                            // Delivery Duration Summary
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(18),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.04),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 38,
+                                    height: 38,
+                                    decoration: BoxDecoration(
+                                      color: Appcolors.tertiaryGreen.withOpacity(0.12),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: const Icon(Icons.timer_outlined, color: Appcolors.tertiaryGreen, size: 20),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text(
+                                          "Actual Delivery Time",
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          docData["delivery_duration_seconds"] != null
+                                              ? _formatDurationSeconds((docData["delivery_duration_seconds"] as num).toInt())
+                                              : "Delivered successfully",
+                                          style: const TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w800,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Appcolors.tertiaryGreen.withOpacity(0.12),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: const Text(
+                                      "Completed",
+                                      style: TextStyle(
+                                        color: Appcolors.tertiaryGreen,
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 14),
+
+                            // Rate Driver Button
+                            if (assignedDriverId != null &&
+                                assignedDriverId.toString().isNotEmpty &&
+                                docData['broker_reviewed_driver'] != true) ...[
+                              SizedBox(
+                                width: double.infinity,
+                                height: 50,
+                                child: ElevatedButton.icon(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Appcolors.secondaryPurple,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(25),
+                                    ),
+                                    elevation: 0,
+                                  ),
+                                  onPressed: () {
+                                    final String dName = (docData["assigned_driver_name"] ??
+                                            docData["driverName"] ??
+                                            docData["driver_name"] ??
+                                            'Driver')
+                                        .toString();
+                                    _showRateDriverDialog(
+                                      context: context,
+                                      orderId: orderId,
+                                      driverId: assignedDriverId.toString(),
+                                      driverName: dName,
+                                      brokerId: brokerId,
+                                    );
+                                  },
+                                  icon: const Icon(Icons.star_rounded, color: Colors.white, size: 20),
+                                  label: const Text(
+                                    "Rate Driver",
                                     style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 15.5,
                                       fontWeight: FontWeight.w700,
                                       color: Colors.white,
                                     ),
                                   ),
-                          ),
-                        );
-                      },
-                    ),
+                                ),
+                              ),
+                            ] else if (docData['broker_reviewed_driver'] == true) ...[
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(14),
+                                decoration: BoxDecoration(
+                                  color: Appcolors.secondaryPurple.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: const Row(
+                                  children: [
+                                    Icon(Icons.check_circle_rounded, color: Appcolors.secondaryPurple, size: 20),
+                                    SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        "You have submitted a review for this driver. Thank you!",
+                                        style: TextStyle(
+                                          fontSize: 12.5,
+                                          fontWeight: FontWeight.w600,
+                                          color: Appcolors.secondaryPurple,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ],
+                        ],
+
+                      );
+                    },
                   ),
 
-                  SizedBox(height: isMobile ? 15 : 20),
+                  const SizedBox(height: 20),
                 ],
               ),
             );
           },
         ),
+      ),
+    );
+  }
+
+  Widget _buildDriverLifecycleCard({
+    required String rawStatus,
+    required String? assignedDriverId,
+    required dynamic assignedDriverName,
+    required dynamic driverOfferedFare,
+    required dynamic driverAcceptedFare,
+  }) {
+    final bool hasDriver = assignedDriverId != null && assignedDriverId.toString().isNotEmpty;
+
+    // 1. Not assigned
+    if (!hasDriver) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.amber.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: Colors.amber.withOpacity(0.3), width: 1.2),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.amber[700],
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.person_outline_rounded, color: Colors.white, size: 18),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Driver Not Assigned",
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.amber[900],
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    "Assign an eligible driver from your network to handle transit.",
+                    style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // 2. Offer Sent
+    if (rawStatus == 'driver_offer_sent') {
+      final fareStr = driverOfferedFare != null ? "PKR $driverOfferedFare" : "Fare Pending";
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1565C0).withOpacity(0.08),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0xFF1565C0).withOpacity(0.3), width: 1.2),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(
+                color: Color(0xFF1565C0),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.send_rounded, color: Colors.white, size: 18),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Waiting for Driver Acceptance",
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF1565C0),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    "Offer sent to $assignedDriverName. Offered Fare: $fareStr",
+                    style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // 3. Driver Rejected
+    if (rawStatus == 'driver_rejected') {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.red.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: Colors.red.withOpacity(0.3), width: 1.2),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(
+                color: Colors.red,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.cancel_outlined, color: Colors.white, size: 18),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Driver Declined Offer",
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.red,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    "$assignedDriverName declined this offer. You can re-assign another driver.",
+                    style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // 4. Accepted by Driver
+    if (rawStatus == 'accepted_by_driver') {
+      final fareStr = driverAcceptedFare != null ? "PKR $driverAcceptedFare" : "Agreed Fare";
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Appcolors.tertiaryGreen.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: Appcolors.tertiaryGreen.withOpacity(0.3), width: 1.2),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(
+                color: Appcolors.tertiaryGreen,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Driver Confirmed / Accepted",
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: Appcolors.tertiaryGreen,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    "$assignedDriverName confirmed. Driver Fare: $fareStr",
+                    style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // 5. In Transit
+    if (rawStatus == 'in_transit' || rawStatus == 'in_progress') {
+      final fareStr = driverAcceptedFare != null ? "PKR $driverAcceptedFare" : "Agreed Fare";
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Appcolors.primaryBlue.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: Appcolors.primaryBlue.withOpacity(0.3), width: 1.2),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(
+                color: Appcolors.primaryBlue,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.local_shipping_rounded, color: Colors.white, size: 18),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "In Transit",
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: Appcolors.primaryBlue,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    "Goods are currently in transit with $assignedDriverName ($fareStr).",
+                    style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // 6. Completed
+    if (rawStatus == 'completed' || rawStatus == 'delivered') {
+      final fareStr = driverAcceptedFare != null ? "PKR $driverAcceptedFare" : "Agreed Fare";
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Appcolors.tertiaryGreen.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: Appcolors.tertiaryGreen.withOpacity(0.3), width: 1.2),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(
+                color: Appcolors.tertiaryGreen,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.task_alt_rounded, color: Colors.white, size: 18),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Delivery Completed",
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: Appcolors.tertiaryGreen,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    "Completed by $assignedDriverName. Final Driver Fare: $fareStr",
+                    style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildDriverInfoCard({
+    required BuildContext context,
+    required String driverId,
+    required String fallbackName,
+    required String fallbackPhone,
+    required dynamic fare,
+    required String orderNo,
+    required String brokerId,
+  }) {
+    return FutureBuilder<DocumentSnapshot?>(
+      future: driverId.isNotEmpty
+          ? FirebaseFirestore.instance.collection("Driver").doc(driverId).get()
+          : Future<DocumentSnapshot?>.value(null),
+      builder: (context, snapshot) {
+        String driverName = fallbackName;
+        String phone = fallbackPhone;
+        String vehicle = "Not specified";
+        String plate = "Not specified";
+
+        if (snapshot.connectionState == ConnectionState.done && snapshot.data != null && snapshot.data!.exists) {
+          final dData = snapshot.data!.data() as Map<String, dynamic>? ?? {};
+          driverName = (dData['name'] ?? dData['driver_name'] ?? fallbackName).toString();
+          phone = (dData['phone'] ?? dData['driver_phone'] ?? fallbackPhone).toString();
+          vehicle = (dData['vehicle_type'] ?? dData['vehicleType'] ?? 'Not specified').toString();
+          plate = (dData['vehicle_number'] ?? dData['vehicleNumber'] ?? 'Not specified').toString();
+        }
+
+        final fareDisplay = fare != null ? "PKR $fare" : "Not specified";
+
+        return _InfoCard(
+          icon: Icons.badge_outlined,
+          iconColor: Appcolors.primaryBlue,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                driverName,
+                style: const TextStyle(
+                  fontSize: 15.5,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                "Phone: $phone",
+                style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                "Vehicle: $vehicle ($plate)",
+                style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                "Driver Fare: $fareDisplay",
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: Appcolors.tertiaryGreen,
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                height: 40,
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Appcolors.primaryBlue,
+                    side: BorderSide(
+                      color: Appcolors.primaryBlue.withOpacity(0.4),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  onPressed: () {
+                    final String chatId = getDeterministicChatId(brokerId, driverId);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => BrokerChatPage(
+                          chatId: chatId,
+                          receiverId: driverId,
+                          receiverName: driverName,
+                          receiverRole: 'Driver',
+                          orderId: orderNo,
+                        ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.chat_bubble_outline_rounded, size: 17),
+                  label: const Text(
+                    "Chat with Driver",
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  String _formatDurationSeconds(int seconds) {
+    if (seconds < 60) return "$seconds seconds";
+    final int minutes = seconds ~/ 60;
+    if (minutes < 60) return "$minutes min${minutes > 1 ? 's' : ''}";
+    final int hours = minutes ~/ 60;
+    final int remMin = minutes % 60;
+    if (remMin == 0) return "$hours hr${hours > 1 ? 's' : ''}";
+    return "$hours hr $remMin min";
+  }
+
+  void _showRateDriverDialog({
+    required BuildContext context,
+    required String orderId,
+    required String driverId,
+    required String driverName,
+    required String brokerId,
+  }) {
+    double rating = 5.0;
+    final TextEditingController commentCtrl = TextEditingController();
+    bool isSubmitting = false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetCtx) => StatefulBuilder(
+        builder: (ctx, setModalState) {
+          return Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            padding: EdgeInsets.fromLTRB(
+              20,
+              20,
+              20,
+              20 + MediaQuery.of(ctx).viewInsets.bottom,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    "Rate Driver: $driverName",
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Rate the driver's performance on Order #$orderId",
+                    style: TextStyle(fontSize: 12.5, color: Colors.grey[600]),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(5, (index) {
+                      final starVal = index + 1.0;
+                      return IconButton(
+                        icon: Icon(
+                          starVal <= rating ? Icons.star_rounded : Icons.star_outline_rounded,
+                          color: Colors.amber[600],
+                          size: 34,
+                        ),
+                        onPressed: () => setModalState(() => rating = starVal),
+                      );
+                    }),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: commentCtrl,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      hintText: "Add feedback on driving, punctuality, and communication...",
+                      hintStyle: TextStyle(fontSize: 12.5, color: Colors.grey[400]),
+                      filled: true,
+                      fillColor: const Color(0xFFF9FAFB),
+                      contentPadding: const EdgeInsets.all(14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Appcolors.secondaryPurple,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                      ),
+                      onPressed: isSubmitting
+                          ? null
+                          : () async {
+                              setModalState(() => isSubmitting = true);
+                              final currentUser = FirebaseAuth.instance.currentUser;
+                              final brokerUid = currentUser?.uid ?? brokerId;
+                              final brokerName = currentUser?.displayName ?? 'Broker';
+
+                              final ok = await ReviewService().submitDriverReview(
+                                orderId: orderId,
+                                driverId: driverId,
+                                reviewerId: brokerUid,
+                                reviewerName: brokerName,
+                                reviewerRole: 'broker',
+                                rating: rating,
+                                comment: commentCtrl.text,
+                                brokerId: brokerId,
+                              );
+
+                              if (ctx.mounted) {
+                                Navigator.pop(ctx);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(ok
+                                        ? "Driver rated successfully ✓"
+                                        : "Review already recorded for this order."),
+                                    backgroundColor: ok ? Appcolors.tertiaryGreen : Colors.grey[700],
+                                  ),
+                                );
+                              }
+                            },
+                      child: isSubmitting
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text(
+                              "Submit Driver Rating",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 15,
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }

@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
+import 'package:trucklinkai_orignal/Features/Broker Module/Pages/orderDetailPage.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerBloc/brokerCubit.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/getBrokerOrderDetail/getBrokerOrderDetailCubit.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/getBrokerOrderDetail/getBrokerOrderDetailStates.dart';
@@ -21,17 +22,17 @@ class _BrokerOrderPageState extends State<BrokerOrderPage>
 
   final List<String?> _tabStatusFilters = [
     null,
-    "Pending",
+    "pending",
     "accepted",
-    "delivered",
-    "cancelled",
+    "completed",
+    "rejected",
   ];
   final List<String> _tabLabels = [
     "All",
     "Pending",
-    "In Transit",
-    "Delivered",
-    "Cancelled",
+    "Accepted",
+    "Completed",
+    "Rejected",
   ];
 
   @override
@@ -311,12 +312,19 @@ class OrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OrderContainer(
-      onTap: (){},
-      orderNumber: order["orderNo"] ?? "",
-      pickupLocation: order["pickupCity"] ?? "",
-      dropLocation: order["dropCity"] ?? "",
-      date: order["date"] ?? "not specified",
-      status: order["status"] ?? "",
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => OrderDetailsPage(orderReqData: order),
+          ),
+        );
+      },
+      orderNumber: (order["orderNo"] ?? "").toString(),
+      pickupLocation: (order["pickupCity"] ?? "").toString(),
+      dropLocation: (order["dropCity"] ?? "").toString(),
+      date: (order["date"] ?? order["createdAt"] ?? "not specified").toString(),
+      status: (order["status"] ?? "").toString(),
     );
   }
 }

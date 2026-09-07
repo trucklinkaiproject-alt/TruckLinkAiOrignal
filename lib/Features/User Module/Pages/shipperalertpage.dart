@@ -1,13 +1,11 @@
-
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
-import 'package:trucklinkai_orignal/Features/Auth/Widgets/selectionLabel.dart';
+import 'package:trucklinkai_orignal/Core/Services/notificationService.dart';
 
-/// Simple model for a single notification item.
-/// Swap this out for your real model / bloc state whenever you wire this
-/// page up to actual data — the UI below only depends on these fields.
 class NotificationItem {
+  final String id;
   final String title;
   final String subtitle;
   final String time;
@@ -15,6 +13,7 @@ class NotificationItem {
   final bool isRead;
 
   const NotificationItem({
+    required this.id,
     required this.title,
     required this.subtitle,
     required this.time,
@@ -33,165 +32,291 @@ class ShipperAlertPage extends StatefulWidget {
 }
 
 class _ShipperAlertPageState extends State<ShipperAlertPage> {
-  // -------- Mock data for now — replace with real data source --------
-  final List<NotificationItem> _todayNotifications = [
-    const NotificationItem(
-      title: "Shipment Picked Up",
-      subtitle: "Your shipment #TL-1042 has been picked up by the driver.",
-      time: "10m ago",
-      type: NotificationType.shipment,
-      isRead: false,
-    ),
-    const NotificationItem(
-      title: "New Broker Offer",
-      subtitle: "A broker sent a new quote for your Lahore → Karachi load.",
-      time: "1h ago",
-      type: NotificationType.broker,
-      isRead: false,
-    ),
-    const NotificationItem(
-      title: "Driver Assigned",
-      subtitle: "Ali Raza has been assigned as the driver for shipment #TL-1039.",
-      time: "3h ago",
-      type: NotificationType.driver,
-      isRead: true,
-    ),
-  ];
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  bool _isClearing = false;
 
-  final List<NotificationItem> _earlierNotifications = [
-    const NotificationItem(
-      title: "Delivery Completed",
-      subtitle: "Shipment #TL-1021 was delivered and marked complete.",
-      time: "Yesterday",
-      type: NotificationType.shipment,
-      isRead: true,
-    ),
-    const NotificationItem(
-      title: "Account Verified",
-      subtitle: "Your account has been successfully verified.",
-      time: "2 days ago",
-      type: NotificationType.system,
-      isRead: true,
-    ),
-  ];
+  Future<void> _markAllAsRead(List<QueryDocumentSnapshot> docs) async {
+    final String? userUid = _auth.currentUser?.uid;
+    if (userUid == null || userUid.isEmpty) return;
 
-  void _markAllAsRead() {
-    setState(() {
-      _todayNotifications.replaceRange(
-        0,
-        _todayNotifications.length,
-        _todayNotifications.map(
-          (n) => NotificationItem(
-            title: n.title,
-            subtitle: n.subtitle,
-            time: n.time,
-            type: n.type,
-            isRead: true,
-          ),
+    await NotificationService().markAllAsRead(
+      collectionName: "User",
+      uid: userUid,
+      existingDocs: docs,
+    );
+  }
+
+  Future<void> _clearAllNotifications(List<QueryDocumentSnapshot> docs) async {
+    if (_isClearing) return;
+    final String? userUid = _auth.currentUser?.uid;
+    if (userUid == null || userUid.isEmpty || docs.isEmpty) return;
+
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        title: const Text(
+          "Clear all notifications?",
+          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17),
         ),
-      );
+        content: const Text(
+          "This will permanently remove all your notifications.",
+          style: TextStyle(fontSize: 13.5, color: Colors.black87),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text("Cancel", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w600)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text("Clear All", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    setState(() {
+      _isClearing = true;
     });
+
+    try {
+      await NotificationService().clearAllNotifications(
+        collectionName: "User",
+        uid: userUid,
+        existingDocs: docs,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("All notifications cleared."),
+            backgroundColor: Appcolors.primaryBlue,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Failed to clear notifications: $e"),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isClearing = false;
+        });
+      }
+    }
+  }
+
+  NotificationType _mapType(String typeStr) {
+    switch (typeStr.toLowerCase()) {
+      case 'request_accepted':
+      case 'broker_offer':
+      case 'broker':
+      case 'quote_accepted':
+      case 'quote_rejected':
+        return NotificationType.broker;
+      case 'driver_assigned':
+      case 'driver_accepted':
+      case 'driver_at_pickup':
+      case 'driver_at_drop':
+      case 'driver':
+        return NotificationType.driver;
+      case 'ride_started':
+      case 'cargo_picked_up':
+      case 'order_completed':
+      case 'shipment':
+      case 'order':
+        return NotificationType.shipment;
+      default:
+        return NotificationType.system;
+    }
+  }
+
+  String _formatTimestamp(dynamic timestamp) {
+    if (timestamp == null) return "Just now";
+    if (timestamp is Timestamp) {
+      final date = timestamp.toDate();
+      final now = DateTime.now();
+      final diff = now.difference(date);
+      if (diff.inMinutes < 1) return "Just now";
+      if (diff.inMinutes < 60) return "${diff.inMinutes}m ago";
+      if (diff.inHours < 24) return "${diff.inHours}h ago";
+      return "${date.day}/${date.month}/${date.year}";
+    }
+    return timestamp.toString();
   }
 
   @override
   Widget build(BuildContext context) {
-    final bool hasAnyUnread =
-        _todayNotifications.any((n) => !n.isRead) ||
-        _earlierNotifications.any((n) => !n.isRead);
+    final String? userUid = _auth.currentUser?.uid;
+
+    if (userUid == null || userUid.isEmpty) {
+      return const Scaffold(
+        backgroundColor: Color(0xFFF5F6FA),
+        body: SafeArea(
+          child: _EmptyState(message: "Please log in to view notifications."),
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final width = constraints.maxWidth;
-            final bool isMobile = width < 600;
-            final double horizontalPadding = isMobile ? 22 : width * 0.12;
+        child: StreamBuilder<QuerySnapshot>(
+          stream: _firestore
+              .collection("User")
+              .doc(userUid)
+              .collection("Notifications")
+              .orderBy("timestamp", descending: true)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+              return const Center(child: CircularProgressIndicator(color: Appcolors.primaryBlue));
+            }
 
-            return Column(
-              children: [
-                // -------- Header --------
-                Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    horizontalPadding,
-                    15,
-                    horizontalPadding,
-                    10,
-                  ),
-                  child: Row(
-                    children: [
-                    
-                      const SizedBox(width: 14),
-                      const Expanded(
-                        child: Text(
-                          "Notifications",
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
-                            color: Colors.black87,
-                          ),
-                        ),
+            final docs = snapshot.data?.docs ?? [];
+
+            final List<NotificationItem> items = docs.map((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              return NotificationItem(
+                id: doc.id,
+                title: (data['title'] ?? 'Notification').toString(),
+                subtitle: (data['body'] ?? data['subtitle'] ?? '').toString(),
+                time: _formatTimestamp(data['timestamp'] ?? data['created_at']),
+                type: _mapType((data['type'] ?? 'system').toString()),
+                isRead: data['is_read'] == true,
+              );
+            }).toList();
+
+            final bool hasUnread = items.any((n) => !n.isRead);
+
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                final width = constraints.maxWidth;
+                final bool isMobile = width < 600;
+                final double horizontalPadding = isMobile ? 22 : width * 0.12;
+
+                return Column(
+                  children: [
+                    // -------- Header --------
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        horizontalPadding,
+                        15,
+                        horizontalPadding,
+                        10,
                       ),
-                      if (hasAnyUnread)
-                        TextButton(
-                          style: TextButton.styleFrom(
-                            overlayColor: Colors.transparent,
-                            padding: EdgeInsets.zero,
-                            minimumSize: const Size(0, 0),
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          onPressed: _markAllAsRead,
-                          child: Text(
-                            "Mark all read",
-                            style: TextStyle(
-                              color: Appcolors.primaryBlue,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 13.5,
+                      child: Row(
+                        children: [
+                          const Expanded(
+                            child: Text(
+                              "Notifications",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.black87,
+                              ),
                             ),
                           ),
-                        ),
-                    ],
-                  ),
-                ),
-
-                // -------- List --------
-                Expanded(
-                  child: (_todayNotifications.isEmpty &&
-                          _earlierNotifications.isEmpty)
-                      ? const _EmptyState()
-                      : ListView(
-                          padding: EdgeInsets.fromLTRB(
-                            horizontalPadding,
-                            5,
-                            horizontalPadding,
-                            24,
-                          ),
-                          children: [
-                            if (_todayNotifications.isNotEmpty) ...[
-                              const SectionLabel("Today"),
-                              const SizedBox(height: 10),
-                              ..._todayNotifications.map(
-                                (n) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 12),
-                                  child: _NotificationCard(item: n),
+                          if (hasUnread) ...[
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                overlayColor: Colors.transparent,
+                                padding: EdgeInsets.zero,
+                                minimumSize: const Size(0, 0),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              onPressed: () => _markAllAsRead(docs),
+                              child: const Text(
+                                "Mark read",
+                                style: TextStyle(
+                                  color: Appcolors.primaryBlue,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13,
                                 ),
                               ),
-                              const SizedBox(height: 12),
-                            ],
-                            if (_earlierNotifications.isNotEmpty) ...[
-                              const SectionLabel("Earlier"),
-                              const SizedBox(height: 10),
-                              ..._earlierNotifications.map(
-                                (n) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 12),
-                                  child: _NotificationCard(item: n),
-                                ),
-                              ),
-                            ],
+                            ),
+                            const SizedBox(width: 12),
                           ],
-                        ),
-                ),
-              ],
+                          if (docs.isNotEmpty)
+                            _isClearing
+                                ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.redAccent,
+                                    ),
+                                  )
+                                : TextButton(
+                                    style: TextButton.styleFrom(
+                                      overlayColor: Colors.transparent,
+                                      padding: EdgeInsets.zero,
+                                      minimumSize: const Size(0, 0),
+                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    ),
+                                    onPressed: () => _clearAllNotifications(docs),
+                                    child: const Text(
+                                      "Clear All",
+                                      style: TextStyle(
+                                        color: Colors.redAccent,
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ),
+                        ],
+                      ),
+                    ),
+
+                    // -------- List --------
+                    Expanded(
+                      child: items.isEmpty
+                          ? const _EmptyState()
+                          : ListView.separated(
+                              padding: EdgeInsets.fromLTRB(
+                                horizontalPadding,
+                                5,
+                                horizontalPadding,
+                                24,
+                              ),
+                              itemCount: items.length,
+                              separatorBuilder: (_, __) => const SizedBox(height: 12),
+                              itemBuilder: (context, index) {
+                                return _NotificationCard(
+                                  item: items[index],
+                                  onTap: () {
+                                    if (!items[index].isRead) {
+                                      _firestore
+                                          .collection("User")
+                                          .doc(userUid)
+                                          .collection("Notifications")
+                                          .doc(items[index].id)
+                                          .update({'is_read': true});
+                                    }
+                                  },
+                                );
+                              },
+                            ),
+                    ),
+                  ],
+                );
+              },
             );
           },
         ),
@@ -200,15 +325,10 @@ class _ShipperAlertPageState extends State<ShipperAlertPage> {
   }
 }
 
-// =====================================================================
-// UI-only helper widgets below, matching the rest of the app's theme
-// (LogInPage, RoleSelectionPage, SignUpPage, Advantages pages, etc).
-// =====================================================================
-
-
 class _NotificationCard extends StatelessWidget {
   final NotificationItem item;
-  const _NotificationCard({required this.item});
+  final VoidCallback? onTap;
+  const _NotificationCard({required this.item, this.onTap});
 
   _IconStyle get _style {
     switch (item.type) {
@@ -220,7 +340,7 @@ class _NotificationCard extends StatelessWidget {
           Appcolors.secondaryPurple,
         );
       case NotificationType.driver:
-        return _IconStyle(Icons.person_outline_sharp, Appcolors.tertiaryGreen);
+        return _IconStyle(Icons.badge_outlined, Appcolors.tertiaryGreen);
       case NotificationType.system:
         return _IconStyle(Icons.notifications_none_rounded, Colors.grey[700]!);
     }
@@ -232,7 +352,7 @@ class _NotificationCard extends StatelessWidget {
 
     return InkWell(
       borderRadius: BorderRadius.circular(18),
-      onTap: () {},
+      onTap: onTap,
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -271,9 +391,7 @@ class _NotificationCard extends StatelessWidget {
                           item.title,
                           style: TextStyle(
                             fontSize: 15,
-                            fontWeight: item.isRead
-                                ? FontWeight.w600
-                                : FontWeight.w800,
+                            fontWeight: item.isRead ? FontWeight.w600 : FontWeight.w800,
                             color: Colors.black87,
                           ),
                         ),
@@ -283,7 +401,7 @@ class _NotificationCard extends StatelessWidget {
                           width: 8,
                           height: 8,
                           margin: const EdgeInsets.only(left: 8, top: 4),
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             color: Appcolors.primaryBlue,
                             shape: BoxShape.circle,
                           ),
@@ -325,7 +443,8 @@ class _IconStyle {
 }
 
 class _EmptyState extends StatelessWidget {
-  const _EmptyState();
+  final String? message;
+  const _EmptyState({this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -342,7 +461,7 @@ class _EmptyState extends StatelessWidget {
                 color: Appcolors.primaryBlue.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.notifications_none_rounded,
                 size: 38,
                 color: Appcolors.primaryBlue,
@@ -359,7 +478,7 @@ class _EmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              "No notifications right now. We'll let you know when something new comes in.",
+              message ?? "No notifications right now. We'll let you know when something new comes in.",
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13.5,

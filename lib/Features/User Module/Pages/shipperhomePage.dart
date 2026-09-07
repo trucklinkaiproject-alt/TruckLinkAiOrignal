@@ -1,4 +1,6 @@
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
@@ -6,6 +8,7 @@ import 'package:trucklinkai_orignal/Core/Widgets/offerCard.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/Pages/brokerListPage.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/Pages/createorderpage.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/Pages/shipperOrderDetailPage.dart';
+import 'package:trucklinkai_orignal/Features/User%20Module/Pages/userChatInboxPage.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/Widgets/ordercontainer.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/bloc/OrderDetailBloc/orderDetailState.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/bloc/OrderDetailBloc/orderDetialCubit.dart';
@@ -43,6 +46,13 @@ class _ShipperHomePageState extends State<ShipperHomePage> {
             if (!context.mounted) return;
             _dialogShowing = true;
 
+            final req = state.requestData;
+            final String brokerId = (req["brokerId"] ?? "").toString();
+            final String brokerName = (req["brokerName"] ?? "Broker").toString();
+            final String fareStr = "${req["brokerOffer"] ?? req["fare"] ?? req["quoteAmount"] ?? "0"}";
+            final double brokerRating = (req["brokerRating"] as num?)?.toDouble() ?? 4.8;
+            final String etaStr = (req["eta"] ?? "Calculated Route Duration").toString();
+
             await showDialog(
               context: context,
               barrierDismissible: false,
@@ -51,19 +61,20 @@ class _ShipperHomePageState extends State<ShipperHomePage> {
                   backgroundColor: Colors.transparent,
                   insetPadding: const EdgeInsets.symmetric(horizontal: 20),
                   child: OfferCard(
-                    brokerName: "Ali",
-                    fare: "${state.requestData["brokerOffer"]}",
-                    eta: "1 hour",
-                    rating: 4.5,
+                    brokerId: brokerId,
+                    brokerName: brokerName,
+                    fare: fareStr,
+                    eta: etaStr,
+                    rating: brokerRating,
                     onAccept: () {
                       context.read<UserCubit>().acceptOffer(
-                        state.requestData["requestId"],
+                        req["requestId"] ?? req["orderId"] ?? "",
                       );
                       Navigator.of(dialogContext).pop();
                     },
                     onReject: () {
                       context.read<UserCubit>().rejectOffer(
-                        state.requestData["requestId"],
+                        req["requestId"] ?? req["orderId"] ?? "",
                       );
                       Navigator.of(dialogContext).pop();
                     },
@@ -141,29 +152,86 @@ class _ShipperHomePageState extends State<ShipperHomePage> {
                             ],
                           ),
                         ),
-                        InkWell(
-                          borderRadius: BorderRadius.circular(14),
-                          onTap: () {},
-                          child: Container(
-                            width: 42,
-                            height: 42,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
+                        // Real-time Chat Entry Point with Unread Badge
+                        StreamBuilder<QuerySnapshot>(
+                          stream: FirebaseAuth.instance.currentUser?.uid != null
+                              ? FirebaseFirestore.instance
+                                  .collection("chats")
+                                  .where("participants",
+                                      arrayContains: FirebaseAuth.instance.currentUser!.uid)
+                                  .snapshots()
+                              : const Stream.empty(),
+                          builder: (context, chatSnap) {
+                            int totalUnread = 0;
+                            final currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
+                            if (chatSnap.hasData && chatSnap.data != null && currentUid.isNotEmpty) {
+                              for (final doc in chatSnap.data!.docs) {
+                                final d = doc.data() as Map<String, dynamic>? ?? {};
+                                final count = d['unreadCount_$currentUid'] ?? 0;
+                                if (count is num) {
+                                  totalUnread += count.toInt();
+                                }
+                              }
+                            }
+
+                            return InkWell(
                               borderRadius: BorderRadius.circular(14),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.06),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const UserChatInboxPage(),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                width: 42,
+                                height: 42,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(14),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.06),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.notifications_none_rounded,
-                              color: Colors.black87,
-                              size: 20,
-                            ),
-                          ),
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.chat_bubble_outline_rounded,
+                                      color: Colors.black87,
+                                      size: 20,
+                                    ),
+                                    if (totalUnread > 0)
+                                      Positioned(
+                                        top: 5,
+                                        right: 5,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(4),
+                                          decoration: const BoxDecoration(
+                                            color: Appcolors.primaryBlue,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Text(
+                                            totalUnread > 9 ? "9+" : "$totalUnread",
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.w900,
+                                              height: 1,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),

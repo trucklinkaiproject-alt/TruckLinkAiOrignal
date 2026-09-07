@@ -88,14 +88,55 @@ class ChatMessage {
   });
 
   factory ChatMessage.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = (doc.data() as Map<String, dynamic>?) ?? {};
+    return ChatMessage.fromMap(data, doc.id);
+  }
+
+  factory ChatMessage.fromMap(Map<String, dynamic> data, [String id = '']) {
+    DateTime parsedTimestamp = DateTime.now();
+    final rawTimestamp = data['timestamp'] ??
+        data['createdAt'] ??
+        data['created_at'] ??
+        data['sentAt'] ??
+        data['time'];
+
+    if (rawTimestamp is Timestamp) {
+      parsedTimestamp = rawTimestamp.toDate();
+    } else if (rawTimestamp is DateTime) {
+      parsedTimestamp = rawTimestamp;
+    } else if (rawTimestamp is String) {
+      parsedTimestamp = DateTime.tryParse(rawTimestamp) ?? DateTime.now();
+    } else if (rawTimestamp is int) {
+      parsedTimestamp = DateTime.fromMillisecondsSinceEpoch(rawTimestamp);
+    }
+
     return ChatMessage(
-      id: doc.id,
-      senderId: data['senderId'] as String,
-      text: data['text'] as String,
-      timestamp: (data['timestamp'] as Timestamp).toDate(),
-      isRead: data['isRead'] as bool? ?? false,
+      id: id.isNotEmpty ? id : (data['id'] ?? data['messageId'] ?? '').toString(),
+      senderId: (data['senderId'] ?? data['sender_id'] ?? '').toString(),
+      text: (data['text'] ?? data['message'] ?? '').toString(),
+      timestamp: parsedTimestamp,
+      isRead: data['isRead'] as bool? ?? data['is_read'] as bool? ?? false,
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'senderId': senderId,
+      'text': text,
+      'timestamp': Timestamp.fromDate(timestamp),
+      'isRead': isRead,
+    };
+  }
+
+  Map<String, dynamic> toFirestore() {
+    return {
+      'messageId': id,
+      'senderId': senderId,
+      'text': text,
+      'timestamp': Timestamp.fromDate(timestamp),
+      'isRead': isRead,
+    };
   }
 }
 
@@ -137,26 +178,52 @@ class ChatError extends ChatState {
   ChatError(this.message);
 }
 
+/// Generates a deterministic, symmetric conversation ID for any two user UIDs.
+/// Regardless of who initiates (A->B or B->A), the conversation ID is identical.
+String getDeterministicChatId(String userA, String userB) {
+  final cleanA = userA.trim();
+  final cleanB = userB.trim();
+  if (cleanA.isEmpty) return cleanB.isNotEmpty ? "chat_$cleanB" : "chat_general";
+  if (cleanB.isEmpty) return "chat_$cleanA";
+  final list = [cleanA, cleanB]..sort();
+  return "chat_${list[0]}_${list[1]}";
+}
+
 // ══════════════════════════════════════════════════════════════════════════════
 // CUBIT
 // ══════════════════════════════════════════════════════════════════════════════
 
 class ChatCubit extends Cubit<ChatState> {
   final String chatId;
-  final String brokerId;
+  final String receiverId;
+  final String receiverName;
+  final String receiverRole;
+  final String orderId;
+  final String? legacyChatId;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   StreamSubscription<QuerySnapshot>? _messagesSubscription;
 
-  ChatCubit({required this.chatId, required this.brokerId})
-      : super(ChatInitial());
+  ChatCubit({
+    required this.chatId,
+    required this.receiverId,
+    this.receiverName = 'User',
+    this.receiverRole = 'Broker',
+    this.orderId = '',
+    this.legacyChatId,
+  }) : super(ChatInitial());
 
   String get currentUserId => _auth.currentUser?.uid ?? '';
 
   /// Call once when the page opens.
   void initialize() {
     emit(ChatLoading());
+
+    // Merge any legacy messages from old order-based chat ID into the canonical conversation
+    if (legacyChatId != null && legacyChatId!.isNotEmpty && legacyChatId != chatId) {
+      _migrateLegacyMessages(legacyChatId!, chatId);
+    }
 
     _messagesSubscription = _firestore
         .collection('chats')
@@ -184,6 +251,29 @@ class ChatCubit extends Cubit<ChatState> {
         );
   }
 
+  Future<void> _migrateLegacyMessages(String oldId, String targetId) async {
+    try {
+      final oldDocs = await _firestore
+          .collection('chats')
+          .doc(oldId)
+          .collection('messages')
+          .get();
+
+      if (oldDocs.docs.isNotEmpty) {
+        final batch = _firestore.batch();
+        for (final doc in oldDocs.docs) {
+          final targetRef = _firestore
+              .collection('chats')
+              .doc(targetId)
+              .collection('messages')
+              .doc(doc.id);
+          batch.set(targetRef, doc.data(), SetOptions(merge: true));
+        }
+        await batch.commit();
+      }
+    } catch (_) {}
+  }
+
   Future<void> sendMessage(String text) async {
     final trimmed = text.trim();
     if (trimmed.isEmpty) return;
@@ -194,28 +284,72 @@ class ChatCubit extends Cubit<ChatState> {
     }
 
     try {
-      await _firestore
+      final msgRef = _firestore
           .collection('chats')
           .doc(chatId)
           .collection('messages')
-          .add({
+          .doc();
+      final String messageId = msgRef.id;
+
+      final String senderName = _auth.currentUser?.displayName ?? 'User';
+
+      await msgRef.set({
+        'messageId': messageId,
         'senderId': currentUserId,
+        'senderName': senderName,
+        'receiverId': receiverId,
         'text': trimmed,
         'timestamp': FieldValue.serverTimestamp(),
         'isRead': false,
-        
+        'orderId': orderId,
       });
 
-      // Update last-message summary on the parent chat doc (optional).
+      // Update parent chat summary with participant unread counters
       await _firestore.collection('chats').doc(chatId).set({
+        'chatId': chatId,
         'lastMessage': trimmed,
         'lastMessageTime': FieldValue.serverTimestamp(),
-        'participants': [currentUserId, brokerId],
+        'lastSenderId': currentUserId,
+        'participants': [currentUserId, receiverId],
+        'orderId': orderId,
+        'unreadCount_$receiverId': FieldValue.increment(1),
+        'unreadCount_$currentUserId': 0,
       }, SetOptions(merge: true));
+
+      // Deterministic notification to receiver
+      if (receiverId.isNotEmpty) {
+        String targetCollection = 'User';
+        final String roleLower = receiverRole.toLowerCase();
+        if (roleLower == 'broker') {
+          targetCollection = 'Broker';
+        } else if (roleLower == 'driver') {
+          targetCollection = 'Driver';
+        }
+
+        final String notifId = 'chat_msg_$messageId';
+        final String orderStr = orderId.isNotEmpty ? "Order: #$orderId" : "";
+        final String notifBody = "You have a new message from $senderName.\n$orderStr\n\"$trimmed\"";
+
+        await _firestore
+            .collection(targetCollection)
+            .doc(receiverId)
+            .collection('Notifications')
+            .doc(notifId)
+            .set({
+          'id': notifId,
+          'title': 'New Message',
+          'body': notifBody,
+          'subtitle': notifBody,
+          'type': 'chat',
+          'is_read': false,
+          'created_at': FieldValue.serverTimestamp(),
+          'timestamp': FieldValue.serverTimestamp(),
+          'order_id': orderId,
+          'sender_id': currentUserId,
+        }, SetOptions(merge: true));
+      }
     } catch (e) {
-      // Don't crash the page on a failed send; surface it gently.
       emit(ChatError('Message not sent. Please try again.'));
-      // Re-emit loaded state after showing error briefly.
       await Future.delayed(const Duration(seconds: 2));
       if (current is ChatLoaded) emit(current.copyWith(isSending: false));
     } finally {
@@ -226,13 +360,23 @@ class ChatCubit extends Cubit<ChatState> {
 
   Future<void> _markMessagesAsRead(List<QueryDocumentSnapshot> docs) async {
     final batch = _firestore.batch();
+    bool updated = false;
+
     for (final doc in docs) {
       final data = doc.data() as Map<String, dynamic>;
       if (data['senderId'] != currentUserId &&
           !(data['isRead'] as bool? ?? false)) {
         batch.update(doc.reference, {'isRead': true});
+        updated = true;
       }
     }
+
+    batch.set(
+      _firestore.collection('chats').doc(chatId),
+      {'unreadCount_$currentUserId': 0},
+      SetOptions(merge: true),
+    );
+
     await batch.commit();
   }
 
@@ -249,25 +393,49 @@ class ChatCubit extends Cubit<ChatState> {
 
 class BrokerChatPage extends StatelessWidget {
   final String chatId;
-  final String brokerId;
-  final String brokerName;
+  final String? brokerId;
+  final String? brokerName;
+  final String? receiverId;
+  final String? receiverName;
+  final String? receiverRole;
+  final String? orderId;
   final String? brokerAvatar;
 
   const BrokerChatPage({
     super.key,
     required this.chatId,
-    required this.brokerId,
-    required this.brokerName,
+    this.brokerId,
+    this.brokerName,
+    this.receiverId,
+    this.receiverName,
+    this.receiverRole,
+    this.orderId,
     this.brokerAvatar,
   });
 
+  String get targetId => receiverId ?? brokerId ?? '';
+  String get targetName => receiverName ?? brokerName ?? 'User';
+  String get targetRole => receiverRole ?? 'Broker';
+
   @override
   Widget build(BuildContext context) {
+    final String currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
+    final String target = targetId;
+    final String effectiveChatId = (currentUid.isNotEmpty && target.isNotEmpty)
+        ? getDeterministicChatId(currentUid, target)
+        : (chatId.isNotEmpty ? chatId : 'chat_general');
+
     return BlocProvider(
-      create: (_) =>
-          ChatCubit(chatId: chatId, brokerId: brokerId)..initialize(),
+      create: (_) => ChatCubit(
+        chatId: effectiveChatId,
+        receiverId: target,
+        receiverName: targetName,
+        receiverRole: targetRole,
+        orderId: orderId ?? '',
+        legacyChatId: (chatId.isNotEmpty && chatId != effectiveChatId) ? chatId : null,
+      )..initialize(),
       child: _ChatView(
-        brokerName: brokerName,
+        brokerName: targetName,
         brokerAvatar: brokerAvatar,
       ),
     );

@@ -21,26 +21,48 @@ class BuiltyPage extends StatelessWidget {
     required this.driverName,
     required this.fromLocation,
     required this.toLocation,
-    required this.weight,
+    required dynamic weight,
     required this.itemType,
     required this.transportName,
-    required this.price,
-    required this.quantity,
-  });
+    required dynamic price,
+    required dynamic quantity,
+  })  : weight = _parseSafeNum(weight),
+        quantity = _parseSafeNum(quantity),
+        price = _parseSafeNum(price),
+        rawPriceStr = (price != null && price.toString().isNotEmpty) ? price.toString() : '0',
+        rawWeightStr = (weight != null && weight.toString().isNotEmpty) ? weight.toString() : '0',
+        rawQuantityStr = (quantity != null && quantity.toString().isNotEmpty) ? quantity.toString() : '0';
 
   final String docNo;
   final String orderId;
   final String date;
   final String userName;
   final String brokerName;
-  final int quantity;
+  final dynamic quantity;
   final String driverName;
   final String fromLocation;
   final String toLocation;
-  final int weight;
+  final dynamic weight;
   final String itemType;
   final String transportName;
-  final int price;
+  final dynamic price;
+  final String rawPriceStr;
+  final String rawWeightStr;
+  final String rawQuantityStr;
+
+  static dynamic _parseSafeNum(dynamic val) {
+    if (val == null) return 0;
+    if (val is num) return val;
+    if (val is String) {
+      final cleaned = val.replaceAll(RegExp(r'[^0-9.]'), '');
+      if (cleaned.isEmpty) return val;
+      if (cleaned.contains('.')) {
+        return double.tryParse(cleaned) ?? val;
+      }
+      return int.tryParse(cleaned) ?? val;
+    }
+    return val;
+  }
 
   @override
   Widget build(BuildContext context) {

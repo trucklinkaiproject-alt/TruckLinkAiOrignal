@@ -5,6 +5,8 @@ import 'package:trucklinkai_orignal/Features/Auth/AuthBloc/authCubit.dart';
 import 'package:trucklinkai_orignal/Features/Auth/Pages/roleSelectionPage.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerBloc/brokerCubit.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerBloc/brokerStates.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:trucklinkai_orignal/Core/Widgets/myReviewsPage.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/Widgets/appBar.dart';
 
 class BrokerProfilePage extends StatelessWidget {
@@ -13,6 +15,7 @@ class BrokerProfilePage extends StatelessWidget {
   Widget buildProfileOption({
     required IconData icon,
     required String title,
+    String? subtitle,
     bool isDestructive = false,
     VoidCallback? onTap,
   }) {
@@ -38,6 +41,12 @@ class BrokerProfilePage extends StatelessWidget {
           color: isDestructive ? const Color(0xFFEF4444) : Colors.black87,
         ),
       ),
+      subtitle: subtitle != null
+          ? Text(
+              subtitle,
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+            )
+          : null,
       trailing: isDestructive
           ? null
           : const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
@@ -132,6 +141,24 @@ class BrokerProfilePage extends StatelessWidget {
 
             // Second Section
             buildSection([
+              buildProfileOption(
+                icon: Icons.star_rate_rounded,
+                title: 'My Reviews',
+                subtitle: 'View your client ratings & feedback',
+                onTap: () {
+                  final String currentBrokerId = FirebaseAuth.instance.currentUser?.uid ?? '';
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => MyReviewsPage(
+                        userId: currentBrokerId,
+                        userRole: 'Broker',
+                      ),
+                    ),
+                  );
+                },
+              ),
+              Divider(height: 1, color: Colors.grey.shade300),
               buildProfileOption(
                 icon: Icons.help_outline,
                 title: 'Help & Support',

@@ -1,236 +1,17 @@
-// import 'package:flutter/material.dart';
-// import 'package:flutter_bloc/flutter_bloc.dart';
-// import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
-// import 'package:trucklinkai_orignal/Features/Broker%20Module/Pages/orderDetailPage.dart';
-// import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerBloc/brokerCubit.dart';
-// import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerBloc/brokerStates.dart';
-// import 'package:trucklinkai_orignal/Features/Broker%20Module/widgets/brokerincomingreqcontainer.dart';
-
-// class BrokerHomePage extends StatefulWidget {
-//   const BrokerHomePage({super.key});
-
-//   @override
-//   State<BrokerHomePage> createState() => _BrokerHomePageState();
-// }
-
-// class _BrokerHomePageState extends State<BrokerHomePage> {
-//   @override
-//   void initState() {
-//     super.initState();
-
-//     WidgetsBinding.instance.addPostFrameCallback((_) {
-//       context.read<BrokerCubit>().fetchUserData();
-//       context.read<BrokerCubit>().fetchIncomingReq();
-//     });
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: SafeArea(
-//         child: Stack(
-//           children: [
-//             Container(
-//               width: double.infinity,
-//               height: 70,
-//               padding: EdgeInsets.symmetric(horizontal: 20),
-//               decoration: BoxDecoration(color: Appcolors.secondaryPurple),
-//               child: Row(
-//                 //mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                 crossAxisAlignment: CrossAxisAlignment.center,
-//                 children: [
-//                   BlocBuilder<BrokerCubit, BrokerState>(
-//                     builder: (context, state) {
-//                       return Text(
-//                         state is BrokerLoadedState
-//                             ? "Hello, ${state.userData} !"
-//                             : "Hello, Unknown !",
-//                         style: TextStyle(
-//                           color: Colors.white,
-//                           fontSize: 20,
-//                           fontWeight: FontWeight.bold,
-//                         ),
-//                       );
-//                     },
-//                   ),
-//                   Spacer(),
-//                   IconButton(
-//                     onPressed: () {},
-//                     icon: Icon(
-//                       Icons.notifications_none_rounded,
-//                       color: Colors.white,
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//             Container(
-//               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-//               width: double.infinity,
-//               height: double.infinity,
-//               margin: EdgeInsets.only(top: 60),
-//               decoration: BoxDecoration(
-//                 color: const Color.fromARGB(255, 255, 255, 255),
-//                 borderRadius: BorderRadius.circular(15),
-//               ),
-//               child: SingleChildScrollView(
-//                 child: Column(
-//                   crossAxisAlignment: CrossAxisAlignment.start,
-//                   children: [
-//                     Text(
-//                       "Broker, Dashboard",
-//                       style: TextStyle(
-//                         fontSize: 19,
-//                         fontWeight: FontWeight.bold,
-//                         color: Appcolors.secondaryPurple,
-//                       ),
-//                     ),
-//                     SizedBox(height: 20),
-//                     Row(
-//                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                       children: [
-//                         brokerHomeContainer(
-//                           "18",
-//                           "New Request",
-//                           const Color.fromARGB(255, 239, 233, 250),
-//                           Appcolors.secondaryPurple,
-//                           const Color.fromARGB(255, 154, 137, 192),
-//                         ),
-//                         brokerHomeContainer(
-//                           "20",
-//                           "Active Orders",
-//                           const Color.fromARGB(255, 255, 252, 224),
-//                           Colors.black,
-//                           Colors.black,
-//                         ),
-//                         brokerHomeContainer(
-//                           "56",
-//                           "Completed",
-//                           const Color.fromARGB(255, 217, 252, 235),
-//                           Colors.black,
-//                           Colors.black,
-//                         ),
-//                       ],
-//                     ),
-//                     SizedBox(height: 35),
-//                     Row(
-//                       children: [
-//                         Text(
-//                           "Incoming Orders",
-//                           style: TextStyle(
-//                             color: Appcolors.secondaryPurple,
-//                             fontSize: 14,
-//                             fontWeight: FontWeight.bold,
-//                           ),
-//                         ),
-//                         Spacer(),
-//                         Text(
-//                           "View All",
-//                           style: TextStyle(
-//                             color: Color.fromARGB(255, 143, 133, 168),
-//                             fontSize: 13,
-//                             fontWeight: FontWeight.bold,
-//                           ),
-//                         ),
-//                       ],
-//                     ),
-//                     SizedBox(height: 15),
-//                     BlocBuilder<BrokerCubit, BrokerState>(
-//                       builder: (context, state) {
-//                         state is BrokerLoadingState
-//                             ? CircularProgressIndicator()
-//                             : Container();
-//                         return state is BrokerLoadedState
-//                             ? ListView.builder(
-//                                 shrinkWrap: true,
-//                                 physics: NeverScrollableScrollPhysics(),
-//                                 itemCount: state.incomingRequests!.length,
-//                                 itemBuilder: (context, index) {
-//                                   index = state.incomingRequests!.length-1-index;
-//                                   final request = state.incomingRequests![index];
-//                                   return BrokerIcomingReqContainer(
-//                                     orderNumber: request["orderNo"] ?? "",
-//                                     pickupLocation: request["pickupCity"] ?? "",
-//                                     dropLocation: request["dropCity"] ?? "",
-//                                     date: request["createdAt"] ?? "",
-//                                     status: request["status"] ?? "",
-//                                     weight: request["weight"] ?? 0,
-//                                     itemType: request["itemType"] ?? "",
-//                                     orderId: request["orderId"],
-//                                     onTap: () {
-//                                       Navigator.push(
-//                                         context,
-//                                         MaterialPageRoute(
-//                                           builder: (context) =>
-//                                               OrderDetailsPage(
-//                                                 orderReqData: state
-//                                                     .incomingRequests![index],
-//                                               ),
-//                                         ),
-//                                       );
-//                                     },
-//                                   );
-//                                 },
-//                               )
-//                             : Center(child: Text("No Request yet"));
-//                       },
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-
-//   Widget brokerHomeContainer(
-//     String quantity,
-//     String text,
-//     Color clr,
-//     Color? noClr,
-//     Color? txtClr,
-//   ) {
-//     return Container(
-//       width: MediaQuery.of(context).size.width * 0.28,
-//       height: 100,
-//       decoration: BoxDecoration(
-//         borderRadius: BorderRadius.circular(10),
-//         color: clr,
-//       ),
-//       child: Column(
-//         mainAxisAlignment: MainAxisAlignment.center,
-//         children: [
-//           Text(
-//             quantity,
-//             style: TextStyle(
-//               fontWeight: FontWeight.bold,
-//               fontSize: 20,
-//               color: noClr ?? Colors.black,
-//             ),
-//           ),
-//           SizedBox(height: 10),
-//           Text(
-//             text,
-//             style: TextStyle(
-//               fontWeight: FontWeight.bold,
-//               fontSize: 12,
-//               color: txtClr ?? Colors.black,
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
+import 'package:trucklinkai_orignal/Features/Broker%20Module/Pages/brokerAlertPage.dart';
+import 'package:trucklinkai_orignal/Features/Broker%20Module/Pages/brokerChatInboxPage.dart';
+import 'package:trucklinkai_orignal/Features/Broker%20Module/Pages/brokerDriverNetworkPage.dart';
+import 'package:trucklinkai_orignal/Features/Broker%20Module/Pages/brokerOrderPage.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/Pages/orderDetailPage.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerBloc/brokerCubit.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerBloc/brokerStates.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/widgets/brokerincomingreqcontainer.dart';
+import 'package:trucklinkai_orignal/Features/User%20Module/Pages/brokerchatpage.dart';
 
 class BrokerHomePage extends StatefulWidget {
   const BrokerHomePage({super.key});
@@ -252,210 +33,616 @@ class _BrokerHomePageState extends State<BrokerHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final String currentBrokerId =
+        FirebaseAuth.instance.currentUser?.uid ?? '';
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
+      floatingActionButton: StreamBuilder<QuerySnapshot>(
+        stream: currentBrokerId.isNotEmpty
+            ? FirebaseFirestore.instance
+                .collection("chats")
+                .where("participants", arrayContains: currentBrokerId)
+                .snapshots()
+            : const Stream.empty(),
+        builder: (context, chatSnap) {
+          int totalUnreadChats = 0;
+          if (chatSnap.hasData && chatSnap.data != null) {
+            for (var doc in chatSnap.data!.docs) {
+              final data = doc.data() as Map<String, dynamic>;
+              final int unread =
+                  (data['unreadCount_$currentBrokerId'] as num?)?.toInt() ?? 0;
+              if (unread > 0) {
+                totalUnreadChats += unread;
+              }
+            }
+          }
+
+          return FloatingActionButton.extended(
+            backgroundColor: Appcolors.secondaryPurple,
+            elevation: 4,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const BrokerChatInboxPage(),
+                ),
+              );
+            },
+            icon: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const Icon(Icons.chat_bubble_outline_rounded,
+                    color: Colors.white, size: 20),
+                if (totalUnreadChats > 0)
+                  Positioned(
+                    top: -6,
+                    right: -8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 5, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.redAccent,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      constraints:
+                          const BoxConstraints(minWidth: 18, minHeight: 14),
+                      child: Text(
+                        totalUnreadChats > 99 ? '99+' : '$totalUnreadChats',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            label: Text(
+              totalUnreadChats > 0 ? "Chat ($totalUnreadChats)" : "Messages",
+              style: const TextStyle(
+                  color: Colors.white, fontWeight: FontWeight.w700),
+            ),
+          );
+        },
+      ),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
             final width = constraints.maxWidth;
             final bool isMobile = width < 600;
-            final double horizontalPadding = isMobile ? 22 : width * 0.12;
+            final double horizontalPadding = isMobile ? 20 : width * 0.12;
 
             return SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
               padding: EdgeInsets.fromLTRB(
                 horizontalPadding,
-                15,
+                16,
                 horizontalPadding,
                 24,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // -------- Header --------
-                  Row(
-                    children: [
-                      Container(
-                        width: 46,
-                        height: 46,
-                        decoration: BoxDecoration(
-                          color: Appcolors.secondaryPurple,
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: const Icon(
-                          Icons.interpreter_mode_outlined,
-                          color: Colors.white,
-                          size: 22,
-                        ),
+                  // -------- Dashboard Top Header --------
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Appcolors.secondaryPurple,
+                          Appcolors.secondaryPurple.withOpacity(0.85),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            BlocBuilder<BrokerCubit, BrokerState>(
-                              builder: (context, state) {
-                                return Text(
-                                  state is BrokerLoadedState
-                                      ? "Hello, ${state.userData} !"
-                                      : "Hello, Unknown !",
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    color: Colors.black87,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                );
-                              },
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              "Broker Dashboard",
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 12.5,
-                              ),
-                            ),
-                          ],
+                      borderRadius: BorderRadius.circular(22),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Appcolors.secondaryPurple.withOpacity(0.3),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
                         ),
-                      ),
-                      InkWell(
-                        borderRadius: BorderRadius.circular(14),
-                        onTap: () {},
-                        child: Container(
-                          width: 42,
-                          height: 42,
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
                           decoration: BoxDecoration(
-                            color: Appcolors.primaryBlue.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(14),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.06),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: const Icon(
+                            Icons.dashboard_rounded,
+                            color: Colors.white,
+                            size: 26,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              BlocBuilder<BrokerCubit, BrokerState>(
+                                builder: (context, state) {
+                                  final name = state is BrokerLoadedState
+                                      ? state.userData
+                                      : "Broker";
+                                  return Text(
+                                    "Hello, $name 👋",
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  );
+                                },
+                              ),
+                              const SizedBox(height: 3),
+                              const Text(
+                                "Broker Command Center",
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ],
                           ),
-                          child: const Icon(
-                            Icons.message_outlined,
-                            color: Appcolors.primaryBlue,
-                            size: 20,
+                        ),
+
+                        // Notification Bell with Real Unread Badge
+                        StreamBuilder<QuerySnapshot>(
+                          stream: currentBrokerId.isNotEmpty
+                              ? FirebaseFirestore.instance
+                                  .collection("Broker")
+                                  .doc(currentBrokerId)
+                                  .collection("Notifications")
+                                  .where("is_read", isEqualTo: false)
+                                  .snapshots()
+                              : const Stream.empty(),
+                          builder: (context, notifSnap) {
+                            final unreadCount =
+                                notifSnap.data?.docs.length ?? 0;
+                            return InkWell(
+                              borderRadius: BorderRadius.circular(14),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => const BrokerAlertPage()),
+                                );
+                              },
+                              child: Container(
+                                width: 42,
+                                height: 42,
+                                margin: const EdgeInsets.only(right: 8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.notifications_none_rounded,
+                                      color: Colors.white,
+                                      size: 22,
+                                    ),
+                                    if (unreadCount > 0)
+                                      Positioned(
+                                        top: 6,
+                                        right: 6,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(3),
+                                          decoration: const BoxDecoration(
+                                            color: Colors.redAccent,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          constraints: const BoxConstraints(
+                                              minWidth: 16, minHeight: 16),
+                                          child: Text(
+                                            unreadCount > 9
+                                                ? '9+'
+                                                : '$unreadCount',
+                                            textAlign: TextAlign.center,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 9.5,
+                                              fontWeight: FontWeight.w800,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+
+                        // Real-Time Broker Availability Control (Online / Offline)
+                        StreamBuilder<DocumentSnapshot>(
+                          stream: currentBrokerId.isNotEmpty
+                              ? FirebaseFirestore.instance
+                                  .collection("Broker")
+                                  .doc(currentBrokerId)
+                                  .snapshots()
+                              : const Stream.empty(),
+                          builder: (context, bSnap) {
+                            final bData = bSnap.data?.data() as Map<String, dynamic>? ?? {};
+                            final String currentStatus = (bData['availability_status'] ?? bData['status'] ?? 'online')
+                                .toString()
+                                .toLowerCase();
+                            final bool isOnline = currentStatus != 'offline';
+
+                            return InkWell(
+                              borderRadius: BorderRadius.circular(20),
+                              onTap: () async {
+                                final newStatus = isOnline ? 'offline' : 'online';
+                                await context.read<BrokerCubit>().updateBrokerAvailability(newStatus);
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        newStatus == 'online'
+                                            ? "You are now Online & Active ✓"
+                                            : "You are now Offline",
+                                      ),
+                                      backgroundColor: newStatus == 'online'
+                                          ? Appcolors.tertiaryGreen
+                                          : Colors.grey[800],
+                                      duration: const Duration(seconds: 2),
+                                      behavior: SnackBarBehavior.floating,
+                                    ),
+                                  );
+                                }
+                              },
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 250),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isOnline
+                                      ? Appcolors.tertiaryGreen
+                                      : Colors.grey[700],
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: (isOnline
+                                              ? Appcolors.tertiaryGreen
+                                              : Colors.black)
+                                          .withOpacity(0.25),
+                                      blurRadius: 6,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      width: 8,
+                                      height: 8,
+                                      decoration: BoxDecoration(
+                                        color: isOnline ? Colors.white : Colors.grey[400],
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      isOnline ? "Online" : "Offline",
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 11.5,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    const Icon(
+                                      Icons.swap_horiz_rounded,
+                                      color: Colors.white70,
+                                      size: 13,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  SizedBox(height: isMobile ? 22 : 28),
+
+                  // -------- Live Real-Time Firebase Metrics --------
+                  StreamBuilder<QuerySnapshot>(
+                    stream: currentBrokerId.isNotEmpty
+                        ? FirebaseFirestore.instance
+                            .collection("Broker")
+                            .doc(currentBrokerId)
+                            .collection("IncomingRequests")
+                            .snapshots()
+                        : const Stream.empty(),
+                    builder: (context, snapshot) {
+                      int newRequestsCount = 0;
+                      int activeOrdersCount = 0;
+                      int completedOrdersCount = 0;
+                      List<Map<String, dynamic>> pendingList = [];
+
+                      if (snapshot.hasData && snapshot.data != null) {
+                        final docs = snapshot.data!.docs;
+
+                        for (var doc in docs) {
+                          final data = doc.data() as Map<String, dynamic>;
+                          final item = {
+                            "orderId": doc.id,
+                            ...data,
+                          };
+                          final status = (data["status"] ?? "pending")
+                              .toString()
+                              .toLowerCase();
+
+                          if (status == "pending") {
+                            newRequestsCount++;
+                            pendingList.add(item);
+                          } else if ([
+                            "accepted",
+                            "accepted_by_driver",
+                            "driver_offer_sent",
+                            "in_progress",
+                            "in_transit",
+                          ].contains(status)) {
+                            activeOrdersCount++;
+                          } else if (["completed", "delivered"]
+                              .contains(status)) {
+                            completedOrdersCount++;
+                          }
+                        }
+                      }
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Stat Cards Row with fixed flexible layout (0 pixel overflow)
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _StatCard(
+                                  value: newRequestsCount.toString(),
+                                  label: "New Requests",
+                                  icon: Icons.mark_email_unread_rounded,
+                                  color: Appcolors.secondaryPurple,
+                                  isLoading:
+                                      snapshot.connectionState ==
+                                          ConnectionState.waiting &&
+                                      !snapshot.hasData,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: _StatCard(
+                                  value: activeOrdersCount.toString(),
+                                  label: "Active Orders",
+                                  icon: Icons.local_shipping_rounded,
+                                  color: Colors.orange,
+                                  isLoading:
+                                      snapshot.connectionState ==
+                                          ConnectionState.waiting &&
+                                      !snapshot.hasData,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: _StatCard(
+                                  value: completedOrdersCount.toString(),
+                                  label: "Completed",
+                                  icon: Icons.check_circle_rounded,
+                                  color: Appcolors.tertiaryGreen,
+                                  isLoading:
+                                      snapshot.connectionState ==
+                                          ConnectionState.waiting &&
+                                      !snapshot.hasData,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ),
-                    ],
-                  ),
 
-                  SizedBox(height: isMobile ? 26 : 34),
+                          SizedBox(height: isMobile ? 24 : 30),
 
-                  // -------- Stat cards (same 18 / 20 / 56 values) --------
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _StatCard(
-                          value: "18",
-                          label: "New Request",
-                          icon: Icons.mark_email_unread_outlined,
-                          color: Appcolors.secondaryPurple,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: _StatCard(
-                          value: "20",
-                          label: "Active Orders",
-                          icon: Icons.local_shipping_outlined,
-                          color: Colors.orange,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: _StatCard(
-                          value: "56",
-                          label: "Completed",
-                          icon: Icons.check_circle_outline,
-                          color: Appcolors.tertiaryGreen,
-                        ),
-                      ),
-                    ],
-                  ),
+                          // -------- Incoming Requests Feed --------
+                          Row(
+                            children: [
+                              const Text(
+                                "New Requests",
+                                style: TextStyle(
+                                  color: Colors.black87,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Appcolors.secondaryPurple
+                                      .withOpacity(0.12),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  "${pendingList.length} Pending",
+                                  style: TextStyle(
+                                    color: Appcolors.secondaryPurple,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                              const Spacer(),
+                              InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const BrokerOrderPage(),
+                                    ),
+                                  );
+                                },
+                                child: Text(
+                                  "View All",
+                                  style: TextStyle(
+                                    color: Appcolors.secondaryPurple,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
 
-                  SizedBox(height: isMobile ? 30 : 38),
+                          const SizedBox(height: 14),
 
-                  // -------- Incoming Orders header --------
-                  Row(
-                    children: [
-                      Text(
-                        "Incoming Orders",
-                        style: TextStyle(
-                          color: Appcolors.secondaryPurple,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        "View All",
-                        style: TextStyle(
-                          color: Colors.grey[500],
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  // -------- Incoming requests list (same logic) --------
-                  BlocBuilder<BrokerCubit, BrokerState>(
-                    builder: (context, state) {
-                      state is BrokerLoadingState
-                          ? CircularProgressIndicator()
-                          : Container();
-                      return state is BrokerLoadedState
-                          ? ListView.builder(
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting &&
+                              !snapshot.hasData)
+                            const Center(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(vertical: 30),
+                                child: CircularProgressIndicator(),
+                              ),
+                            )
+                          else if (pendingList.isEmpty)
+                            Container(
+                              width: double.infinity,
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 36),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(18),
+                                border: Border.all(
+                                  color: Colors.grey.withOpacity(0.15),
+                                ),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: Appcolors.secondaryPurple
+                                          .withOpacity(0.08),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.inbox_outlined,
+                                      size: 36,
+                                      color: Appcolors.secondaryPurple,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  const Text(
+                                    "No Pending Requests",
+                                    style: TextStyle(
+                                      color: Colors.black87,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    "Incoming requests from shippers will appear here in real time",
+                                    style: TextStyle(
+                                      color: Colors.grey[500],
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          else
+                            ListView.builder(
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
-                              itemCount: state.incomingRequests!.length,
+                              itemCount: pendingList.length,
                               itemBuilder: (context, index) {
-                                index =
-                                    state.incomingRequests!.length - 1 - index;
-                                final request = state.incomingRequests![index];
+                                final reversedIndex =
+                                    pendingList.length - 1 - index;
+                                final request = pendingList[reversedIndex];
+
                                 return BrokerIcomingReqContainer(
-                                  orderNumber: request["orderNo"] ?? "",
-                                  pickupLocation: request["pickupCity"] ?? "",
-                                  dropLocation: request["dropCity"] ?? "",
-                                  date: request["createdAt"] ?? "",
-                                  status: request["status"] ?? "",
-                                  weight: request["weight"] ?? 0,
-                                  itemType: request["itemType"] ?? "",
-                                  orderId: request["orderId"],
+                                  orderNumber:
+                                      (request["orderNo"] ?? "").toString(),
+                                  pickupLocation:
+                                      (request["pickupCity"] ?? "").toString(),
+                                  dropLocation:
+                                      (request["dropCity"] ?? "").toString(),
+                                  date: (request["createdAt"] ??
+                                          request["date"] ??
+                                          "")
+                                      .toString(),
+                                  status: (request["status"] ?? "pending")
+                                      .toString(),
+                                  weight: request["weight"] is int
+                                      ? request["weight"]
+                                      : int.tryParse(
+                                              request["weight"].toString()) ??
+                                          0,
+                                  itemType:
+                                      (request["itemType"] ?? "").toString(),
+                                  orderId:
+                                      (request["orderId"] ?? "").toString(),
                                   onTap: () {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) => OrderDetailsPage(
-                                          orderReqData:
-                                              state.incomingRequests![index],
+                                          orderReqData: request,
                                         ),
                                       ),
                                     );
                                   },
+                                  onSubmitQuote: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => OrderDetailsPage(
+                                          orderReqData: request,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  onReject: () async {
+                                    await context
+                                        .read<BrokerCubit>()
+                                        .rejectRequest(request);
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                              "Request #${request['orderNo'] ?? ''} Rejected"),
+                                          backgroundColor: Colors.redAccent,
+                                        ),
+                                      );
+                                    }
+                                  },
                                 );
                               },
-                            )
-                          : Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 40),
-                              child: Center(
-                                child: Text(
-                                  "No Request yet",
-                                  style: TextStyle(
-                                    color: Colors.grey[500],
-                                    fontSize: 13.5,
-                                  ),
-                                ),
-                              ),
-                            );
+                            ),
+                        ],
+                      );
                     },
                   ),
                 ],
@@ -468,32 +655,29 @@ class _BrokerHomePageState extends State<BrokerHomePage> {
   }
 }
 
-// =====================================================================
-// UI-only helper widget, matching the app's theme. No business logic
-// lives here — same static values (18 / 20 / 56) as before.
-// =====================================================================
-
 class _StatCard extends StatelessWidget {
   final String value;
   final String label;
   final IconData icon;
   final Color color;
+  final bool isLoading;
 
   const _StatCard({
     required this.value,
     required this.label,
     required this.icon,
     required this.color,
+    this.isLoading = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 110,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      constraints: const BoxConstraints(minHeight: 100),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
@@ -504,6 +688,7 @@ class _StatCard extends StatelessWidget {
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             width: 32,
@@ -514,19 +699,31 @@ class _StatCard extends StatelessWidget {
             ),
             child: Icon(icon, color: color, size: 17),
           ),
-          const SizedBox(height: 10),
-          Text(
-            value,
-            style: const TextStyle(
-              fontWeight: FontWeight.w800,
-              fontSize: 18,
-              color: Colors.black87,
+          const SizedBox(height: 6),
+          if (isLoading)
+            const SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          else
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                value,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 19,
+                  color: Colors.black87,
+                ),
+              ),
             ),
-          ),
           const SizedBox(height: 2),
           Text(
             label,
             textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 10.5,
@@ -538,3 +735,5 @@ class _StatCard extends StatelessWidget {
     );
   }
 }
+
+

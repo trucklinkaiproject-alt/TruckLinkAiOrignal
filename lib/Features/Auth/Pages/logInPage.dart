@@ -8,6 +8,7 @@ import 'package:trucklinkai_orignal/Features/Auth/AuthBloc/authCubit.dart';
 import 'package:trucklinkai_orignal/Features/Auth/AuthBloc/authState.dart';
 import 'package:trucklinkai_orignal/Features/Auth/Pages/forgetPasswordPage.dart';
 import 'package:trucklinkai_orignal/Features/Auth/Pages/roleSelectionPage.dart';
+import 'package:trucklinkai_orignal/Features/Auth/Pages/verifyEmailPage.dart';
 import 'package:trucklinkai_orignal/Features/Auth/Widgets/pillTextField.dart';
 import 'package:trucklinkai_orignal/Features/Auth/Widgets/roleCard.dart';
 import 'package:trucklinkai_orignal/Features/Auth/Widgets/selectionLabel.dart';
@@ -60,6 +61,24 @@ class _LogInPageState extends State<LogInPage> {
                   return ShipperBottomNavBar();
                 }
               },
+            ),
+          );
+        }
+
+        if (state is AuthEmailNotVerified) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Please verify your email before logging in."),
+              backgroundColor: Colors.orange,
+            ),
+          );
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => VerifyEmailPage(
+                email: state.email,
+                password: passwordController.text,
+              ),
             ),
           );
         }

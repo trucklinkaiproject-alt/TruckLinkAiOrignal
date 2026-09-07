@@ -458,6 +458,8 @@
 //     );
 //   }
 // }
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
@@ -479,241 +481,377 @@ class BrokerDetailPage extends StatefulWidget {
 class _BrokerDetailPageState extends State<BrokerDetailPage> {
   @override
   Widget build(BuildContext context) {
+    final String brokerId = (widget.brokerData["uid"] ??
+            widget.brokerData["brokerId"] ??
+            widget.brokerData["id"] ??
+            '')
+        .toString();
+    final String currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final width = constraints.maxWidth;
-            final bool isMobile = width < 600;
-            final double horizontalPadding = isMobile ? 22 : width * 0.12;
+        child: StreamBuilder<DocumentSnapshot>(
+          stream: brokerId.isNotEmpty
+              ? FirebaseFirestore.instance
+                  .collection("Broker")
+                  .doc(brokerId)
+                  .snapshots()
+              : const Stream.empty(),
+          builder: (context, brokerSnap) {
+            final liveBrokerData =
+                brokerSnap.hasData && brokerSnap.data?.data() != null
+                    ? brokerSnap.data!.data() as Map<String, dynamic>
+                    : widget.brokerData;
 
-            return SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: horizontalPadding,
-                  vertical: 15,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // -------- Header --------
-                    Row(
+            final String brokerName =
+                (liveBrokerData["name"] ?? widget.brokerData["name"] ?? "Broker")
+                    .toString();
+            final String brokerPhone = (liveBrokerData["phone"] ??
+                    widget.brokerData["phone"] ??
+                    "Not specified")
+                .toString();
+            final String brokerEmail = (liveBrokerData["email"] ??
+                    widget.brokerData["email"] ??
+                    "Not specified")
+                .toString();
+            final String brokerLocation = (liveBrokerData["location"] ??
+                    widget.brokerData["location"] ??
+                    "Not specified")
+                .toString();
+
+            final double rating = (liveBrokerData["rating"] as num?)?.toDouble() ??
+                (liveBrokerData["overall_rating"] as num?)?.toDouble() ??
+                0.0;
+            final int totalReviews =
+                (liveBrokerData["total_reviews"] as num?)?.toInt() ??
+                    (liveBrokerData["reviews"] as num?)?.toInt() ??
+                    (liveBrokerData["review_count"] as num?)?.toInt() ??
+                    0;
+
+            final String ratingDisplay = rating > 0
+                ? "$rating (${totalReviews > 0 ? totalReviews : 1} ${totalReviews == 1 ? 'review' : 'reviews'})"
+                : "No reviews yet (0.0)";
+
+            final String estimatedTimeDisplay = (liveBrokerData["estimatedTime"] != null &&
+                    liveBrokerData["estimatedTime"].toString().isNotEmpty &&
+                    !liveBrokerData["estimatedTime"].toString().contains("2 hours"))
+                ? liveBrokerData["estimatedTime"].toString()
+                : "Calculated upon trip route";
+
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                final width = constraints.maxWidth;
+                final bool isMobile = width < 600;
+                final double horizontalPadding = isMobile ? 22 : width * 0.12;
+
+                return SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: horizontalPadding,
+                      vertical: 15,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        BackArrowButton(onTap: () => Navigator.pop(context)),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Text(
-                            widget.brokerData["name"] ?? "Broker",
-                            style: const TextStyle(
-                              fontSize: 19,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.black87,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: isMobile ? 22 : 28),
-
-                    // -------- Broker Details --------
-                    const _SectionLabel("Broker Details"),
-                    const SizedBox(height: 10),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(18),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.04),
-                            blurRadius: 10,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _DetailRow(
-                            icon: Icons.badge_outlined,
-                            label: "Broker ID",
-                            value: widget.brokerData["uid"],
-                          ),
-                          _DetailRow(
-                            icon: Icons.location_on_outlined,
-                            label: "Location",
-                            value:
-                                widget.brokerData["location"] ??
-                                "Not specify by broker",
-                          ),
-                          _DetailRow(
-                            icon: Icons.call_outlined,
-                            label: "Contact No",
-                            value: widget.brokerData["phone"],
-                          ),
-                          _DetailRow(
-                            icon: Icons.email_outlined,
-                            label: "Email",
-                            value: widget.brokerData["email"],
-                          ),
-                          _DetailRow(
-                            icon: Icons.star_border_rounded,
-                            label: "Ratings",
-                            value:
-                                widget.brokerData["rating"] ??
-                                "4.5 (200 reviews)",
-                          ),
-                          _DetailRow(
-                            icon: Icons.schedule_outlined,
-                            label: "Estimated Time",
-                            value:
-                                widget.brokerData["estimatedTime"] ?? "2 hours",
-                            isLast: true,
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    SizedBox(height: isMobile ? 22 : 28),
-
-                    // -------- Chat with broker (same navigation) --------
-                    InkWell(
-                      borderRadius: BorderRadius.circular(18),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => BrokerChatPage(
-                              brokerId: widget.brokerData["uid"],
-                              brokerName: widget.brokerData["name"],
-                              chatId: "12345678",
-                            ),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: Appcolors.secondaryPurple.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                        child: Row(
+                        // -------- Header --------
+                        Row(
                           children: [
-                            Container(
-                              width: 44,
-                              height: 44,
-                              decoration: BoxDecoration(
-                                color: Appcolors.secondaryPurple,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.chat_bubble_outline_rounded,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                            ),
+                            BackArrowButton(onTap: () => Navigator.pop(context)),
                             const SizedBox(width: 14),
                             Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    "Chat with Broker",
-                                    style: TextStyle(
-                                      color: Colors.black87,
-                                      fontSize: 14.5,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 3),
-                                  Text(
-                                    "Discuss your requirements and negotiate terms",
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
-                                      fontSize: 11.5,
-                                    ),
-                                  ),
-                                ],
+                              child: Text(
+                                brokerName,
+                                style: const TextStyle(
+                                  fontSize: 19,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.black87,
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
-                            ),
-                            Icon(
-                              Icons.arrow_forward_ios,
-                              color: Appcolors.secondaryPurple,
-                              size: 16,
                             ),
                           ],
                         ),
-                      ),
-                    ),
 
-                    SizedBox(height: isMobile ? 26 : 32),
+                        SizedBox(height: isMobile ? 22 : 28),
 
-                    BlocBuilder<CreateReqCubit, CreateReqState>(
-                      builder: (context, state) {
-                        final bool loading = state is CreateReqLoadingState;
+                        // -------- Broker Details --------
+                        const _SectionLabel("Broker Details"),
+                        const SizedBox(height: 10),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(18),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.04),
+                                blurRadius: 10,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _DetailRow(
+                                icon: Icons.badge_outlined,
+                                label: "Broker ID",
+                                value: brokerId,
+                              ),
+                              _DetailRow(
+                                icon: Icons.location_on_outlined,
+                                label: "Location",
+                                value: brokerLocation,
+                              ),
+                              _DetailRow(
+                                icon: Icons.call_outlined,
+                                label: "Contact No",
+                                value: brokerPhone,
+                              ),
+                              _DetailRow(
+                                icon: Icons.email_outlined,
+                                label: "Email",
+                                value: brokerEmail,
+                              ),
+                              _DetailRow(
+                                icon: Icons.star_rounded,
+                                label: "Ratings",
+                                value: ratingDisplay,
+                              ),
+                              _DetailRow(
+                                icon: Icons.schedule_outlined,
+                                label: "Estimated Time",
+                                value: estimatedTimeDisplay,
+                                isLast: true,
+                              ),
+                            ],
+                          ),
+                        ),
 
-                        return ContinueButton(
-                          text: "Send Request",
-                          clr: Appcolors.primaryBlue,
-                          isLoading: loading,
-                          onTap: loading
-                              ? null
-                              : () async {
-                                  await context
-                                      .read<CreateReqCubit>()
-                                      .createRequestToBroker(
-                                        widget.brokerData["uid"],
+                        SizedBox(height: isMobile ? 22 : 28),
+
+                        // -------- Pre-Acceptance Chat with Broker --------
+                        InkWell(
+                          borderRadius: BorderRadius.circular(18),
+                          onTap: () {
+                            final String chatId =
+                                getDeterministicChatId(currentUserId, brokerId);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => BrokerChatPage(
+                                  chatId: chatId,
+                                  brokerId: brokerId,
+                                  brokerName: brokerName,
+                                  receiverId: brokerId,
+                                  receiverName: brokerName,
+                                  receiverRole: 'Broker',
+                                ),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: Appcolors.secondaryPurple.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 44,
+                                  height: 44,
+                                  decoration: BoxDecoration(
+                                    color: Appcolors.secondaryPurple,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.chat_bubble_outline_rounded,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        "Chat with Broker",
+                                        style: TextStyle(
+                                          color: Colors.black87,
+                                          fontSize: 14.5,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 3),
+                                      Text(
+                                        "Discuss your requirements directly before or after acceptance",
+                                        style: TextStyle(
+                                          color: Colors.grey[600],
+                                          fontSize: 11.5,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: Appcolors.secondaryPurple,
+                                  size: 16,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        SizedBox(height: isMobile ? 26 : 32),
+
+                        BlocBuilder<CreateReqCubit, CreateReqState>(
+                          builder: (context, state) {
+                            final bool loading = state is CreateReqLoadingState;
+
+                            return ContinueButton(
+                              text: "Send Request",
+                              clr: Appcolors.primaryBlue,
+                              isLoading: loading,
+                              onTap: loading
+                                  ? null
+                                  : () async {
+                                      await context
+                                          .read<CreateReqCubit>()
+                                          .createRequestToBroker(
+                                            brokerId,
+                                          );
+
+                                      if (!mounted) return;
+
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const ShipperBottomNavBar(),
+                                        ),
                                       );
+                                    },
+                            );
+                          },
+                        ),
 
-                                  if (!mounted) return;
+                        SizedBox(height: isMobile ? 26 : 32),
 
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          ShipperBottomNavBar(),
+                        // -------- Real Firebase Reviews Section --------
+                        const _SectionLabel("Customer Reviews"),
+                        const SizedBox(height: 10),
+
+                        StreamBuilder<QuerySnapshot>(
+                          stream: brokerId.isNotEmpty
+                              ? FirebaseFirestore.instance
+                                  .collection("Broker")
+                                  .doc(brokerId)
+                                  .collection("Reviews")
+                                  .orderBy("created_at", descending: true)
+                                  .snapshots()
+                              : const Stream.empty(),
+                          builder: (context, reviewSnap) {
+                            if (reviewSnap.connectionState ==
+                                    ConnectionState.waiting &&
+                                !reviewSnap.hasData) {
+                              return const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(20.0),
+                                  child: CircularProgressIndicator(
+                                      color: Appcolors.secondaryPurple),
+                                ),
+                              );
+                            }
+
+                            final docs = reviewSnap.data?.docs ?? [];
+                            if (docs.isEmpty) {
+                              return Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 24, horizontal: 16),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(18),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.04),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 3),
                                     ),
-                                  );
-                                },
-                        );
-                      },
-                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  children: [
+                                    Icon(
+                                      Icons.rate_review_outlined,
+                                      color: Colors.grey[400],
+                                      size: 32,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      "No customer reviews yet",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 14,
+                                        color: Colors.grey[700],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      "Reviews will appear here once verified completed orders are rated.",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey[500],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
 
-                    SizedBox(height: isMobile ? 26 : 32),
+                            return ListView.separated(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: docs.length,
+                              separatorBuilder: (_, __) =>
+                                  const SizedBox(height: 12),
+                              itemBuilder: (context, index) {
+                                final rData =
+                                    docs[index].data() as Map<String, dynamic>;
+                                final rName =
+                                    (rData["reviewer_name"] ?? "Verified Customer")
+                                        .toString();
+                                final rRating =
+                                    (rData["rating"] as num?)?.toDouble() ?? 5.0;
+                                final rComment =
+                                    (rData["comment"] ?? "").toString();
 
-                    const _SectionLabel("Reviews"),
-                    const SizedBox(height: 10),
-                    const _ReviewCard(
-                      name: "Jane Smith",
-                      rating: "5/5",
-                      review:
-                          "Great experience! The broker was responsive and helped me find the right truck for my shipment.",
-                    ),
-                    const SizedBox(height: 12),
-                    const _ReviewCard(
-                      name: "Jane Smith",
-                      rating: "5/5",
-                      review:
-                          "Great experience! The broker was responsive and helped me find the right truck for my shipment.",
-                    ),
-                    const SizedBox(height: 12),
-                    const _ReviewCard(
-                      name: "Jane Smith",
-                      rating: "5/5",
-                      review:
-                          "Great experience! The broker was responsive and helped me find the right truck for my shipment.",
-                    ),
+                                return _ReviewCard(
+                                  name: rName,
+                                  rating: "${rRating.toStringAsFixed(1)}/5.0",
+                                  review: rComment.isNotEmpty
+                                      ? rComment
+                                      : "Great and reliable service.",
+                                );
+                              },
+                            );
+                          },
+                        ),
 
-                    SizedBox(height: isMobile ? 20 : 30),
-                  ],
-                ),
-              ),
+                        SizedBox(height: isMobile ? 20 : 30),
+                      ],
+                    ),
+                  ),
+                );
+              },
             );
           },
         ),

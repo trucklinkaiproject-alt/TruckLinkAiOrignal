@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/bloc/userBloc/usercubit.dart';
+import 'package:trucklinkai_orignal/Features/Transporter%20Module/bloc/driverBloc/driverCubit.dart';
 import 'authState.dart';
 
 class AuthCubit extends Cubit<AuthState> {
@@ -46,22 +47,49 @@ class AuthCubit extends Cubit<AuthState> {
       await userCredential.user?.sendEmailVerification();
 
      
+      Map<String, dynamic> userData = {
+        'name': name,
+        'email': email,
+        'phone': phone,
+        'role': selectedRole,
+        'uid': userCredential.user!.uid,
+      };
+
+      if (selectedRole == 'Driver') {
+        userData.addAll({
+          'driver_id': userCredential.user!.uid,
+          'broker_id': null,
+          'driver_latitude': null,
+          'driver_longitude': null,
+          'vehicle_type': null,
+          'vehicle_available': false,
+          'driver_rating': 0.0,
+          'total_trips': 0,
+          'completed_trips': 0,
+          'cancelled_trips': 0,
+        });
+      }
+
+      if (selectedRole == 'Broker') {
+        // Initialize all AI training feature fields for new Broker accounts.
+        // These are maintained automatically by the system — never manually edited.
+        userData.addAll({
+          'broker_id': userCredential.user!.uid,
+          'broker_rating': 0.0,
+          'acceptance_rate': 0.0,
+          'completion_rate': 0.0,
+          'cancellation_rate': 0.0,
+          'total_requests': 0,
+          'accepted_requests': 0,
+          'completed_requests': 0,
+          'cancelled_requests': 0,
+        });
+      }
+
       await firebaseFirestore
           .collection(selectedRole)
           .doc(userCredential.user!.uid)
-          .set({
-            'name': name,
-            'email': email,
-            'phone': phone,
-            'role': selectedRole,
-            'uid': userCredential.user!.uid,
-            // 'location':"Broker Location",
-            // 'rating':'0',
-            // 'total_orders_completed':0,
-            // 'response_time':
-            // 'active_orders':0,
-            
-          });
+          .set(userData);
 
       await _auth.signOut();
 
@@ -96,12 +124,22 @@ class AuthCubit extends Cubit<AuthState> {
         return;
       }
 
-       await _auth.signInWithEmailAndPassword(
+      final userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      
+      // Refresh currentUser state to verify email verification status
+      final user = userCredential.user;
+      if (user != null) {
+        await user.reload();
+        final refreshedUser = _auth.currentUser;
+        if (refreshedUser != null && !refreshedUser.emailVerified) {
+          await _auth.signOut();
+          emit(AuthEmailNotVerified(email));
+          return;
+        }
+      }
 
       emit(AuthSuccess(role: role));
     } on FirebaseAuthException catch (e) {
@@ -191,8 +229,15 @@ Future<void> cancelSignUp({
 }
   Future<void> logOut(BuildContext context) async {
     try {
+      final userCubit = context.read<UserCubit>();
+      final driverCubit = context.read<DriverCubit>();
       emit(AuthLoading());
-      await context.read<UserCubit>().stopListening();
+      try {
+        await userCubit.stopListening();
+      } catch (_) {}
+      try {
+        driverCubit.stopListening();
+      } catch (_) {}
       await _auth.signOut();
       emit(AuthSuccess());
     } catch (e) {

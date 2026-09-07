@@ -473,6 +473,9 @@ class BrokerIcomingReqContainer extends StatelessWidget {
     required this.itemType,
     this.onTap,
     required this.orderId,
+    this.onAccept,
+    this.onSubmitQuote,
+    this.onReject,
   });
   final String orderNumber;
   final String pickupLocation;
@@ -483,9 +486,14 @@ class BrokerIcomingReqContainer extends StatelessWidget {
   final String status;
   final String orderId;
   final VoidCallback? onTap;
+  final VoidCallback? onAccept;
+  final VoidCallback? onSubmitQuote;
+  final VoidCallback? onReject;
 
   @override
   Widget build(BuildContext context) {
+    final quoteAction = onSubmitQuote ?? onAccept;
+
     return InkWell(
       borderRadius: BorderRadius.circular(18),
       onTap: onTap,
@@ -625,6 +633,59 @@ class BrokerIcomingReqContainer extends StatelessWidget {
                 ),
               ],
             ),
+
+            if (quoteAction != null || onReject != null) ...[
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  if (onReject != null)
+                    Expanded(
+                      child: SizedBox(
+                        height: 38,
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.red[700],
+                            side: BorderSide(color: Colors.red.withOpacity(0.4)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(19),
+                            ),
+                          ),
+                          onPressed: onReject,
+                          child: const Text(
+                            "Reject",
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (quoteAction != null && onReject != null) const SizedBox(width: 10),
+                  if (quoteAction != null)
+                    Expanded(
+                      child: SizedBox(
+                        height: 38,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Appcolors.secondaryPurple,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(19),
+                            ),
+                          ),
+                          onPressed: quoteAction,
+                          child: const Text(
+                            "Submit Quote",
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ],
           ],
         ),
       ),

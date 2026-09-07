@@ -102,21 +102,65 @@ class UserCubit extends Cubit<UserState> {
           .doc(requestId)
           .get();
 
-      final String brokerId = requestDoc["brokerId"] as String;
+      final data = requestDoc.data() ?? {};
+      final String brokerId = (data["brokerId"] ?? data["broker_id"] ?? "").toString();
+      final String orderNo = (data["orderNo"] ?? requestId).toString();
+      final num agreedFare = data["customer_fare"] ??
+          data["customerFare"] ??
+          data["accepted_fare"] ??
+          data["quoteAmount"] ??
+          data["brokerOffer"] ??
+          data["fare"] ??
+          0;
+
+      final updatePayload = {
+        "status": "accepted",
+        "customer_fare": agreedFare,
+        "customerFare": agreedFare,
+        "accepted_fare": agreedFare,
+        "accepted_at": FieldValue.serverTimestamp(),
+        "updated_at": FieldValue.serverTimestamp(),
+      };
 
       await firestore
           .collection("User")
           .doc(userId)
           .collection("Requests")
           .doc(requestId)
-          .update({"status": "accepted"});
+          .update(updatePayload);
 
-      await firestore
-          .collection("Broker")
-          .doc(brokerId)
-          .collection("IncomingRequests")
-          .doc(requestId)
-          .update({"status": "accepted"});
+      if (brokerId.isNotEmpty) {
+        await firestore
+            .collection("Broker")
+            .doc(brokerId)
+            .collection("IncomingRequests")
+            .doc(requestId)
+            .update(updatePayload);
+
+        // Notify Broker of quote acceptance
+        try {
+          final String notifId = "quote_acc_${requestId}_$userId";
+          await firestore
+              .collection("Broker")
+              .doc(brokerId)
+              .collection("Notifications")
+              .doc(notifId)
+              .set({
+                'id': notifId,
+                'broker_id': brokerId,
+                'type': 'quote_accepted',
+                'title': 'Quote Accepted',
+                'body': 'Shipper $userName has accepted your quote of PKR ${agreedFare.toStringAsFixed(0)} for Order #$orderNo.',
+                'order_id': requestId,
+                'order_no': orderNo,
+                'customer_fare': agreedFare,
+                'user_uid': userId,
+                'user_name': userName,
+                'timestamp': FieldValue.serverTimestamp(),
+                'is_read': false,
+              }, SetOptions(merge: true));
+        } catch (_) {}
+      }
 
       if (!isClosed) {
         emit(UserLoadedState(userName, userId));
@@ -130,29 +174,62 @@ class UserCubit extends Cubit<UserState> {
 
   Future<void> rejectOffer(String requestId) async {
     try {
-      await firestore
-          .collection("User")
-          .doc(userId)
-          .collection("Requests")
-          .doc(requestId)
-          .update({"status": "rejected"});
-
-          final requestDoc = await firestore
+      final requestDoc = await firestore
           .collection("User")
           .doc(userId)
           .collection("Requests")
           .doc(requestId)
           .get();
 
-      final String brokerId = requestDoc["brokerId"] as String;
-       await firestore
-          .collection("Broker")
-          .doc(brokerId)
-          .collection("IncomingRequests")
-          .doc(requestId)
-          .update({"status": "rejected"});
+      final data = requestDoc.data() ?? {};
+      final String brokerId = (data["brokerId"] ?? data["broker_id"] ?? "").toString();
+      final String orderNo = (data["orderNo"] ?? requestId).toString();
 
-     
+      final updatePayload = {
+        "status": "rejected",
+        "rejected_at": FieldValue.serverTimestamp(),
+        "updated_at": FieldValue.serverTimestamp(),
+      };
+
+      await firestore
+          .collection("User")
+          .doc(userId)
+          .collection("Requests")
+          .doc(requestId)
+          .update(updatePayload);
+
+      if (brokerId.isNotEmpty) {
+        await firestore
+            .collection("Broker")
+            .doc(brokerId)
+            .collection("IncomingRequests")
+            .doc(requestId)
+            .update(updatePayload);
+
+        // Notify Broker of quote rejection
+        try {
+          final String notifId = "quote_rej_${requestId}_$userId";
+          await firestore
+              .collection("Broker")
+              .doc(brokerId)
+              .collection("Notifications")
+              .doc(notifId)
+              .set({
+                'id': notifId,
+                'broker_id': brokerId,
+                'type': 'quote_rejected',
+                'title': 'Quote Declined',
+                'body': 'Shipper $userName has declined your quote for Order #$orderNo.',
+                'order_id': requestId,
+                'order_no': orderNo,
+                'user_uid': userId,
+                'user_name': userName,
+                'timestamp': FieldValue.serverTimestamp(),
+                'is_read': false,
+              }, SetOptions(merge: true));
+        } catch (_) {}
+      }
+
       if (!isClosed) {
         emit(UserLoadedState(userName, userId));
       }
