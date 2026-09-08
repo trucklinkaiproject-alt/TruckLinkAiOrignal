@@ -56,10 +56,11 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
             final bool hasDriverGps = driverLat != null && driverLng != null && (driverLat != 0.0 || driverLng != 0.0);
 
             // Pickup & Drop coordinates if available, otherwise fallback to reasonable regional defaults
-            final double pLat = (order["pickup_lat"] ?? order["pickupLatitude"] as num?)?.toDouble() ?? 33.6844;
-            final double pLng = (order["pickup_lng"] ?? order["pickupLongitude"] as num?)?.toDouble() ?? 73.0479;
-            final double dLat = (order["drop_lat"] ?? order["dropLatitude"] as num?)?.toDouble() ?? 31.5204;
-            final double dLng = (order["drop_lng"] ?? order["dropLongitude"] as num?)?.toDouble() ?? 74.3587;
+            final double pLat = (order["pickup_lat"] ?? order["pickupLatitude"] ?? order["pickupLat"] as num?)?.toDouble() ?? 33.6844;
+            final double pLng = (order["pickup_lng"] ?? order["pickupLongitude"] ?? order["pickupLng"] as num?)?.toDouble() ?? 73.0479;
+            final double dLat = (order["drop_lat"] ?? order["dropLatitude"] ?? order["dropLat"] as num?)?.toDouble() ?? 31.5204;
+            final double dLng = (order["drop_lng"] ?? order["dropLongitude"] ?? order["dropLng"] as num?)?.toDouble() ?? 74.3587;
+
 
             final LatLng driverLocation = hasDriverGps ? LatLng(driverLat, driverLng) : LatLng(pLat, pLng);
             final LatLng pickupLocation = LatLng(pLat, pLng);
@@ -161,17 +162,30 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
                               mapController: _mapController,
                               options: MapOptions(
                                 initialCenter: driverLocation,
-                                initialZoom: 13,
+                                initialZoom: 13.0,
+                                minZoom: 4.5,
+                                maxZoom: 18.5,
+                                cameraConstraint: const CameraConstraint.unconstrained(),
+                                interactionOptions: const InteractionOptions(
+                                  flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+                                ),
                               ),
                               children: [
                                 TileLayer(
                                   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                                   userAgentPackageName: "com.trucklinkai.app",
                                   maxZoom: 19,
+                                  minZoom: 4,
+                                  keepBuffer: 1,
+                                  panBuffer: 0,
+                                  errorTileCallback: (tile, error, stackTrace) {
+                                    debugPrint("Tracking tile error: $error");
+                                  },
                                 ),
                                 const SimpleAttributionWidget(
                                   source: Text('© OpenStreetMap contributors'),
                                 ),
+
                                 PolylineLayer(
                                   polylines: [
                                     Polyline(
@@ -264,19 +278,52 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
                                 ),
                               ],
                             ),
-                            // Map Control Floating Button
+                            // Map Control Floating Buttons (Zoom & Recenter)
                             Positioned(
                               right: 12,
                               bottom: 12,
-                              child: FloatingActionButton.small(
-                                heroTag: "recenter_btn",
-                                backgroundColor: Colors.white,
-                                foregroundColor: Appcolors.primaryBlue,
-                                elevation: 4,
-                                onPressed: () {
-                                  _mapController.move(hasDriverGps && !isCompleted ? driverLocation : pickupLocation, 14);
-                                },
-                                child: const Icon(Icons.my_location_rounded),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  FloatingActionButton.small(
+                                    heroTag: "tracking_zoom_in_btn",
+                                    backgroundColor: Colors.white,
+                                    foregroundColor: Appcolors.primaryBlue,
+                                    elevation: 3,
+                                    onPressed: () {
+                                      final currentZoom = _mapController.camera.zoom;
+                                      if (currentZoom < 18.5) {
+                                        _mapController.move(_mapController.camera.center, (currentZoom + 1.0).clamp(4.5, 18.5));
+                                      }
+                                    },
+                                    child: const Icon(Icons.add, size: 18),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  FloatingActionButton.small(
+                                    heroTag: "tracking_zoom_out_btn",
+                                    backgroundColor: Colors.white,
+                                    foregroundColor: Appcolors.primaryBlue,
+                                    elevation: 3,
+                                    onPressed: () {
+                                      final currentZoom = _mapController.camera.zoom;
+                                      if (currentZoom > 4.5) {
+                                        _mapController.move(_mapController.camera.center, (currentZoom - 1.0).clamp(4.5, 18.5));
+                                      }
+                                    },
+                                    child: const Icon(Icons.remove, size: 18),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  FloatingActionButton.small(
+                                    heroTag: "recenter_btn",
+                                    backgroundColor: Colors.white,
+                                    foregroundColor: Appcolors.primaryBlue,
+                                    elevation: 4,
+                                    onPressed: () {
+                                      _mapController.move(hasDriverGps && !isCompleted ? driverLocation : pickupLocation, 14);
+                                    },
+                                    child: const Icon(Icons.my_location_rounded),
+                                  ),
+                                ],
                               ),
                             ),
                             // Real-time GPS status tag (hidden once completed)

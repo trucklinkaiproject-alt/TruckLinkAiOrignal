@@ -23,8 +23,12 @@ class CreateReqCubit extends Cubit<CreateReqState> {
     String vehicleType,
     String additionalInfo,
     int weight,
-    int quantity,
-  ) async {
+    int quantity, {
+    double pickupLat = 0.0,
+    double pickupLng = 0.0,
+    double dropLat = 0.0,
+    double dropLng = 0.0,
+  }) async {
     try {
       emit(CreateReqLoadingState());
       await _firestore.collection("AppData").doc("appVariables").get().then((
@@ -50,11 +54,16 @@ class CreateReqCubit extends Cubit<CreateReqState> {
         quantity: quantity,
         orderId: orderId,
         orderNo: orderNo,
+        pickupLat: pickupLat,
+        pickupLng: pickupLng,
+        dropLat: dropLat,
+        dropLng: dropLng,
         status: orderStatus,
         date: DateFormat('dd-MM-yyyy, hh:mm a').format(DateTime.now()),
       );
       // If the request is successful, emit the success state
       emit(CreateReqSuccessState("Request created successfully!"));
+
       await _firestore.collection("AppData").doc("appVariables").update({
         'orderNo': (int.parse(orderNo) + 1)
             .toString(), // Increment order number for next request

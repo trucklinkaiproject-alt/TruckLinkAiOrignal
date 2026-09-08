@@ -1,30 +1,21 @@
-// // This is a basic Flutter widget test.
-// //
-// // To perform an interaction with a widget in your test, use the WidgetTester
-// // utility in the flutter_test package. For example, you can send tap and scroll
-// // gestures. You can also use WidgetTester to find child widgets in the widget
-// // tree, read text, and verify that the values of widget properties are correct.
+import 'package:flutter_test/flutter_test.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:trucklinkai_orignal/Features/User%20Module/Models/locationModel.dart';
 
-// import 'package:flutter/material.dart';
-// import 'package:flutter_test/flutter_test.dart';
+void main() {
+  test('LocationModel and LatLng instantiation smoke test', () {
+    const latLng = LatLng(34.1688, 73.2215);
+    expect(latLng.latitude, 34.1688);
+    expect(latLng.longitude, 73.2215);
 
-// import 'package:trucklinkai_orignal/main.dart';
+    final loc = LocationModel(
+      city: 'Islamabad',
+      address: 'Islamabad, Pakistan',
+      latitude: latLng.latitude,
+      longitude: latLng.longitude,
+    );
 
-// void main() {
-//   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-//     // Build our app and trigger a frame.
-//     await tester.pumpWidget(const MyApp());
-
-//     // Verify that our counter starts at 0.
-//     expect(find.text('0'), findsOneWidget);
-//     expect(find.text('1'), findsNothing);
-
-//     // Tap the '+' icon and trigger a frame.
-//     await tester.tap(find.byIcon(Icons.add));
-//     await tester.pump();
-
-//     // Verify that our counter has incremented.
-//     expect(find.text('0'), findsNothing);
-//     expect(find.text('1'), findsOneWidget);
-//   });
-// }
+    expect(loc.city, 'Islamabad');
+    expect(loc.latitude, 34.1688);
+  });
+}

@@ -395,10 +395,11 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
       }
 
       // 5. Extract pickup/drop coordinates if present
-      double? pickupLat = (offer['pickup_lat'] ?? offer['pickupLatitude']) as double?;
-      double? pickupLng = (offer['pickup_lng'] ?? offer['pickupLongitude']) as double?;
-      double? dropLat = (offer['drop_lat'] ?? offer['dropLatitude']) as double?;
-      double? dropLng = (offer['drop_lng'] ?? offer['dropLongitude']) as double?;
+      final double? pickupLat = (offer['pickup_lat'] ?? offer['pickupLatitude'] ?? offer['pickupLat'] as num?)?.toDouble();
+      final double? pickupLng = (offer['pickup_lng'] ?? offer['pickupLongitude'] ?? offer['pickupLng'] as num?)?.toDouble();
+      final double? dropLat = (offer['drop_lat'] ?? offer['dropLatitude'] ?? offer['dropLat'] as num?)?.toDouble();
+      final double? dropLng = (offer['drop_lng'] ?? offer['dropLongitude'] ?? offer['dropLng'] as num?)?.toDouble();
+
 
       // 6. Start Real GPS Live Tracking
       await DriverLocationService().startTracking(

@@ -368,11 +368,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
+import 'package:trucklinkai_orignal/Features/User%20Module/Models/locationModel.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/Pages/brokerselectionpage.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/Pages/mapscreenpage.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/bloc/CreateReqBloc/createReqcubit.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/bloc/CreateReqBloc/createReqstate.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/bloc/userBloc/usercubit.dart';
+
 
 class CreateOrderPage extends StatefulWidget {
   const CreateOrderPage({super.key});
@@ -474,8 +476,10 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
                   _LocationCard(
                     icon: Icons.trip_origin,
                     color: Appcolors.primaryBlue,
-                    city: pickupCity.isEmpty ? "City" : pickupCity,
-                    address: pickupComp.isEmpty ? "Street" : pickupComp,
+                    city: pickupCity.isEmpty ? "Select Pickup City" : pickupCity,
+                    address: pickupComp.isEmpty ? "Tap to search or pick exact map location" : pickupComp,
+                    latitude: pickupLat != 0.0 ? pickupLat : null,
+                    longitude: pickupLng != 0.0 ? pickupLng : null,
                     onTap: () async {
                       final result = await Navigator.push(
                         context,
@@ -484,11 +488,10 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
                         ),
                       );
 
-                      if (result != null) {
+                      if (result is LocationModel) {
                         setState(() {
                           pickupCity = result.city;
                           pickupComp = result.address;
-
                           pickupLat = result.latitude;
                           pickupLng = result.longitude;
                         });
@@ -504,8 +507,10 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
                   _LocationCard(
                     icon: Icons.location_on,
                     color: Appcolors.secondaryPurple,
-                    city: dropCity.isEmpty ? "City" : dropCity,
-                    address: dropComp.isEmpty ? "Street" : dropComp,
+                    city: dropCity.isEmpty ? "Select Drop City" : dropCity,
+                    address: dropComp.isEmpty ? "Tap to search or pick exact map location" : dropComp,
+                    latitude: dropLat != 0.0 ? dropLat : null,
+                    longitude: dropLng != 0.0 ? dropLng : null,
                     onTap: () async {
                       final result = await Navigator.push(
                         context,
@@ -514,17 +519,17 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
                         ),
                       );
 
-                      if (result != null) {
+                      if (result is LocationModel) {
                         setState(() {
                           dropCity = result.city;
                           dropComp = result.address;
-
                           dropLat = result.latitude;
                           dropLng = result.longitude;
                         });
                       }
                     },
                   ),
+
 
                   SizedBox(height: isMobile ? 24 : 30),
 
@@ -787,6 +792,10 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
                                               quantityController.text,
                                             ) ??
                                             0,
+                                        pickupLat: pickupLat,
+                                        pickupLng: pickupLng,
+                                        dropLat: dropLat,
+                                        dropLng: dropLng,
                                       );
 
                                   if (!mounted) return;
@@ -824,7 +833,7 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
                     },
                   ),
 
-                  SizedBox(height: isMobile ? 20 : 26),
+                  const SizedBox(height: 24),
                 ],
               ),
             );
@@ -863,6 +872,8 @@ class _LocationCard extends StatelessWidget {
   final Color color;
   final String city;
   final String address;
+  final double? latitude;
+  final double? longitude;
   final VoidCallback onTap;
 
   const _LocationCard({
@@ -870,11 +881,18 @@ class _LocationCard extends StatelessWidget {
     required this.color,
     required this.city,
     required this.address,
+    this.latitude,
+    this.longitude,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final bool hasCoordinates = latitude != null &&
+        longitude != null &&
+        latitude != 0.0 &&
+        longitude != 0.0;
+
     return InkWell(
       borderRadius: BorderRadius.circular(16),
       onTap: onTap,
@@ -895,13 +913,13 @@ class _LocationCard extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 38,
-              height: 38,
+              width: 40,
+              height: 40,
               decoration: BoxDecoration(
                 color: color.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(11),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: color, size: 19),
+              child: Icon(icon, color: color, size: 20),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -922,9 +940,28 @@ class _LocationCard extends StatelessWidget {
                   Text(
                     address,
                     overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
+                    maxLines: 2,
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
+                  if (hasCoordinates) ...[
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        "${latitude!.toStringAsFixed(6)}, ${longitude!.toStringAsFixed(6)}",
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
+                          color: color,
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

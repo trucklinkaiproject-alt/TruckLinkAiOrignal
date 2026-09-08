@@ -125,16 +125,21 @@ class BrokerAssignDriverCubit extends Cubit<BrokerAssignDriverState> {
         'created_at': FieldValue.serverTimestamp(),
         // Complete Order Details Snapshot (PART 19)
         'user_uid': userUid,
-        'pickup_city': orderData['pickupCity'] ?? '',
-        'drop_city': orderData['dropCity'] ?? '',
-        'pickup_comp': orderData['pickupComp'] ?? '',
-        'drop_comp': orderData['dropComp'] ?? '',
-        'item_type': orderData['itemType'] ?? '',
+        'pickup_city': orderData['pickupCity'] ?? orderData['pickup_city'] ?? '',
+        'drop_city': orderData['dropCity'] ?? orderData['drop_city'] ?? '',
+        'pickup_comp': orderData['pickupComp'] ?? orderData['pickup_comp'] ?? '',
+        'drop_comp': orderData['dropComp'] ?? orderData['drop_comp'] ?? '',
+        'pickup_lat': (orderData['pickup_lat'] ?? orderData['pickupLatitude'] ?? orderData['pickupLat'] as num?)?.toDouble() ?? 0.0,
+        'pickup_lng': (orderData['pickup_lng'] ?? orderData['pickupLongitude'] ?? orderData['pickupLng'] as num?)?.toDouble() ?? 0.0,
+        'drop_lat': (orderData['drop_lat'] ?? orderData['dropLatitude'] ?? orderData['dropLat'] as num?)?.toDouble() ?? 0.0,
+        'drop_lng': (orderData['drop_lng'] ?? orderData['dropLongitude'] ?? orderData['dropLng'] as num?)?.toDouble() ?? 0.0,
+        'item_type': orderData['itemType'] ?? orderData['item_type'] ?? '',
         'weight': orderData['weight'] ?? 0,
         'quantity': orderData['quantity'] ?? 0,
-        'additional_info': orderData['additionalInfo'] ?? '',
+        'additional_info': orderData['additionalInfo'] ?? orderData['additional_info'] ?? '',
         'date': orderData['date'] ?? '',
       };
+
 
       // Write Offer under Orders/{orderId}/DriverOffers/{offerId}
       await _firestore
