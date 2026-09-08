@@ -6,38 +6,35 @@ echo " TruckLink AI - Flutter Web Vercel Build "
 echo "========================================="
 
 FLUTTER_VERSION="3.38.7"
-FLUTTER_TAR="flutter_linux_${FLUTTER_VERSION}-stable.tar.xz"
-FLUTTER_URL="https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/${FLUTTER_TAR}"
+FLUTTER_DIR="$HOME/flutter"
 
-echo "Step 1: Checking / Installing Flutter SDK ${FLUTTER_VERSION}..."
+git config --global --add safe.directory "*" || true
 
-if [ ! -d "$HOME/flutter/bin" ]; then
-  echo "Downloading Flutter SDK ${FLUTTER_VERSION} from official archive..."
-  mkdir -p "$HOME"
-  cd "$HOME"
-  curl -fsSL "$FLUTTER_URL" -o "$FLUTTER_TAR"
-  tar -xf "$FLUTTER_TAR"
-  rm -f "$FLUTTER_TAR"
-  cd - > /dev/null
+if [ ! -d "$FLUTTER_DIR/bin" ]; then
+  echo "Cloning official Flutter SDK version ${FLUTTER_VERSION}..."
+  git clone -b "${FLUTTER_VERSION}" --depth 1 https://github.com/flutter/flutter.git "$FLUTTER_DIR"
 else
-  echo "Flutter SDK directory found in cache: $HOME/flutter"
+  echo "Flutter SDK found in cache: $FLUTTER_DIR"
 fi
 
-export PATH="$PATH:$HOME/flutter/bin"
+export PATH="$FLUTTER_DIR/bin:$PATH"
 
-echo "Step 2: Verifying Flutter installation..."
+echo "Disabling analytics..."
+flutter config --no-analytics
+
+echo "Verifying Flutter version..."
 flutter --version
 
-echo "Step 3: Enabling Web Support..."
+echo "Enabling Flutter Web..."
 flutter config --enable-web
 
-echo "Step 4: Installing dependencies..."
+echo "Fetching Flutter dependencies..."
 flutter pub get
 
-echo "Step 5: Building Flutter Web release bundle..."
-flutter build web --release
+echo "Building Flutter Web release..."
+flutter build web --release --no-wasm-dry-run
 
-echo "Step 6: Verifying build artifact..."
+echo "Verifying build output..."
 if [ ! -f "build/web/index.html" ]; then
   echo "ERROR: build/web/index.html was not generated!"
   exit 1
