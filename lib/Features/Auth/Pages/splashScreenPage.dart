@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
+import 'package:trucklinkai_orignal/Core/Services/fcmTokenService.dart';
+import 'package:trucklinkai_orignal/Core/Services/notificationNavigationService.dart';
 import 'package:trucklinkai_orignal/Features/Auth/Pages/roleSelectionPage.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/Pages/brokernavbar.dart';
 import 'package:trucklinkai_orignal/Features/Transporter%20Module/Pages/transporterHomePage.dart';
@@ -18,7 +20,6 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
-
   @override
   void initState() {
     super.initState();
@@ -26,76 +27,123 @@ class _SplashPageState extends State<SplashPage> {
   }
 
   Future<void> checkUser() async {
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      final splashDelay = Future.delayed(const Duration(milliseconds: 1500));
 
-    final user = FirebaseAuth.instance.currentUser;
+      // 1. Retrieve existing authenticated user from Firebase Auth persistence
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        user = await FirebaseAuth.instance
+            .authStateChanges()
+            .first
+            .timeout(
+              const Duration(seconds: 2),
+              onTimeout: () => FirebaseAuth.instance.currentUser,
+            );
+      }
 
-    if (user == null) {
+      await splashDelay;
+      if (!mounted) return;
+
+      if (user == null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const RoleSelectionPage(),
+          ),
+        );
+        return;
+      }
+
+      // Check email verification if required
+      await user.reload();
+      final refreshedUser = FirebaseAuth.instance.currentUser;
+      if (refreshedUser != null && !refreshedUser.emailVerified) {
+        await FirebaseAuth.instance.signOut();
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const LogInPage(),
+            ),
+          );
+        }
+        return;
+      }
+
+      final uid = user.uid;
+
+      // 2. Query Firestore role collections in parallel to quickly determine role
+      final results = await Future.wait([
+        FirebaseFirestore.instance.collection("User").doc(uid).get(),
+        FirebaseFirestore.instance.collection("Broker").doc(uid).get(),
+        FirebaseFirestore.instance.collection("Driver").doc(uid).get(),
+      ]);
+
+      final userDoc = results[0];
+      final brokerDoc = results[1];
+      final driverDoc = results[2];
+
+      if (!mounted) return;
+
+      if (userDoc.exists) {
+        FcmTokenService().registerToken(uid: uid, role: 'User');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const ShipperBottomNavBar(),
+          ),
+        ).then((_) {
+          NotificationNavigationService().processPendingNotification();
+        });
+        return;
+      }
+
+      if (brokerDoc.exists) {
+        FcmTokenService().registerToken(uid: uid, role: 'Broker');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const BrokerBottomNavBar(),
+          ),
+        ).then((_) {
+          NotificationNavigationService().processPendingNotification();
+        });
+        return;
+      }
+
+      if (driverDoc.exists) {
+        FcmTokenService().registerToken(uid: uid, role: 'Driver');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const TransporterHomePage(),
+          ),
+        ).then((_) {
+          NotificationNavigationService().processPendingNotification();
+        });
+        return;
+      }
+
+      // If auth account has no associated role document, sign out and go to RoleSelectionPage
+      await FirebaseAuth.instance.signOut();
+      if (!mounted) return;
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (_) => const RoleSelectionPage(),
         ),
       );
-      return;
-    }
-
-    final uid = user.uid;
-
-    final userDoc = await FirebaseFirestore.instance
-        .collection("User")
-        .doc(uid)
-        .get();
-
-    if (userDoc.exists) {
+    } catch (e) {
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => const ShipperBottomNavBar(),
+          builder: (_) => const RoleSelectionPage(),
         ),
       );
-      return;
     }
-
-    final brokerDoc = await FirebaseFirestore.instance
-        .collection("Broker")
-        .doc(uid)
-        .get();
-
-    if (brokerDoc.exists) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const BrokerBottomNavBar(),
-        ),
-      );
-      return;
-    }
-
-
-    final driverDoc = await FirebaseFirestore.instance
-        .collection("Driver")
-        .doc(uid)
-        .get();
-
-    if (driverDoc.exists) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const TransporterHomePage(),
-        ),
-      );
-      return;
-    }
-
-    await FirebaseAuth.instance.signOut();
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const LogInPage(),
-      ),
-    );
   }
 
   @override

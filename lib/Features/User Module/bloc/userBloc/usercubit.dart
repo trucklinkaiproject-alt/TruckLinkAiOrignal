@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:trucklinkai_orignal/Core/Services/notificationService.dart';
 import 'package:trucklinkai_orignal/Features/User Module/bloc/userBloc/userstate.dart';
 
 class UserCubit extends Cubit<UserState> {
@@ -140,25 +141,22 @@ class UserCubit extends Cubit<UserState> {
         // Notify Broker of quote acceptance
         try {
           final String notifId = "quote_acc_${requestId}_$userId";
-          await firestore
-              .collection("Broker")
-              .doc(brokerId)
-              .collection("Notifications")
-              .doc(notifId)
-              .set({
-                'id': notifId,
-                'broker_id': brokerId,
-                'type': 'quote_accepted',
-                'title': 'Quote Accepted',
-                'body': 'Shipper $userName has accepted your quote of PKR ${agreedFare.toStringAsFixed(0)} for Order #$orderNo.',
-                'order_id': requestId,
-                'order_no': orderNo,
-                'customer_fare': agreedFare,
-                'user_uid': userId,
-                'user_name': userName,
-                'timestamp': FieldValue.serverTimestamp(),
-                'is_read': false,
-              }, SetOptions(merge: true));
+          await NotificationService().sendNotification(
+            targetCollection: 'Broker',
+            recipientId: brokerId,
+            type: NotificationTypes.requestAccepted,
+            title: 'Quote Accepted',
+            body: 'Shipper $userName has accepted your quote of PKR ${agreedFare.toStringAsFixed(0)} for Order #$orderNo.',
+            notificationId: notifId,
+            orderId: requestId,
+            orderNo: orderNo,
+            senderId: userId,
+            senderName: userName,
+            receiverRole: 'Broker',
+            additionalData: {
+              'customer_fare': agreedFare,
+            },
+          );
         } catch (_) {}
       }
 
@@ -209,24 +207,19 @@ class UserCubit extends Cubit<UserState> {
         // Notify Broker of quote rejection
         try {
           final String notifId = "quote_rej_${requestId}_$userId";
-          await firestore
-              .collection("Broker")
-              .doc(brokerId)
-              .collection("Notifications")
-              .doc(notifId)
-              .set({
-                'id': notifId,
-                'broker_id': brokerId,
-                'type': 'quote_rejected',
-                'title': 'Quote Declined',
-                'body': 'Shipper $userName has declined your quote for Order #$orderNo.',
-                'order_id': requestId,
-                'order_no': orderNo,
-                'user_uid': userId,
-                'user_name': userName,
-                'timestamp': FieldValue.serverTimestamp(),
-                'is_read': false,
-              }, SetOptions(merge: true));
+          await NotificationService().sendNotification(
+            targetCollection: 'Broker',
+            recipientId: brokerId,
+            type: NotificationTypes.requestRejected,
+            title: 'Quote Declined',
+            body: 'Shipper $userName has declined your quote for Order #$orderNo.',
+            notificationId: notifId,
+            orderId: requestId,
+            orderNo: orderNo,
+            senderId: userId,
+            senderName: userName,
+            receiverRole: 'Broker',
+          );
         } catch (_) {}
       }
 

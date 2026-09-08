@@ -571,6 +571,8 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
                 chatId: chatId,
                 receiverId: participantId,
                 receiverName: participantName,
+                brokerId: participantId,
+                brokerName: participantName,
                 receiverRole: participantRole,
                 orderId: orderId,
                 brokerAvatar: avatarUrl,

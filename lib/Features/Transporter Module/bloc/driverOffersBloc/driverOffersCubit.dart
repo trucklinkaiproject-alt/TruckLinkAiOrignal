@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:trucklinkai_orignal/Core/Services/notificationService.dart';
 import 'package:trucklinkai_orignal/Features/Transporter%20Module/Services/driverLocationService.dart';
 import 'package:trucklinkai_orignal/Features/Transporter Module/bloc/driverOffersBloc/driverOffersState.dart';
 
@@ -132,22 +133,19 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
         // Notify Broker
         final String notifId = "driver_acc_${orderId}_$driverId";
         try {
-          await _firestore
-              .collection("Broker")
-              .doc(brokerId)
-              .collection("Notifications")
-              .doc(notifId)
-              .set({
-            'id': notifId,
-            'type': 'driver_accepted',
-            'title': 'Driver Accepted Assignment',
-            'body': '$driverName accepted the assignment for Order #$orderNo.',
-            'order_id': orderId,
-            'order_no': orderNo,
-            'driver_id': driverId,
-            'timestamp': FieldValue.serverTimestamp(),
-            'is_read': false,
-          }, SetOptions(merge: true));
+          await NotificationService().sendNotification(
+            targetCollection: 'Broker',
+            recipientId: brokerId,
+            type: NotificationTypes.driverAccepted,
+            title: 'Driver Accepted Assignment',
+            body: '$driverName accepted the assignment for Order #$orderNo.',
+            notificationId: notifId,
+            orderId: orderId,
+            orderNo: orderNo,
+            senderId: driverId,
+            senderName: driverName,
+            receiverRole: 'Broker',
+          );
         } catch (_) {}
       }
 
@@ -165,23 +163,19 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
         // Notify User
         final String notifId = "driver_acc_user_${orderId}_$driverId";
         try {
-          await _firestore
-              .collection("User")
-              .doc(userUid)
-              .collection("Notifications")
-              .doc(notifId)
-              .set({
-            'id': notifId,
-            'user_uid': userUid,
-            'type': 'driver_accepted',
-            'title': 'Driver Confirmed',
-            'body': '$driverName has accepted your shipment ride for Order #$orderNo.',
-            'order_id': orderId,
-            'order_no': orderNo,
-            'driver_id': driverId,
-            'timestamp': FieldValue.serverTimestamp(),
-            'is_read': false,
-          }, SetOptions(merge: true));
+          await NotificationService().sendNotification(
+            targetCollection: 'User',
+            recipientId: userUid,
+            type: NotificationTypes.driverAccepted,
+            title: 'Driver Confirmed',
+            body: '$driverName has accepted your shipment ride for Order #$orderNo.',
+            notificationId: notifId,
+            orderId: orderId,
+            orderNo: orderNo,
+            senderId: driverId,
+            senderName: driverName,
+            receiverRole: 'User',
+          );
         } catch (_) {}
       }
 
@@ -254,24 +248,19 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
         try {
           final String notifId = "driver_rej_${orderId}_$driverId";
           final String driverName = (offer['driver_name'] ?? 'Driver').toString();
-          await _firestore
-              .collection("Broker")
-              .doc(brokerId)
-              .collection("Notifications")
-              .doc(notifId)
-              .set({
-            'id': notifId,
-            'broker_id': brokerId,
-            'type': 'driver_rejected',
-            'title': 'Driver Declined Offer',
-            'body': '$driverName declined the assignment for Order #$orderNo. The shipment is now ready for re-assignment.',
-            'order_id': orderId,
-            'order_no': orderNo,
-            'driver_id': driverId,
-            'driver_name': driverName,
-            'timestamp': FieldValue.serverTimestamp(),
-            'is_read': false,
-          }, SetOptions(merge: true));
+          await NotificationService().sendNotification(
+            targetCollection: 'Broker',
+            recipientId: brokerId,
+            type: NotificationTypes.driverRejected,
+            title: 'Driver Declined Offer',
+            body: '$driverName declined the assignment for Order #$orderNo. The shipment is now ready for re-assignment.',
+            notificationId: notifId,
+            orderId: orderId,
+            orderNo: orderNo,
+            senderId: driverId,
+            senderName: driverName,
+            receiverRole: 'Broker',
+          );
         } catch (_) {}
       }
 
@@ -359,22 +348,19 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
         // Notify Broker
         final String notifId = "ride_start_${orderId}_$driverId";
         try {
-          await _firestore
-              .collection("Broker")
-              .doc(brokerId)
-              .collection("Notifications")
-              .doc(notifId)
-              .set({
-            'id': notifId,
-            'type': 'ride_started',
-            'title': 'Ride In Transit',
-            'body': '$driverName has started the ride for Order #$orderNo and is travelling towards pickup.',
-            'order_id': orderId,
-            'order_no': orderNo,
-            'driver_id': driverId,
-            'timestamp': FieldValue.serverTimestamp(),
-            'is_read': false,
-          }, SetOptions(merge: true));
+          await NotificationService().sendNotification(
+            targetCollection: 'Broker',
+            recipientId: brokerId,
+            type: NotificationTypes.tripStarted,
+            title: 'Ride In Transit',
+            body: '$driverName has started the ride for Order #$orderNo and is travelling towards pickup.',
+            notificationId: notifId,
+            orderId: orderId,
+            orderNo: orderNo,
+            senderId: driverId,
+            senderName: driverName,
+            receiverRole: 'Broker',
+          );
         } catch (_) {}
       }
 
@@ -392,23 +378,19 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
         // Notify User
         final String notifId = "ride_start_user_${orderId}_$driverId";
         try {
-          await _firestore
-              .collection("User")
-              .doc(userUid)
-              .collection("Notifications")
-              .doc(notifId)
-              .set({
-            'id': notifId,
-            'user_uid': userUid,
-            'type': 'ride_started',
-            'title': 'Ride In Transit',
-            'body': 'Driver $driverName has started the ride for Order #$orderNo. Real-time GPS tracking is now live.',
-            'order_id': orderId,
-            'order_no': orderNo,
-            'driver_id': driverId,
-            'timestamp': FieldValue.serverTimestamp(),
-            'is_read': false,
-          }, SetOptions(merge: true));
+          await NotificationService().sendNotification(
+            targetCollection: 'User',
+            recipientId: userUid,
+            type: NotificationTypes.tripStarted,
+            title: 'Ride In Transit',
+            body: 'Driver $driverName has started the ride for Order #$orderNo. Real-time GPS tracking is now live.',
+            notificationId: notifId,
+            orderId: orderId,
+            orderNo: orderNo,
+            senderId: driverId,
+            senderName: driverName,
+            receiverRole: 'User',
+          );
         } catch (_) {}
       }
 
@@ -481,22 +463,19 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
         // Notify Broker
         final String notifId = "cargo_pk_${orderId}_$driverId";
         try {
-          await _firestore
-              .collection("Broker")
-              .doc(brokerId)
-              .collection("Notifications")
-              .doc(notifId)
-              .set({
-            'id': notifId,
-            'type': 'cargo_picked_up',
-            'title': 'Cargo Collected',
-            'body': '$driverName has loaded the cargo for Order #$orderNo and is heading towards the drop location.',
-            'order_id': orderId,
-            'order_no': orderNo,
-            'driver_id': driverId,
-            'timestamp': FieldValue.serverTimestamp(),
-            'is_read': false,
-          }, SetOptions(merge: true));
+          await NotificationService().sendNotification(
+            targetCollection: 'Broker',
+            recipientId: brokerId,
+            type: NotificationTypes.tripStarted,
+            title: 'Cargo Collected',
+            body: '$driverName has loaded the cargo for Order #$orderNo and is heading towards the drop location.',
+            notificationId: notifId,
+            orderId: orderId,
+            orderNo: orderNo,
+            senderId: driverId,
+            senderName: driverName,
+            receiverRole: 'Broker',
+          );
         } catch (_) {}
       }
 
@@ -513,23 +492,19 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
         // Notify User
         final String notifId = "cargo_pk_usr_${orderId}_$driverId";
         try {
-          await _firestore
-              .collection("User")
-              .doc(userUid)
-              .collection("Notifications")
-              .doc(notifId)
-              .set({
-            'id': notifId,
-            'user_uid': userUid,
-            'type': 'cargo_picked_up',
-            'title': 'Cargo On The Way',
-            'body': 'Your cargo for Order #$orderNo has been collected and is in transit to destination.',
-            'order_id': orderId,
-            'order_no': orderNo,
-            'driver_id': driverId,
-            'timestamp': FieldValue.serverTimestamp(),
-            'is_read': false,
-          }, SetOptions(merge: true));
+          await NotificationService().sendNotification(
+            targetCollection: 'User',
+            recipientId: userUid,
+            type: NotificationTypes.tripStarted,
+            title: 'Cargo On The Way',
+            body: 'Your cargo for Order #$orderNo has been collected and is in transit to destination.',
+            notificationId: notifId,
+            orderId: orderId,
+            orderNo: orderNo,
+            senderId: driverId,
+            senderName: driverName,
+            receiverRole: 'User',
+          );
         } catch (_) {}
       }
 
@@ -629,26 +604,6 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
             .doc(orderId)
             .update(updateData);
 
-        // Notify Broker
-        final String notifId = "comp_broker_${orderId}_$driverId";
-        try {
-          await _firestore
-              .collection("Broker")
-              .doc(brokerId)
-              .collection("Notifications")
-              .doc(notifId)
-              .set({
-            'id': notifId,
-            'type': 'order_completed',
-            'title': 'Order Completed',
-            'body': '$driverName has successfully completed delivery for Order #$orderNo.',
-            'order_id': orderId,
-            'order_no': orderNo,
-            'driver_id': driverId,
-            'timestamp': FieldValue.serverTimestamp(),
-            'is_read': false,
-          }, SetOptions(merge: true));
-        } catch (_) {}
 
         // Atomically update Broker completion metrics
         try {
@@ -684,6 +639,23 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
         } catch (e) {
           debugPrint("Broker stats update error: $e");
         }
+        // Notify Broker
+        final String notifId = "comp_broker_${orderId}_$driverId";
+        try {
+          await NotificationService().sendNotification(
+            targetCollection: 'Broker',
+            recipientId: brokerId,
+            type: NotificationTypes.tripCompleted,
+            title: 'Order Completed',
+            body: '$driverName has successfully completed delivery for Order #$orderNo.',
+            notificationId: notifId,
+            orderId: orderId,
+            orderNo: orderNo,
+            senderId: driverId,
+            senderName: driverName,
+            receiverRole: 'Broker',
+          );
+        } catch (_) {}
       }
 
       // 6. Update User Requests & notify user
@@ -699,23 +671,19 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
 
         final String notifId = "comp_user_${orderId}_$driverId";
         try {
-          await _firestore
-              .collection("User")
-              .doc(userUid)
-              .collection("Notifications")
-              .doc(notifId)
-              .set({
-            'id': notifId,
-            'user_uid': userUid,
-            'type': 'order_completed',
-            'title': 'Order Delivered & Completed',
-            'body': 'Your shipment for Order #$orderNo has been successfully delivered and completed.',
-            'order_id': orderId,
-            'order_no': orderNo,
-            'driver_id': driverId,
-            'timestamp': FieldValue.serverTimestamp(),
-            'is_read': false,
-          }, SetOptions(merge: true));
+          await NotificationService().sendNotification(
+            targetCollection: 'User',
+            recipientId: userUid,
+            type: NotificationTypes.tripCompleted,
+            title: 'Order Delivered & Completed',
+            body: 'Your shipment for Order #$orderNo has been successfully delivered and completed.',
+            notificationId: notifId,
+            orderId: orderId,
+            orderNo: orderNo,
+            senderId: driverId,
+            senderName: driverName,
+            receiverRole: 'User',
+          );
         } catch (_) {}
       }
 

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:trucklinkai_orignal/Core/Services/notificationService.dart';
 import 'package:trucklinkai_orignal/Features/Broker Module/bloc/brokerAssignDriverBloc/brokerAssignDriverState.dart';
 
 class BrokerAssignDriverCubit extends Cubit<BrokerAssignDriverState> {
@@ -151,6 +152,27 @@ class BrokerAssignDriverCubit extends Cubit<BrokerAssignDriverState> {
           .doc(offerId)
           .set(offerPayload);
 
+      // Notify Driver of assignment
+      try {
+        final String driverNotifId = "driver_offer_${orderId}_$offerId";
+        await NotificationService().sendNotification(
+          targetCollection: 'Driver',
+          recipientId: driverId,
+          type: NotificationTypes.driverAssigned,
+          title: 'New Shipment Assignment',
+          body: 'You have a new shipment assignment for Order #$orderNo. Driver Fare: PKR ${fareAmount.toStringAsFixed(0)}',
+          notificationId: driverNotifId,
+          orderId: orderId,
+          orderNo: orderNo,
+          senderId: brokerId,
+          receiverRole: 'Driver',
+          additionalData: {
+            'driver_fare': fareAmount,
+            'offer_id': offerId,
+          },
+        );
+      } catch (_) {}
+
       final String driverPhone = (driverData['phone'] ?? driverData['driver_phone'] ?? '').toString();
 
       // Update Order Status in Broker/IncomingRequests and User/Requests
@@ -177,25 +199,23 @@ class BrokerAssignDriverCubit extends Cubit<BrokerAssignDriverState> {
       // Broker Notification for driver assignment
       try {
         final String brokerNotifId = "driver_asgn_${orderId}_$driverId";
-        await _firestore
-            .collection("Broker")
-            .doc(brokerId)
-            .collection("Notifications")
-            .doc(brokerNotifId)
-            .set({
-              'id': brokerNotifId,
-              'broker_id': brokerId,
-              'type': 'driver_assigned',
-              'title': 'Driver Assigned',
-              'body': 'Driver $driverName has been assigned to Order #$orderNo. Driver Payment: PKR ${fareAmount.toStringAsFixed(0)}',
-              'order_id': orderId,
-              'order_no': orderNo,
-              'driver_id': driverId,
-              'driver_name': driverName,
-              'driver_fare': fareAmount,
-              'timestamp': FieldValue.serverTimestamp(),
-              'is_read': false,
-            }, SetOptions(merge: true));
+        await NotificationService().sendNotification(
+          targetCollection: 'Broker',
+          recipientId: brokerId,
+          type: NotificationTypes.driverAssigned,
+          title: 'Driver Assigned',
+          body: 'Driver $driverName has been assigned to Order #$orderNo. Driver Payment: PKR ${fareAmount.toStringAsFixed(0)}',
+          notificationId: brokerNotifId,
+          orderId: orderId,
+          orderNo: orderNo,
+          senderId: brokerId,
+          receiverRole: 'Broker',
+          additionalData: {
+            'driver_id': driverId,
+            'driver_name': driverName,
+            'driver_fare': fareAmount,
+          },
+        );
       } catch (_) {}
 
       if (userUid.isNotEmpty) {
@@ -210,25 +230,23 @@ class BrokerAssignDriverCubit extends Cubit<BrokerAssignDriverState> {
 
         try {
           final String notifId = "driver_${orderId}_$driverId";
-          await _firestore
-              .collection("User")
-              .doc(userUid)
-              .collection("Notifications")
-              .doc(notifId)
-              .set({
-                'id': notifId,
-                'user_uid': userUid,
-                'type': 'driver_assigned',
-                'title': 'Driver Assigned',
-                'body': 'A driver has been assigned to your shipment.\n\nDriver: $driverName\nPhone: ${driverPhone.isNotEmpty ? driverPhone : 'N/A'}\nOrder No: #$orderNo',
-                'order_id': orderId,
-                'order_no': orderNo,
-                'driver_id': driverId,
-                'driver_name': driverName,
-                'driver_phone': driverPhone,
-                'timestamp': FieldValue.serverTimestamp(),
-                'is_read': false,
-              }, SetOptions(merge: true));
+          await NotificationService().sendNotification(
+            targetCollection: 'User',
+            recipientId: userUid,
+            type: NotificationTypes.driverAssigned,
+            title: 'Driver Assigned',
+            body: 'A driver has been assigned to your shipment.\n\nDriver: $driverName\nPhone: ${driverPhone.isNotEmpty ? driverPhone : 'N/A'}\nOrder No: #$orderNo',
+            notificationId: notifId,
+            orderId: orderId,
+            orderNo: orderNo,
+            senderId: brokerId,
+            receiverRole: 'User',
+            additionalData: {
+              'driver_id': driverId,
+              'driver_name': driverName,
+              'driver_phone': driverPhone,
+            },
+          );
         } catch (_) {}
       }
 

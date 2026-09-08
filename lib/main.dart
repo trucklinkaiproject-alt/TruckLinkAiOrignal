@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:trucklinkai_orignal/Core/Widgets/noscrollbehaviour.dart';
 import 'package:trucklinkai_orignal/Features/Auth/AuthBloc/authCubit.dart';
@@ -16,12 +18,28 @@ import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerDriverRe
 import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerDriverNetworkBloc/brokerDriverNetworkCubit.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerAssignDriverBloc/brokerAssignDriverCubit.dart';
 import 'package:trucklinkai_orignal/Features/Transporter%20Module/bloc/driverOffersBloc/driverOffersCubit.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:trucklinkai_orignal/Core/Services/notificationNavigationService.dart';
+import 'package:trucklinkai_orignal/Core/Services/pushNotificationService.dart';
 import 'Core/Constants/firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Register top-level background FCM message handler
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
+  // Initialize Push Notification Service (Channels, Local notifications, Permissions)
+  await PushNotificationService().initialize();
+
+  if (kIsWeb) {
+    try {
+      await FirebaseAuth.instance.setPersistence(Persistence.SESSION);
+    } catch (_) {}
+  }
+
   runApp(MultiBlocProvider(
         providers: [
           BlocProvider(create: (context) => AuthCubit()),
@@ -38,7 +56,7 @@ void main() async {
           BlocProvider(create: (context) => BrokerAssignDriverCubit()),
           BlocProvider(create: (context) => DriverOffersCubit()),
         ],
-        child: TruckLinkApp(),
+        child: const TruckLinkApp(),
       ),);
 }
 
@@ -48,6 +66,7 @@ class TruckLinkApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: NotificationNavigationService.navigatorKey,
       scrollBehavior: NoScrollbarBehavior(),
       title: "TruckLink AI",
       debugShowCheckedModeBanner: false,

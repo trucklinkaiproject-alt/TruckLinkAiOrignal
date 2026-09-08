@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:trucklinkai_orignal/Core/Services/notificationService.dart';
 
 class ReviewService {
   static final ReviewService _instance = ReviewService._internal();
@@ -131,26 +132,22 @@ class ReviewService {
 
       // 5. Send real-time notification to Broker
       final String notifId = "notif_brk_rev_${orderId}_$userId";
-      await _firestore
-          .collection("Broker")
-          .doc(brokerId)
-          .collection("Notifications")
-          .doc(notifId)
-          .set({
-        'id': notifId,
-        'type': 'new_review',
-        'title': 'New Broker Review',
-        'body': '$userName rated you $rating stars: "${comment.isNotEmpty ? comment : 'No comment'}"',
-        'subtitle': 'Order #$orderId',
-        'order_id': orderId,
-        'reviewer_id': userId,
-        'reviewer_name': userName,
-        'rating': rating,
-        'comment': comment,
-        'timestamp': FieldValue.serverTimestamp(),
-        'created_at': FieldValue.serverTimestamp(),
-        'is_read': false,
-      }, SetOptions(merge: true));
+      await NotificationService().sendNotification(
+        targetCollection: 'Broker',
+        recipientId: brokerId,
+        type: NotificationTypes.newReview,
+        title: 'New Broker Review',
+        body: '$userName rated you $rating stars: "${comment.isNotEmpty ? comment : 'No comment'}"',
+        notificationId: notifId,
+        orderId: orderId,
+        senderId: userId,
+        senderName: userName,
+        receiverRole: 'Broker',
+        additionalData: {
+          'rating': rating,
+          'comment': comment,
+        },
+      );
 
       return true;
     } catch (e) {
@@ -287,26 +284,22 @@ class ReviewService {
 
       // 5. Send real-time notification to Driver
       final String notifId = "notif_drv_rev_${orderId}_$reviewerId";
-      await _firestore
-          .collection("Driver")
-          .doc(driverId)
-          .collection("Notifications")
-          .doc(notifId)
-          .set({
-        'id': notifId,
-        'type': 'new_review',
-        'title': 'New Driver Review',
-        'body': '$reviewerName (${reviewerRole == 'broker' ? 'Broker' : 'User'}) rated you $rating stars.',
-        'subtitle': 'Order #$orderId',
-        'order_id': orderId,
-        'reviewer_id': reviewerId,
-        'reviewer_name': reviewerName,
-        'rating': rating,
-        'comment': comment,
-        'timestamp': FieldValue.serverTimestamp(),
-        'created_at': FieldValue.serverTimestamp(),
-        'is_read': false,
-      }, SetOptions(merge: true));
+      await NotificationService().sendNotification(
+        targetCollection: 'Driver',
+        recipientId: driverId,
+        type: NotificationTypes.newReview,
+        title: 'New Driver Review',
+        body: '$reviewerName (${reviewerRole == 'broker' ? 'Broker' : 'User'}) rated you $rating stars.',
+        notificationId: notifId,
+        orderId: orderId,
+        senderId: reviewerId,
+        senderName: reviewerName,
+        receiverRole: 'Driver',
+        additionalData: {
+          'rating': rating,
+          'comment': comment,
+        },
+      );
 
       return true;
     } catch (e) {

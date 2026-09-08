@@ -339,7 +339,7 @@ class BuiltyPage extends StatelessWidget {
 
   Future<void> downloadBuiltyPdf() async {
     final pdf = pw.Document();
-    final logoBytes = await rootBundle.load('assets/Images/Trucklink AI.png');
+    final logoBytes = await rootBundle.load('assets/Images/TruckLink AI.png');
 
     final logoImage = pw.MemoryImage(logoBytes.buffer.asUint8List());
 

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:trucklinkai_orignal/Core/Services/notificationService.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerQuoteBloc/brokerQuoteStates.dart';
 
 class BrokerQuoteCubit extends Cubit<BrokerQuoteState> {
@@ -66,29 +67,27 @@ class BrokerQuoteCubit extends Cubit<BrokerQuoteState> {
 
       // 4. Send Real Notification to User
       final notifId = 'broker_offer_$orderId';
-      await FirebaseFirestore.instance
-          .collection("User")
-          .doc(userUid)
-          .collection("Notifications")
-          .doc(notifId)
-          .set({
-        'id': notifId,
-        'title': 'New Quote from $brokerName',
-        'body': '$brokerName has offered PKR ${amount.toStringAsFixed(0)} for Order #$orderId',
-        'subtitle': '$brokerName has offered PKR ${amount.toStringAsFixed(0)} for Order #$orderId',
-        'type': 'broker_offer',
-        'brokerId': brokerId,
-        'brokerName': brokerName,
-        'brokerPhone': brokerPhone,
-        'brokerAvatar': brokerAvatar,
-        'brokerRating': brokerRating,
-        'brokerReviewCount': brokerReviewCount,
-        'brokerOffer': amount,
-        'orderId': orderId,
-        'is_read': false,
-        'created_at': FieldValue.serverTimestamp(),
-        'timestamp': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
+      await NotificationService().sendNotification(
+        targetCollection: 'User',
+        recipientId: userUid,
+        type: NotificationTypes.counterQuote,
+        title: 'New Quote from $brokerName',
+        body: '$brokerName has offered PKR ${amount.toStringAsFixed(0)} for Order #$orderId',
+        notificationId: notifId,
+        orderId: orderId,
+        senderId: brokerId,
+        senderName: brokerName,
+        receiverRole: 'User',
+        additionalData: {
+          'brokerId': brokerId,
+          'brokerName': brokerName,
+          'brokerPhone': brokerPhone,
+          'brokerAvatar': brokerAvatar,
+          'brokerRating': brokerRating,
+          'brokerReviewCount': brokerReviewCount,
+          'brokerOffer': amount,
+        },
+      );
 
       emit(BrokerQuoteSuccess(amount));
     } catch (e) {

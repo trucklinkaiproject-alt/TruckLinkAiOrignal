@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:trucklinkai_orignal/Core/Services/notificationService.dart';
 
 class DriverLocationService {
   static final DriverLocationService _instance = DriverLocationService._internal();
@@ -293,22 +294,18 @@ class DriverLocationService {
 
       // Broker Notification (one-time)
       final String notifId = "pickup_arr_${orderId}_$driverId";
-      await _firestore
-          .collection("Broker")
-          .doc(brokerId)
-          .collection("Notifications")
-          .doc(notifId)
-          .set({
-        'id': notifId,
-        'type': 'driver_at_pickup',
-        'title': 'Driver Arrived at Pickup',
-        'body': 'Assigned Driver has arrived at the pickup location for Order #$orderNo.',
-        'order_id': orderId,
-        'order_no': orderNo,
-        'driver_id': driverId,
-        'timestamp': FieldValue.serverTimestamp(),
-        'is_read': false,
-      }, SetOptions(merge: true));
+      await NotificationService().sendNotification(
+        targetCollection: 'Broker',
+        recipientId: brokerId,
+        type: NotificationTypes.driverAtPickup,
+        title: 'Driver Arrived at Pickup',
+        body: 'Assigned Driver has arrived at the pickup location for Order #$orderNo.',
+        notificationId: notifId,
+        orderId: orderId,
+        orderNo: orderNo,
+        senderId: driverId,
+        receiverRole: 'Broker',
+      );
     }
 
     if (userUid != null && userUid.isNotEmpty) {
@@ -321,23 +318,18 @@ class DriverLocationService {
 
       // User Notification (one-time)
       final String notifId = "pickup_arr_${orderId}_$driverId";
-      await _firestore
-          .collection("User")
-          .doc(userUid)
-          .collection("Notifications")
-          .doc(notifId)
-          .set({
-        'id': notifId,
-        'user_uid': userUid,
-        'type': 'driver_at_pickup',
-        'title': 'Driver Arrived at Pickup',
-        'body': 'Your assigned driver has arrived at the pickup location for Order #$orderNo.',
-        'order_id': orderId,
-        'order_no': orderNo,
-        'driver_id': driverId,
-        'timestamp': FieldValue.serverTimestamp(),
-        'is_read': false,
-      }, SetOptions(merge: true));
+      await NotificationService().sendNotification(
+        targetCollection: 'User',
+        recipientId: userUid,
+        type: NotificationTypes.driverAtPickup,
+        title: 'Driver Arrived at Pickup',
+        body: 'Your assigned driver has arrived at the pickup location for Order #$orderNo.',
+        notificationId: notifId,
+        orderId: orderId,
+        orderNo: orderNo,
+        senderId: driverId,
+        receiverRole: 'User',
+      );
     }
   }
 
@@ -373,22 +365,18 @@ class DriverLocationService {
 
       // Broker Notification
       final String notifId = "drop_arr_${orderId}_$driverId";
-      await _firestore
-          .collection("Broker")
-          .doc(brokerId)
-          .collection("Notifications")
-          .doc(notifId)
-          .set({
-        'id': notifId,
-        'type': 'driver_at_drop',
-        'title': 'Driver Arrived at Drop Location',
-        'body': 'Driver has reached the destination drop location for Order #$orderNo.',
-        'order_id': orderId,
-        'order_no': orderNo,
-        'driver_id': driverId,
-        'timestamp': FieldValue.serverTimestamp(),
-        'is_read': false,
-      }, SetOptions(merge: true));
+      await NotificationService().sendNotification(
+        targetCollection: 'Broker',
+        recipientId: brokerId,
+        type: NotificationTypes.driverAtPickup,
+        title: 'Driver Arrived at Drop Location',
+        body: 'Driver has reached the destination drop location for Order #$orderNo.',
+        notificationId: notifId,
+        orderId: orderId,
+        orderNo: orderNo,
+        senderId: driverId,
+        receiverRole: 'Broker',
+      );
     }
 
     if (userUid != null && userUid.isNotEmpty) {
@@ -401,23 +389,18 @@ class DriverLocationService {
 
       // User Notification
       final String notifId = "drop_arr_${orderId}_$driverId";
-      await _firestore
-          .collection("User")
-          .doc(userUid)
-          .collection("Notifications")
-          .doc(notifId)
-          .set({
-        'id': notifId,
-        'user_uid': userUid,
-        'type': 'driver_at_drop',
-        'title': 'Driver Arrived at Drop Location',
-        'body': 'Driver has reached your delivery destination for Order #$orderNo.',
-        'order_id': orderId,
-        'order_no': orderNo,
-        'driver_id': driverId,
-        'timestamp': FieldValue.serverTimestamp(),
-        'is_read': false,
-      }, SetOptions(merge: true));
+      await NotificationService().sendNotification(
+        targetCollection: 'User',
+        recipientId: userUid,
+        type: NotificationTypes.driverAtPickup,
+        title: 'Driver Arrived at Drop Location',
+        body: 'Driver has reached your delivery destination for Order #$orderNo.',
+        notificationId: notifId,
+        orderId: orderId,
+        orderNo: orderNo,
+        senderId: driverId,
+        receiverRole: 'User',
+      );
     }
   }
 

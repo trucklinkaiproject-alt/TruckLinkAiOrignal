@@ -594,6 +594,8 @@ class _UserChatInboxPageState extends State<UserChatInboxPage> {
           MaterialPageRoute(
             builder: (_) => BrokerChatPage(
               chatId: chatId,
+              receiverId: otherUserId,
+              receiverName: name,
               brokerId: otherUserId,
               brokerName: name,
               brokerAvatar: avatarUrl,

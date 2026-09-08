@@ -2,9 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
-import 'package:trucklinkai_orignal/Features/Broker%20Module/Pages/brokerChatInboxPage.dart';
-
+import 'package:trucklinkai_orignal/Core/Services/notificationNavigationService.dart';
 import 'package:trucklinkai_orignal/Core/Services/notificationService.dart';
+import 'package:trucklinkai_orignal/Features/Broker%20Module/Pages/brokerChatInboxPage.dart';
 
 class BrokerAlertPage extends StatefulWidget {
   const BrokerAlertPage({super.key});
@@ -345,21 +345,13 @@ class _BrokerAlertPageState extends State<BrokerAlertPage> {
                                   borderRadius: BorderRadius.circular(18),
                                   onTap: () {
                                     if (!isRead) {
-                                      _firestore
-                                          .collection("Broker")
-                                          .doc(brokerId)
-                                          .collection("Notifications")
-                                          .doc(id)
-                                          .update({'is_read': true});
-                                    }
-                                    if (typeStr == 'chat') {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => const BrokerChatInboxPage(),
-                                        ),
+                                      NotificationService().markAsRead(
+                                        collectionName: "Broker",
+                                        uid: brokerId,
+                                        notificationId: id,
                                       );
                                     }
+                                    NotificationNavigationService().handleNotificationTap(data);
                                   },
                                   child: Container(
                                     width: double.infinity,

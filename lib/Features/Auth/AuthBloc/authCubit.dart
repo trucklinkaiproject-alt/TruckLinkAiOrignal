@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:trucklinkai_orignal/Core/Services/fcmTokenService.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/bloc/userBloc/usercubit.dart';
 import 'package:trucklinkai_orignal/Features/Transporter%20Module/bloc/driverBloc/driverCubit.dart';
 import 'authState.dart';
@@ -141,6 +142,13 @@ class AuthCubit extends Cubit<AuthState> {
         }
       }
 
+      // Register device FCM token upon successful login
+      if (user != null) {
+        try {
+          await FcmTokenService().registerToken(uid: user.uid, role: role);
+        } catch (_) {}
+      }
+
       emit(AuthSuccess(role: role));
     } on FirebaseAuthException catch (e) {
       emit(AuthFailure(e.message ?? "An unknown error occurred"));
@@ -238,8 +246,25 @@ Future<void> cancelSignUp({
       try {
         driverCubit.stopListening();
       } catch (_) {}
+
+      // Clean up current device FCM token
+      final currentUid = _auth.currentUser?.uid;
+      final roleToClean = selectedRole;
+      if (currentUid != null && currentUid.isNotEmpty && roleToClean.isNotEmpty) {
+        try {
+          await FcmTokenService().removeCurrentDeviceToken(uid: currentUid, role: roleToClean);
+        } catch (_) {}
+      } else if (currentUid != null && currentUid.isNotEmpty) {
+        for (final r in ['User', 'Broker', 'Driver']) {
+          try {
+            await FcmTokenService().removeCurrentDeviceToken(uid: currentUid, role: r);
+          } catch (_) {}
+        }
+      }
+
+      selectedRole = '';
       await _auth.signOut();
-      emit(AuthSuccess());
+      emit(AuthInitial());
     } catch (e) {
       emit(AuthFailure("An unknown error occurred"));
     }

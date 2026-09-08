@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
+import 'package:trucklinkai_orignal/Core/Services/notificationNavigationService.dart';
 import 'package:trucklinkai_orignal/Core/Services/notificationService.dart';
 
 class NotificationItem {
@@ -11,6 +12,7 @@ class NotificationItem {
   final String time;
   final NotificationType type;
   final bool isRead;
+  final Map<String, dynamic>? data;
 
   const NotificationItem({
     required this.id,
@@ -19,6 +21,7 @@ class NotificationItem {
     required this.time,
     required this.type,
     this.isRead = false,
+    this.data,
   });
 }
 
@@ -200,6 +203,7 @@ class _ShipperAlertPageState extends State<ShipperAlertPage> {
                 time: _formatTimestamp(data['timestamp'] ?? data['created_at']),
                 type: _mapType((data['type'] ?? 'system').toString()),
                 isRead: data['is_read'] == true,
+                data: data,
               );
             }).toList();
 
@@ -302,12 +306,14 @@ class _ShipperAlertPageState extends State<ShipperAlertPage> {
                                   item: items[index],
                                   onTap: () {
                                     if (!items[index].isRead) {
-                                      _firestore
-                                          .collection("User")
-                                          .doc(userUid)
-                                          .collection("Notifications")
-                                          .doc(items[index].id)
-                                          .update({'is_read': true});
+                                      NotificationService().markAsRead(
+                                        collectionName: "User",
+                                        uid: userUid,
+                                        notificationId: items[index].id,
+                                      );
+                                    }
+                                    if (items[index].data != null) {
+                                      NotificationNavigationService().handleNotificationTap(items[index].data!);
                                     }
                                   },
                                 );

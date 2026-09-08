@@ -1,0 +1,115 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(uid) {
+      return isAuthenticated() && request.auth.uid == uid;
+    }
+
+    // User Collection & Subcollections
+    match /User/{userId} {
+      allow read, write: if isAuthenticated();
+
+      match /Requests/{requestId} {
+        allow read, write: if isAuthenticated();
+      }
+
+      // Notifications Subcollection
+      match /Notifications/{notificationId} {
+        allow read, delete, update: if isOwner(userId);
+        allow create: if isAuthenticated();
+      }
+
+      // FCM Tokens Subcollection (strictly private to owner)
+      match /fcmTokens/{tokenId} {
+        allow read, write, delete: if isOwner(userId);
+      }
+    }
+
+    // Broker Collection & Subcollections
+    match /Broker/{brokerId} {
+      allow read, write: if isAuthenticated();
+
+      match /IncomingRequests/{requestId} {
+        allow read, write: if isAuthenticated();
+      }
+
+      match /DriverNetwork/{driverId} {
+        allow read, write: if isAuthenticated();
+      }
+
+      match /Reviews/{reviewId} {
+        allow read: if true;
+        allow write: if isAuthenticated();
+      }
+
+      // Notifications Subcollection
+      match /Notifications/{notificationId} {
+        allow read, delete, update: if isOwner(brokerId);
+        allow create: if isAuthenticated();
+      }
+
+      // FCM Tokens Subcollection (strictly private to owner)
+      match /fcmTokens/{tokenId} {
+        allow read, write, delete: if isOwner(brokerId);
+      }
+    }
+
+    // Driver Collection & Subcollections
+    match /Driver/{driverId} {
+      allow read, write: if isAuthenticated();
+
+      match /ReceivedOffers/{offerId} {
+        allow read, write: if isAuthenticated();
+      }
+
+      match /DriverTrips/{tripId} {
+        allow read, write: if isAuthenticated();
+      }
+
+      match /Reviews/{reviewId} {
+        allow read: if true;
+        allow write: if isAuthenticated();
+      }
+
+      // Notifications Subcollection
+      match /Notifications/{notificationId} {
+        allow read, delete, update: if isOwner(driverId);
+        allow create: if isAuthenticated();
+      }
+
+      // FCM Tokens Subcollection (strictly private to owner)
+      match /fcmTokens/{tokenId} {
+        allow read, write, delete: if isOwner(driverId);
+      }
+    }
+
+    // Orders Collection
+    match /Orders/{orderId} {
+      allow read, write: if isAuthenticated();
+
+      match /DriverOffers/{offerId} {
+        allow read, write: if isAuthenticated();
+      }
+    }
+
+    // Chat Collection & Messages
+    match /chats/{chatId} {
+      allow read, write: if isAuthenticated();
+
+      match /messages/{messageId} {
+        allow read, write: if isAuthenticated();
+      }
+    }
+
+    // Fallback for authenticated users
+    match /{document=**} {
+      allow read, write: if isAuthenticated();
+    }
+  }
+}

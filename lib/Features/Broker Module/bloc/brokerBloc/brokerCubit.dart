@@ -54,6 +54,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:trucklinkai_orignal/Core/Services/notificationService.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerBloc/brokerStates.dart';
 
 class BrokerCubit extends Cubit<BrokerState> {
@@ -182,24 +183,23 @@ class BrokerCubit extends Cubit<BrokerState> {
               : (requestData['brokerName'] ?? 'Broker');
           final String orderNo = (requestData['orderNo'] ?? orderId).toString();
 
-          await firebaseFirestore
-              .collection("User")
-              .doc(userUid)
-              .collection("Notifications")
-              .doc(notifId)
-              .set({
-                'id': notifId,
-                'user_uid': userUid,
-                'type': 'request_accepted',
-                'title': 'Request Accepted',
-                'body': 'Your shipment request has been accepted by $brokerNameStr.\n\nOrder No: #$orderNo\nAccepted Amount: PKR ${amountNum.toStringAsFixed(0)}',
-                'order_id': orderId,
-                'order_no': orderNo,
-                'broker_name': brokerNameStr,
-                'amount': amountNum,
-                'timestamp': FieldValue.serverTimestamp(),
-                'is_read': false,
-              }, SetOptions(merge: true));
+          await NotificationService().sendNotification(
+            targetCollection: 'User',
+            recipientId: userUid,
+            type: NotificationTypes.requestAccepted,
+            title: 'Request Accepted',
+            body: 'Your shipment request has been accepted by $brokerNameStr.\n\nOrder No: #$orderNo\nAccepted Amount: PKR ${amountNum.toStringAsFixed(0)}',
+            notificationId: notifId,
+            orderId: orderId,
+            orderNo: orderNo,
+            senderId: brokerId,
+            senderName: brokerNameStr,
+            receiverRole: 'User',
+            additionalData: {
+              'broker_name': brokerNameStr,
+              'amount': amountNum,
+            },
+          );
         } catch (_) {}
       }
 
@@ -215,22 +215,18 @@ class BrokerCubit extends Cubit<BrokerState> {
       try {
         final String brokerNotifId = "req_acc_$orderId";
         final String orderNo = (requestData['orderNo'] ?? orderId).toString();
-        await firebaseFirestore
-            .collection("Broker")
-            .doc(brokerId)
-            .collection("Notifications")
-            .doc(brokerNotifId)
-            .set({
-              'id': brokerNotifId,
-              'broker_id': brokerId,
-              'type': 'request_accepted',
-              'title': 'Request Accepted',
-              'body': 'You accepted Order #$orderNo. You can now assign a driver from your network.',
-              'order_id': orderId,
-              'order_no': orderNo,
-              'timestamp': FieldValue.serverTimestamp(),
-              'is_read': false,
-            }, SetOptions(merge: true));
+        await NotificationService().sendNotification(
+          targetCollection: 'Broker',
+          recipientId: brokerId,
+          type: NotificationTypes.requestAccepted,
+          title: 'Request Accepted',
+          body: 'You accepted Order #$orderNo. You can now assign a driver from your network.',
+          notificationId: brokerNotifId,
+          orderId: orderId,
+          orderNo: orderNo,
+          senderId: brokerId,
+          receiverRole: 'Broker',
+        );
       } catch (_) {}
 
       // ── AI STATS: increment accepted_requests atomically ────────────────
@@ -398,22 +394,18 @@ class BrokerCubit extends Cubit<BrokerState> {
       try {
         final String brokerNotifId = "order_comp_$orderId";
         final String orderNo = (requestData['orderNo'] ?? orderId).toString();
-        await firebaseFirestore
-            .collection("Broker")
-            .doc(brokerId)
-            .collection("Notifications")
-            .doc(brokerNotifId)
-            .set({
-              'id': brokerNotifId,
-              'broker_id': brokerId,
-              'type': 'order_completed',
-              'title': 'Order Completed',
-              'body': 'Order #$orderNo has been marked as completed.',
-              'order_id': orderId,
-              'order_no': orderNo,
-              'timestamp': FieldValue.serverTimestamp(),
-              'is_read': false,
-            }, SetOptions(merge: true));
+        await NotificationService().sendNotification(
+          targetCollection: 'Broker',
+          recipientId: brokerId,
+          type: NotificationTypes.tripCompleted,
+          title: 'Order Completed',
+          body: 'Order #$orderNo has been marked as completed.',
+          notificationId: brokerNotifId,
+          orderId: orderId,
+          orderNo: orderNo,
+          senderId: brokerId,
+          receiverRole: 'Broker',
+        );
       } catch (_) {}
 
       // ── AI STATS: increment completed_requests atomically ────────────────

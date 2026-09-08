@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:trucklinkai_orignal/Core/Services/notificationService.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/Models/userRequestDataModel.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/bloc/CreateReqBloc/createReqstate.dart';
 
@@ -87,23 +88,18 @@ class CreateReqCubit extends Cubit<CreateReqState> {
         // Notify Broker of new shipment request
         try {
           final String notifId = "req_new_${currentRequest!.orderId}_${currentRequest!.userUid}";
-          await _firestore
-              .collection('Broker')
-              .doc(currentRequest!.brokerId)
-              .collection('Notifications')
-              .doc(notifId)
-              .set({
-                'id': notifId,
-                'broker_id': currentRequest!.brokerId,
-                'type': 'new_request',
-                'title': 'New Shipment Request',
-                'body': 'New request for Order #${currentRequest!.orderNo}: ${currentRequest!.pickupCity} → ${currentRequest!.dropCity} (${currentRequest!.vehicleType})',
-                'order_id': currentRequest!.orderId,
-                'order_no': currentRequest!.orderNo,
-                'user_uid': currentRequest!.userUid,
-                'timestamp': FieldValue.serverTimestamp(),
-                'is_read': false,
-              }, SetOptions(merge: true));
+          await NotificationService().sendNotification(
+            targetCollection: 'Broker',
+            recipientId: currentRequest!.brokerId,
+            type: NotificationTypes.newRequest,
+            title: 'New Shipment Request',
+            body: 'New request for Order #${currentRequest!.orderNo}: ${currentRequest!.pickupCity} → ${currentRequest!.dropCity} (${currentRequest!.vehicleType})',
+            notificationId: notifId,
+            orderId: currentRequest!.orderId,
+            orderNo: currentRequest!.orderNo,
+            senderId: currentRequest!.userUid,
+            receiverRole: 'Broker',
+          );
         } catch (_) {}
 
         // ── AI STATS: increment total_requests atomically ──────────────────

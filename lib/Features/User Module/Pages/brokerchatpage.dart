@@ -67,6 +67,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:trucklinkai_orignal/Core/Services/notificationService.dart';
 
 // ══════════════════════════════════════════════════════════════════════════════
 // MODEL
@@ -183,11 +184,15 @@ class ChatError extends ChatState {
 String getDeterministicChatId(String userA, String userB) {
   final cleanA = userA.trim();
   final cleanB = userB.trim();
-  if (cleanA.isEmpty) return cleanB.isNotEmpty ? "chat_$cleanB" : "chat_general";
+  if (cleanA.isEmpty && cleanB.isEmpty) return "chat_general";
+  if (cleanA.isEmpty) return "chat_$cleanB";
   if (cleanB.isEmpty) return "chat_$cleanA";
   final list = [cleanA, cleanB]..sort();
   return "chat_${list[0]}_${list[1]}";
 }
+
+/// Standard helper alias for deterministic conversation ID generation.
+String getConversationId(String uid1, String uid2) => getDeterministicChatId(uid1, uid2);
 
 // ══════════════════════════════════════════════════════════════════════════════
 // CUBIT
@@ -199,7 +204,6 @@ class ChatCubit extends Cubit<ChatState> {
   final String receiverName;
   final String receiverRole;
   final String orderId;
-  final String? legacyChatId;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -211,7 +215,6 @@ class ChatCubit extends Cubit<ChatState> {
     this.receiverName = 'User',
     this.receiverRole = 'Broker',
     this.orderId = '',
-    this.legacyChatId,
   }) : super(ChatInitial());
 
   String get currentUserId => _auth.currentUser?.uid ?? '';
@@ -220,11 +223,7 @@ class ChatCubit extends Cubit<ChatState> {
   void initialize() {
     emit(ChatLoading());
 
-    // Merge any legacy messages from old order-based chat ID into the canonical conversation
-    if (legacyChatId != null && legacyChatId!.isNotEmpty && legacyChatId != chatId) {
-      _migrateLegacyMessages(legacyChatId!, chatId);
-    }
-
+    // Listen ONLY to this conversation's dedicated messages subcollection
     _messagesSubscription = _firestore
         .collection('chats')
         .doc(chatId)
@@ -251,29 +250,6 @@ class ChatCubit extends Cubit<ChatState> {
         );
   }
 
-  Future<void> _migrateLegacyMessages(String oldId, String targetId) async {
-    try {
-      final oldDocs = await _firestore
-          .collection('chats')
-          .doc(oldId)
-          .collection('messages')
-          .get();
-
-      if (oldDocs.docs.isNotEmpty) {
-        final batch = _firestore.batch();
-        for (final doc in oldDocs.docs) {
-          final targetRef = _firestore
-              .collection('chats')
-              .doc(targetId)
-              .collection('messages')
-              .doc(doc.id);
-          batch.set(targetRef, doc.data(), SetOptions(merge: true));
-        }
-        await batch.commit();
-      }
-    } catch (_) {}
-  }
-
   Future<void> sendMessage(String text) async {
     final trimmed = text.trim();
     if (trimmed.isEmpty) return;
@@ -294,27 +270,45 @@ class ChatCubit extends Cubit<ChatState> {
       final String senderName = _auth.currentUser?.displayName ?? 'User';
 
       await msgRef.set({
+        'id': messageId,
         'messageId': messageId,
         'senderId': currentUserId,
         'senderName': senderName,
         'receiverId': receiverId,
         'text': trimmed,
         'timestamp': FieldValue.serverTimestamp(),
+        'createdAt': FieldValue.serverTimestamp(),
         'isRead': false,
         'orderId': orderId,
+        'chatId': chatId,
+        'conversationId': chatId,
       });
 
-      // Update parent chat summary with participant unread counters
-      await _firestore.collection('chats').doc(chatId).set({
+      // Update parent conversation document metadata
+      final Map<String, dynamic> convData = {
         'chatId': chatId,
+        'conversationId': chatId,
         'lastMessage': trimmed,
+        'text': trimmed,
         'lastMessageTime': FieldValue.serverTimestamp(),
+        'lastMessageTimestamp': FieldValue.serverTimestamp(),
+        'timestamp': FieldValue.serverTimestamp(),
         'lastSenderId': currentUserId,
+        'lastMessageSenderId': currentUserId,
         'participants': [currentUserId, receiverId],
-        'orderId': orderId,
-        'unreadCount_$receiverId': FieldValue.increment(1),
-        'unreadCount_$currentUserId': 0,
-      }, SetOptions(merge: true));
+        'participantIds': [currentUserId, receiverId],
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+
+      if (orderId.isNotEmpty) {
+        convData['orderId'] = orderId;
+      }
+      if (receiverId.isNotEmpty) {
+        convData['unreadCount_$receiverId'] = FieldValue.increment(1);
+      }
+      convData['unreadCount_$currentUserId'] = 0;
+
+      await _firestore.collection('chats').doc(chatId).set(convData, SetOptions(merge: true));
 
       // Deterministic notification to receiver
       if (receiverId.isNotEmpty) {
@@ -327,26 +321,22 @@ class ChatCubit extends Cubit<ChatState> {
         }
 
         final String notifId = 'chat_msg_$messageId';
-        final String orderStr = orderId.isNotEmpty ? "Order: #$orderId" : "";
-        final String notifBody = "You have a new message from $senderName.\n$orderStr\n\"$trimmed\"";
+        final String orderStr = orderId.isNotEmpty ? "Order: #$orderId\n" : "";
+        final String notifBody = "$orderStr$trimmed";
 
-        await _firestore
-            .collection(targetCollection)
-            .doc(receiverId)
-            .collection('Notifications')
-            .doc(notifId)
-            .set({
-          'id': notifId,
-          'title': 'New Message',
-          'body': notifBody,
-          'subtitle': notifBody,
-          'type': 'chat',
-          'is_read': false,
-          'created_at': FieldValue.serverTimestamp(),
-          'timestamp': FieldValue.serverTimestamp(),
-          'order_id': orderId,
-          'sender_id': currentUserId,
-        }, SetOptions(merge: true));
+        await NotificationService().sendNotification(
+          targetCollection: targetCollection,
+          recipientId: receiverId,
+          type: NotificationTypes.newMessage,
+          title: 'New Message from $senderName',
+          body: notifBody,
+          notificationId: notifId,
+          chatId: chatId,
+          orderId: orderId,
+          senderId: currentUserId,
+          senderName: senderName,
+          receiverRole: targetCollection,
+        );
       }
     } catch (e) {
       emit(ChatError('Message not sent. Please try again.'));
@@ -359,25 +349,26 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   Future<void> _markMessagesAsRead(List<QueryDocumentSnapshot> docs) async {
-    final batch = _firestore.batch();
-    bool updated = false;
+    try {
+      final batch = _firestore.batch();
 
-    for (final doc in docs) {
-      final data = doc.data() as Map<String, dynamic>;
-      if (data['senderId'] != currentUserId &&
-          !(data['isRead'] as bool? ?? false)) {
-        batch.update(doc.reference, {'isRead': true});
-        updated = true;
+      for (final doc in docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        final String sId = (data['senderId'] ?? data['sender_id'] ?? '').toString();
+        final bool isRead = data['isRead'] as bool? ?? data['is_read'] as bool? ?? false;
+        if (sId.isNotEmpty && sId != currentUserId && !isRead) {
+          batch.update(doc.reference, {'isRead': true, 'is_read': true});
+        }
       }
-    }
 
-    batch.set(
-      _firestore.collection('chats').doc(chatId),
-      {'unreadCount_$currentUserId': 0},
-      SetOptions(merge: true),
-    );
+      batch.set(
+        _firestore.collection('chats').doc(chatId),
+        {'unreadCount_$currentUserId': 0},
+        SetOptions(merge: true),
+      );
 
-    await batch.commit();
+      await batch.commit();
+    } catch (_) {}
   }
 
   @override
@@ -432,11 +423,11 @@ class BrokerChatPage extends StatelessWidget {
         receiverName: targetName,
         receiverRole: targetRole,
         orderId: orderId ?? '',
-        legacyChatId: (chatId.isNotEmpty && chatId != effectiveChatId) ? chatId : null,
       )..initialize(),
       child: _ChatView(
         brokerName: targetName,
         brokerAvatar: brokerAvatar,
+        receiverRole: targetRole,
       ),
     );
   }
@@ -449,8 +440,13 @@ class BrokerChatPage extends StatelessWidget {
 class _ChatView extends StatefulWidget {
   final String brokerName;
   final String? brokerAvatar;
+  final String receiverRole;
 
-  const _ChatView({required this.brokerName, this.brokerAvatar});
+  const _ChatView({
+    required this.brokerName,
+    this.brokerAvatar,
+    this.receiverRole = 'Broker',
+  });
 
   @override
   State<_ChatView> createState() => _ChatViewState();
@@ -507,6 +503,7 @@ class _ChatViewState extends State<_ChatView> {
       appBar: _BrokerAppBar(
         brokerName: widget.brokerName,
         brokerAvatar: widget.brokerAvatar,
+        receiverRole: widget.receiverRole,
       ),
       body: Column(
         children: [
@@ -533,7 +530,10 @@ class _ChatViewState extends State<_ChatView> {
                 }
                 if (state is ChatLoaded) {
                   if (state.messages.isEmpty) {
-                    return _EmptyChat(brokerName: widget.brokerName);
+                    return _EmptyChat(
+                      brokerName: widget.brokerName,
+                      receiverRole: widget.receiverRole,
+                    );
                   }
                   return _MessageList(
                     messages: state.messages,
@@ -567,8 +567,13 @@ class _ChatViewState extends State<_ChatView> {
 class _BrokerAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String brokerName;
   final String? brokerAvatar;
+  final String receiverRole;
 
-  const _BrokerAppBar({required this.brokerName, this.brokerAvatar});
+  const _BrokerAppBar({
+    required this.brokerName,
+    this.brokerAvatar,
+    this.receiverRole = 'Broker',
+  });
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -602,9 +607,9 @@ class _BrokerAppBar extends StatelessWidget implements PreferredSizeWidget {
                   letterSpacing: -0.3,
                 ),
               ),
-              const Text(
-                'Broker',
-                style: TextStyle(
+              Text(
+                receiverRole,
+                style: const TextStyle(
                   fontSize: 11,
                   color: Color(0xFF6B7280),
                   fontWeight: FontWeight.w400,
@@ -617,16 +622,9 @@ class _BrokerAppBar extends StatelessWidget implements PreferredSizeWidget {
       actions: [
         IconButton(
           icon: const Icon(Icons.phone_outlined, color: Color(0xFF4F46E5)),
-          tooltip: 'Call broker',
+          tooltip: 'Call $receiverRole',
           onPressed: () {
-            // TODO: integrate your calling logic
-          },
-        ),
-        IconButton(
-          icon: const Icon(Icons.more_vert, color: Color(0xFF6B7280)),
-          tooltip: 'More options',
-          onPressed: () {
-            // TODO: show bottom sheet with options
+            // Future calling logic
           },
         ),
       ],
@@ -809,7 +807,8 @@ class _DateDivider extends StatelessWidget {
 
 class _EmptyChat extends StatelessWidget {
   final String brokerName;
-  const _EmptyChat({required this.brokerName});
+  final String receiverRole;
+  const _EmptyChat({required this.brokerName, this.receiverRole = 'Broker'});
 
   @override
   Widget build(BuildContext context) {
@@ -842,7 +841,7 @@ class _EmptyChat extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Send a message to $brokerName and get the\npersonalized advice you need.',
+              'Send a message to $brokerName ($receiverRole)\nto communicate directly.',
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 13.5,
