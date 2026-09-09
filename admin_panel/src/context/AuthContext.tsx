@@ -16,7 +16,6 @@ interface AuthContextType {
   isAdmin: boolean;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name?: string) => Promise<void>;
   logout: () => Promise<void>;
   registerInitialAdmin: (uid: string, email: string, name: string) => Promise<void>;
 }
@@ -94,29 +93,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const register = async (email: string, password: string, name?: string) => {
-    setLoading(true);
-    try {
-      const cred = await createUserWithEmailAndPassword(auth, email, password);
-      const user = cred.user;
-      const adminDocRef = doc(db, 'Admins', user.uid);
-      const newAdmin: AdminUser = {
-        uid: user.uid,
-        email: email,
-        displayName: name || 'Super Admin',
-        role: 'superadmin',
-        status: 'active',
-        createdAt: serverTimestamp(),
-        lastLoginAt: serverTimestamp(),
-      };
-      await setDoc(adminDocRef, newAdmin);
-      setAdminProfile(newAdmin);
-      setIsAdmin(true);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const logout = async () => {
     await firebaseSignOut(auth);
     setAdminProfile(null);
@@ -147,7 +123,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAdmin,
         loading,
         login,
-        register,
         logout,
         registerInitialAdmin,
       }}

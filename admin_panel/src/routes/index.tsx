@@ -9,9 +9,7 @@ import { Brokers } from '../pages/Brokers';
 import { Drivers } from '../pages/Drivers';
 import { Vehicles } from '../pages/Vehicles';
 import { Requests } from '../pages/Requests';
-import { Orders } from '../pages/Orders';
 import { Tracking } from '../pages/Tracking';
-import { AIRecommendations } from '../pages/AIRecommendations';
 import { Ratings } from '../pages/Ratings';
 import { Notifications } from '../pages/Notifications';
 import { Messages } from '../pages/Messages';
@@ -41,9 +39,8 @@ export const AppRouter: React.FC = () => {
         <Route path="drivers" element={<Drivers />} />
         <Route path="vehicles" element={<Vehicles />} />
         <Route path="requests" element={<Requests />} />
-        <Route path="orders" element={<Orders />} />
+        <Route path="orders" element={<Navigate to="/requests" replace />} />
         <Route path="tracking" element={<Tracking />} />
-        <Route path="ai-recommendations" element={<AIRecommendations />} />
         <Route path="ratings" element={<Ratings />} />
         <Route path="notifications" element={<Notifications />} />
         <Route path="messages" element={<Messages />} />

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, Activity, Sparkles, Clock } from 'lucide-react';
+import { Menu, Clock } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 interface HeaderProps {
@@ -46,12 +46,6 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, title }) => {
         <div className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-medium">
           <Clock className="w-3.5 h-3.5 text-slate-400" />
           <span>{currentTime}</span>
-        </div>
-
-        {/* AI System Badge */}
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-semibold">
-          <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-          <span className="hidden sm:inline">AI Matching Engine:</span> Active
         </div>
       </div>
     </header>

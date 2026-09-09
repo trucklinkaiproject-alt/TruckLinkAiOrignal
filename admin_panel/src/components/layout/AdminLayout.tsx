@@ -12,21 +12,18 @@ export const AdminLayout: React.FC = () => {
       case '/dashboard':
         return 'System Overview & Real-time Metrics';
       case '/users':
-        return 'Shippers & Customers Management';
+        return 'Users Management';
       case '/brokers':
-        return 'Freight Brokers & Transporters';
+        return 'Brokers Management';
       case '/drivers':
         return 'Fleet Drivers Registry';
       case '/vehicles':
         return 'Trucks, Fleets & Capacities';
       case '/requests':
-        return 'Shipper Load Requests';
       case '/orders':
-        return 'Active & Historical Orders';
+        return 'Requests & Orders Dossier';
       case '/tracking':
         return 'Live GPS & Fleet Telematics Map';
-      case '/ai-recommendations':
-        return 'TruckLink AI Matching & Dispatch Engine';
       case '/ratings':
         return 'Ratings, Feedback & Trust Score';
       case '/notifications':

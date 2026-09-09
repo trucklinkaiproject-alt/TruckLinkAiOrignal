@@ -36,8 +36,8 @@ export const Notifications: React.FC = () => {
       await sendBroadcastNotification(title, message, targetAudience, adminEmail);
       setTitle('');
       setMessage('');
-      setSuccessMsg('Broadcast alert dispatched successfully to target audience.');
-      setTimeout(() => setSuccessMsg(null), 4000);
+      setSuccessMsg('Broadcast alert dispatched successfully & FCM push notification sent to active mobile devices.');
+      setTimeout(() => setSuccessMsg(null), 5000);
     } catch (err) {
       console.error('Failed to send notification:', err);
     } finally {
@@ -84,10 +84,10 @@ export const Notifications: React.FC = () => {
                 onChange={(e) => setTargetAudience(e.target.value as any)}
                 className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700/80 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500"
               >
-                <option value="all">Entire Ecosystem (All Shippers, Brokers & Drivers)</option>
-                <option value="users">Shippers Only</option>
-                <option value="brokers">Freight Brokers Only</option>
-                <option value="drivers">Fleet Drivers Only</option>
+                <option value="all">Entire Ecosystem (All Users, Brokers & Drivers)</option>
+                <option value="users">Users Only</option>
+                <option value="brokers">Brokers Only</option>
+                <option value="drivers">Drivers Only</option>
               </select>
             </div>
 

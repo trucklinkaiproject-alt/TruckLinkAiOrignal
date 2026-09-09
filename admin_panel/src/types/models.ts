@@ -111,42 +111,162 @@ export interface VehicleRecord {
 
 export interface UserRequest {
   id: string;
+  orderId?: string;
+  order_id?: string;
+  orderNo?: string;
+  order_no?: string;
+  numericOrderNo?: number;
+  
+  // User (Shipper)
+  userUid?: string;
+  user_uid?: string;
   userId?: string;
   userName?: string;
   userPhone?: string;
+  userEmail?: string;
+  
+  // Cargo Details
+  itemType?: string;
+  item_type?: string;
+  cargoType?: string;
+  weight?: string | number;
+  quantity?: string | number;
+  vehicleType?: string;
+  vehicle_type?: string;
+  vehicleTypeRequired?: string;
+  additionalInfo?: string;
+  additional_info?: string;
+  description?: string;
+  
+  // Locations (Pickup & Drop-off)
+  pickupCity?: string;
+  pickup_city?: string;
+  pickupComp?: string;
+  pickup_comp?: string;
   pickupLocation?: string;
   pickupLat?: number;
   pickupLng?: number;
+  pickup_lat?: number;
+  pickup_lng?: number;
+  pickupLatitude?: number;
+  pickupLongitude?: number;
+  
+  dropCity?: string;
+  drop_city?: string;
+  dropComp?: string;
+  drop_comp?: string;
   dropoffLocation?: string;
-  dropoffLat?: number;
-  dropoffLng?: number;
-  cargoType?: string;
-  weight?: string | number;
-  dimensions?: string;
-  vehicleTypeRequired?: string;
-  budget?: string | number;
-  urgency?: string;
-  status?: 'pending' | 'accepted' | 'in-transit' | 'completed' | 'cancelled' | string;
-  preferredDate?: string;
-  createdAt?: any;
-  assignedBrokerId?: string;
+  dropLat?: number;
+  dropLng?: number;
+  drop_lat?: number;
+  drop_lng?: number;
+  dropLatitude?: number;
+  dropLongitude?: number;
+  
+  // Broker Assignment & Quotation
+  brokerId?: string;
+  broker_id?: string;
+  brokerName?: string;
+  broker_name?: string;
+  brokerPhone?: string;
+  broker_phone?: string;
+  brokerRating?: number;
+  brokerOffer?: number;
+  quoteAmount?: number;
+  quote_amount?: number;
+  
+  // Driver Assignment & Vehicle
+  assigned_driver_id?: string;
   assignedDriverId?: string;
+  driverId?: string;
+  driver_id?: string;
+  driverUid?: string;
+  assigned_driver_name?: string;
+  driverName?: string;
+  assigned_driver_phone?: string;
+  driverPhone?: string;
+  assigned_fare?: number;
+  driver_fare?: number;
+  driverFare?: number;
+  driverVehicleType?: string;
+  driverVehicleNumber?: string;
+  
+  // Fare & Financials
+  customer_fare?: number;
+  customerFare?: number;
+  accepted_fare?: number;
+  acceptedFare?: number;
+  fare?: number;
+  amount?: number;
+  budget?: string | number;
+  finalFare?: number | null;
+  fareStatus?: 'finalized' | 'offered' | 'pending';
+  
+  // Lifecycle & Status
+  status?: string;
+  ride_phase?: string;
+  date?: string;
+  createdAt?: any;
+  created_at?: any;
+  quote_submitted_at?: any;
+  accepted_at?: any;
+  rejected_at?: any;
+  ride_started_at?: any;
+  cargo_picked_up_at?: any;
+  arrived_at_drop_at?: any;
+  completed_at?: any;
+  updated_at?: any;
+  updatedAt?: any;
+  rejection_actor?: string;
+  rejection_reason?: string;
+  delivery_duration_seconds?: number;
+  driverOffers?: DriverOfferRecord[];
+  
+  [key: string]: any;
+}
+
+export interface DriverOfferRecord {
+  id: string;
+  offer_id?: string;
+  order_id?: string;
+  order_no?: string;
+  broker_id?: string;
+  broker_name?: string;
+  driver_id?: string;
+  driver_name?: string;
+  driver_phone?: string;
+  vehicle_type?: string;
+  vehicle_number?: string;
+  fare?: number;
+  status?: string;
+  created_at?: any;
+  accepted_at?: any;
+  updated_at?: any;
+  rejection_reason?: string;
+  reason?: string;
   [key: string]: any;
 }
 
 export interface OrderItem {
   id: string;
   orderId?: string;
+  orderNo?: string;
+  order_no?: string;
   requestId?: string;
   userId?: string;
+  userUid?: string;
   userName?: string;
   brokerId?: string;
   brokerName?: string;
   driverId?: string;
   driverName?: string;
   driverPhone?: string;
+  vehicleType?: string;
+  vehicleNumber?: string;
   pickupLocation?: string;
   dropoffLocation?: string;
+  pickupCity?: string;
+  dropCity?: string;
   pickupLat?: number;
   pickupLng?: number;
   dropoffLat?: number;
@@ -154,10 +274,17 @@ export interface OrderItem {
   currentLat?: number;
   currentLng?: number;
   cargoType?: string;
+  itemType?: string;
   weight?: string | number;
+  quantity?: string | number;
   price?: number;
-  status?: 'pending' | 'accepted' | 'assigned' | 'picked_up' | 'in_transit' | 'delivered' | 'cancelled' | string;
+  fare?: number;
+  customer_fare?: number;
+  accepted_fare?: number;
+  driver_fare?: number;
+  status?: string;
   paymentStatus?: 'pending' | 'paid' | 'escrow' | 'refunded' | string;
+  date?: string;
   createdAt?: any;
   updatedAt?: any;
   estimatedDelivery?: any;
@@ -212,13 +339,22 @@ export interface AuditLog {
 
 export interface ReviewRating {
   id: string;
-  targetType: 'broker' | 'driver';
-  targetId: string;
-  reviewerId: string;
-  reviewerName?: string;
+  review_id?: string;
+  order_id?: string;
+  orderNo?: string;
+  reviewer_id?: string;
+  reviewer_name?: string;
+  reviewer_role?: 'user' | 'broker' | 'driver' | string;
+  reviewee_id?: string;
+  reviewee_name?: string;
+  reviewee_role?: 'broker' | 'driver' | 'user' | string;
+  targetType?: 'broker' | 'driver';
+  targetId?: string;
   rating: number;
   comment?: string;
+  created_at?: any;
   createdAt?: any;
+  [key: string]: any;
 }
 
 export interface SystemNotification {

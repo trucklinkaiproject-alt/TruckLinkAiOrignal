@@ -131,7 +131,7 @@ export const Brokers: React.FC = () => {
       render: (b) => (
         <div className="flex items-center gap-1 text-amber-400 font-semibold text-xs">
           <Star className="w-3.5 h-3.5 fill-amber-400" />
-          <span>{b.rating ? Number(b.rating).toFixed(1) : '5.0'}</span>
+          <span>{b.rating ? Number(b.rating).toFixed(1) : '—'}</span>
         </div>
       ),
     },
@@ -163,10 +163,10 @@ export const Brokers: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <Briefcase className="w-6 h-6 text-purple-400" />
-            <h2 className="text-2xl font-black text-white">Freight Brokers & Transporters</h2>
+            <h2 className="text-2xl font-black text-white">Brokers & Freight Partners</h2>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Review freight companies, toggle verification badges, and manage driver networks.
+            Review broker organizations, toggle verification badges, and oversee assigned fleets.
           </p>
         </div>
 

@@ -7,9 +7,7 @@ import {
   Truck,
   CarFront,
   FileText,
-  Package,
   MapPin,
-  Sparkles,
   Star,
   Bell,
   MessageSquare,
@@ -36,14 +34,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       links: [
         { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
         { name: 'Live Tracking', path: '/tracking', icon: MapPin },
-        { name: 'AI Matching', path: '/ai-recommendations', icon: Sparkles },
       ],
     },
     {
       category: 'STAKEHOLDERS',
       links: [
-        { name: 'Shippers / Users', path: '/users', icon: Users },
-        { name: 'Freight Brokers', path: '/brokers', icon: Briefcase },
+        { name: 'Users', path: '/users', icon: Users },
+        { name: 'Brokers', path: '/brokers', icon: Briefcase },
         { name: 'Drivers', path: '/drivers', icon: Truck },
         { name: 'Vehicles & Fleet', path: '/vehicles', icon: CarFront },
       ],
@@ -51,8 +48,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     {
       category: 'LOGISTICS & OPS',
       links: [
-        { name: 'Load Requests', path: '/requests', icon: FileText },
-        { name: 'Orders & Trips', path: '/orders', icon: Package },
+        { name: 'Requests & Orders', path: '/requests', icon: FileText },
         { name: 'Ratings & Reviews', path: '/ratings', icon: Star },
         { name: 'Message Oversight', path: '/messages', icon: MessageSquare },
       ],

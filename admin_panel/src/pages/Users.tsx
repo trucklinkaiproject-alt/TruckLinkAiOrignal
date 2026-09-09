@@ -59,7 +59,7 @@ export const Users: React.FC = () => {
   const columns: Column<UserProfile>[] = [
     {
       key: 'name',
-      header: 'Shipper / User',
+      header: 'User',
       sortable: true,
       render: (u) => (
         <div className="flex items-center gap-3">
@@ -71,7 +71,7 @@ export const Users: React.FC = () => {
             )}
           </div>
           <div>
-            <p className="font-semibold text-white">{u.name || u.fullName || 'Unnamed Shipper'}</p>
+            <p className="font-semibold text-white">{u.name || u.fullName || 'Unnamed User'}</p>
             <p className="text-xs text-slate-400 font-mono">{u.id.substring(0, 10)}...</p>
           </div>
         </div>
@@ -93,7 +93,7 @@ export const Users: React.FC = () => {
       header: 'Role',
       render: (u) => (
         <span className="text-xs font-semibold uppercase tracking-wider text-slate-300">
-          {u.role || 'Shipper'}
+          {u.role || 'User'}
         </span>
       ),
     },
@@ -116,16 +116,16 @@ export const Users: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <UsersIcon className="w-6 h-6 text-sky-400" />
-            <h2 className="text-2xl font-black text-white">Shippers & Load Creators</h2>
+            <h2 className="text-2xl font-black text-white">Users & Customers</h2>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Manage registered shippers, view active load requests, and regulate platform access.
+            Manage registered users, view active load requests, and regulate platform access.
           </p>
         </div>
 
         <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-900 px-3.5 py-2 rounded-xl border border-slate-800">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span>Total Shippers: <strong className="text-white">{users.length}</strong></span>
+          <span>Total Users: <strong className="text-white">{users.length}</strong></span>
         </div>
       </div>
 
@@ -133,10 +133,10 @@ export const Users: React.FC = () => {
       <DataTable
         data={users}
         columns={columns}
-        searchPlaceholder="Search shippers by name, email, phone, UID..."
+        searchPlaceholder="Search users by name, email, phone, UID..."
         searchFields={['name', 'fullName', 'email', 'phone', 'phoneNumber', 'id']}
         loading={loading}
-        emptyMessage="No shippers found in Firestore 'User' collection"
+        emptyMessage="No users found in Firestore 'User' collection"
         actions={(u) => (
           <div className="flex items-center gap-1.5">
             <button
@@ -183,7 +183,7 @@ export const Users: React.FC = () => {
       <Modal
         isOpen={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
-        title="Shipper Profile Details"
+        title="User Profile Details"
         maxWidth="lg"
       >
         {selectedUser && (
@@ -198,14 +198,14 @@ export const Users: React.FC = () => {
               </div>
               <div>
                 <h4 className="text-lg font-bold text-white">
-                  {selectedUser.name || selectedUser.fullName || 'Unnamed Shipper'}
+                  {selectedUser.name || selectedUser.fullName || 'Unnamed User'}
                 </h4>
                 <p className="text-xs font-mono text-sky-400">UID: {selectedUser.id}</p>
                 <div className="mt-1 flex items-center gap-2">
                   <Badge variant={selectedUser.status === 'blocked' ? 'danger' : 'success'}>
                     {selectedUser.status === 'blocked' ? 'Blocked' : 'Active'}
                   </Badge>
-                  <span className="text-xs text-slate-400">Role: {selectedUser.role || 'Shipper'}</span>
+                  <span className="text-xs text-slate-400">Role: {selectedUser.role || 'User'}</span>
                 </div>
               </div>
             </div>
