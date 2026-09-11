@@ -145,97 +145,113 @@ class _DriverOrdersPageState extends State<DriverOrdersPage>
   }
 
   Widget _buildTabBar() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 10),
-      padding: const EdgeInsets.all(1),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double width = constraints.maxWidth;
+        final bool isMobile = width < 600;
+        final double horizontalMargin = isMobile ? 12 : (width < 1000 ? width * 0.05 : width * 0.08);
+
+        return Container(
+          margin: EdgeInsets.symmetric(horizontal: horizontalMargin),
+          padding: const EdgeInsets.all(3),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(30),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: TabBar(
-        controller: _tabController,
-        isScrollable: true,
-        tabAlignment: TabAlignment.start,
-        indicator: BoxDecoration(
-          color: Appcolors.tertiaryGreen,
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: [
-            BoxShadow(
-              color: Appcolors.tertiaryGreen.withOpacity(0.3),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
+          child: TabBar(
+            controller: _tabController,
+            isScrollable: isMobile,
+            tabAlignment: isMobile ? TabAlignment.start : TabAlignment.fill,
+            indicator: BoxDecoration(
+              color: Appcolors.tertiaryGreen,
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: [
+                BoxShadow(
+                  color: Appcolors.tertiaryGreen.withOpacity(0.3),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
-          ],
-        ),
-        indicatorSize: TabBarIndicatorSize.tab,
-        labelColor: Colors.white,
-        unselectedLabelColor: Colors.black54,
-        labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
-        unselectedLabelStyle: const TextStyle(
-          fontWeight: FontWeight.w500,
-          fontSize: 11,
-        ),
-        dividerColor: Colors.transparent,
-        splashBorderRadius: BorderRadius.circular(30),
-        tabs: _tabLabels.map((label) => Tab(text: label)).toList(),
-      ),
+            indicatorSize: TabBarIndicatorSize.tab,
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.black54,
+            labelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+            unselectedLabelStyle: const TextStyle(
+              fontWeight: FontWeight.w500,
+              fontSize: 12,
+            ),
+            dividerColor: Colors.transparent,
+            splashBorderRadius: BorderRadius.circular(30),
+            tabs: _tabLabels.map((label) => Tab(text: label)).toList(),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildOrdersTab(String category) {
-    return BlocBuilder<DriverOffersCubit, DriverOffersState>(
-      builder: (context, state) {
-        if (state is DriverOffersLoadingState) {
-          return const Center(
-            child: CircularProgressIndicator(
-              strokeWidth: 2.5,
-              color: Appcolors.tertiaryGreen,
-            ),
-          );
-        }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double width = constraints.maxWidth;
+        final bool isMobile = width < 600;
+        final double horizontalPadding = isMobile ? 16 : (width < 1000 ? width * 0.05 : width * 0.08);
 
-        if (state is DriverOffersErrorState) {
-          return _buildErrorState(state.errorMessage);
-        }
+        return BlocBuilder<DriverOffersCubit, DriverOffersState>(
+          builder: (context, state) {
+            if (state is DriverOffersLoadingState) {
+              return const Center(
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  color: Appcolors.tertiaryGreen,
+                ),
+              );
+            }
 
-        if (state is DriverOffersLoadedState) {
-          final filtered = _filterOffers(state.offers, category);
+            if (state is DriverOffersErrorState) {
+              return _buildErrorState(state.errorMessage);
+            }
 
-          if (filtered.isEmpty) {
-            return _buildEmptyState(category);
-          }
+            if (state is DriverOffersLoadedState) {
+              final filtered = _filterOffers(state.offers, category);
 
-          return RefreshIndicator(
-            color: Appcolors.tertiaryGreen,
-            onRefresh: () async {
-              final driverState = context.read<DriverCubit>().state;
-              if (driverState is DriverLoadedState) {
-                context.read<DriverOffersCubit>().listenToOffers(
-                  driverId: driverState.driver.driverId,
-                );
+              if (filtered.isEmpty) {
+                return _buildEmptyState(category);
               }
-            },
-            child: ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              itemCount: filtered.length,
-              itemBuilder: (context, index) {
-                final reversedIndex = filtered.length - 1 - index;
-                final offer = filtered[reversedIndex];
-                return _buildOrderCard(offer);
-              },
-            ),
-          );
-        }
 
-        return const SizedBox.shrink();
+              return RefreshIndicator(
+                color: Appcolors.tertiaryGreen,
+                onRefresh: () async {
+                  final driverState = context.read<DriverCubit>().state;
+                  if (driverState is DriverLoadedState) {
+                    context.read<DriverOffersCubit>().listenToOffers(
+                      driverId: driverState.driver.driverId,
+                    );
+                  }
+                },
+                child: ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 8),
+                  itemCount: filtered.length,
+                  itemBuilder: (context, index) {
+                    final reversedIndex = filtered.length - 1 - index;
+                    final offer = filtered[reversedIndex];
+                    return _buildOrderCard(offer);
+                  },
+                ),
+              );
+            }
+
+            return const SizedBox.shrink();
+          },
+        );
       },
     );
   }

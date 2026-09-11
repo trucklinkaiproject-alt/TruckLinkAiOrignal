@@ -730,18 +730,33 @@ class _BrokerDetailPageState extends State<BrokerDetailPage> {
 
                                       if (!mounted) return;
 
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                          content: Text("Request sent to broker successfully!"),
-                                          backgroundColor: Appcolors.tertiaryGreen,
-                                        ),
-                                      );
+                                      final cubitState = context.read<CreateReqCubit>().state;
+                                      if (cubitState is CreateReqSuccessState) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text("Request sent to broker successfully!"),
+                                            backgroundColor: Appcolors.tertiaryGreen,
+                                          ),
+                                        );
 
-                                      if (Navigator.canPop(context)) {
-                                        Navigator.pop(context);
-                                      }
-                                      if (Navigator.canPop(context)) {
-                                        Navigator.pop(context);
+                                        // Reset CreateReqCubit state so future requests start fresh
+                                        context.read<CreateReqCubit>().resetState();
+
+                                        // Navigate to User Home (ShipperBottomNavBar)
+                                        Navigator.pushAndRemoveUntil(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => const ShipperBottomNavBar(),
+                                          ),
+                                          (route) => false,
+                                        );
+                                      } else if (cubitState is CreateReqErrorState) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text(cubitState.errorMessage),
+                                            backgroundColor: Colors.redAccent,
+                                          ),
+                                        );
                                       }
                                     },
                             );

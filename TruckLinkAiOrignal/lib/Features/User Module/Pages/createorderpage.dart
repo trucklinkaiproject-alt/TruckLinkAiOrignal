@@ -430,6 +430,45 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
     _loadUser();
   }
 
+  @override
+  void dispose() {
+    itemTypeController.dispose();
+    weightController.dispose();
+    quantityController.dispose();
+    additionalDetailsController.dispose();
+    pickupCompLocation.dispose();
+    dropCompLocation.dispose();
+    pickupCityLocation.dispose();
+    dropCityLocation.dispose();
+    super.dispose();
+  }
+
+  void _resetForm() {
+    itemTypeController.clear();
+    weightController.clear();
+    quantityController.clear();
+    additionalDetailsController.clear();
+    pickupCompLocation.clear();
+    dropCompLocation.clear();
+    pickupCityLocation.clear();
+    dropCityLocation.clear();
+    if (mounted) {
+      setState(() {
+        selectedItemType = '';
+        selectedVehicleType = '';
+        pickupCity = '';
+        pickupComp = '';
+        dropCity = '';
+        dropComp = '';
+        pickupLat = 0;
+        pickupLng = 0;
+        dropLat = 0;
+        dropLng = 0;
+        _isSubmitting = false;
+      });
+    }
+  }
+
   Future<void> _loadUser() async {
     await context.read<UserCubit>().fetchUserData();
 

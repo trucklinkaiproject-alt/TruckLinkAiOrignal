@@ -432,34 +432,77 @@ class DriverOfferDetailPage extends StatelessWidget {
                           const SizedBox(height: 24),
 
                           // =======================================================
-                          // STATE-SPECIFIC ACTIONS (NO Accept/Reject in Order Detail)
+                          // STATE-SPECIFIC ACTIONS
                           // =======================================================
-                          if (isPending)
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Colors.amber.withOpacity(0.12),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: Colors.amber.withOpacity(0.4)),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.info_outline, color: Colors.amber),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Text(
-                                      "Accept / Reject decisions are made directly from the Incoming Requests section on your Home dashboard.",
-                                      style: TextStyle(
-                                        fontSize: 12.5,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.grey[800],
+                          if (isPending) ...[
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: SizedBox(
+                                    height: 50,
+                                    child: OutlinedButton(
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: Colors.red[700],
+                                        side: BorderSide(color: Colors.red.withOpacity(0.4), width: 1.5),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(25),
+                                        ),
+                                      ),
+                                      onPressed: state is DriverOffersLoadingState
+                                          ? null
+                                          : () async {
+                                              await context.read<DriverOffersCubit>().rejectOffer(offer: liveOffer);
+                                              if (context.mounted && Navigator.canPop(context)) {
+                                                Navigator.pop(context);
+                                              }
+                                            },
+                                      child: const Text(
+                                        "REJECT",
+                                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                                       ),
                                     ),
                                   ),
-                                ],
-                              ),
-                            )
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: SizedBox(
+                                    height: 50,
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Appcolors.tertiaryGreen,
+                                        elevation: 0,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(25),
+                                        ),
+                                      ),
+                                      onPressed: state is DriverOffersLoadingState
+                                          ? null
+                                          : () {
+                                              context.read<DriverOffersCubit>().acceptOffer(offer: liveOffer);
+                                            },
+                                      child: state is DriverOffersLoadingState
+                                          ? const SizedBox(
+                                              width: 22,
+                                              height: 22,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2.2,
+                                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                              ),
+                                            )
+                                          : const Text(
+                                              "ACCEPT",
+                                              style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w800,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ]
                           else if (isAccepted) ...[
                             SizedBox(
                               width: double.infinity,

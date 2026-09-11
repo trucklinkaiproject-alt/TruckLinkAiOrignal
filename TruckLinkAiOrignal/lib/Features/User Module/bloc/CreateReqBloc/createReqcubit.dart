@@ -149,15 +149,18 @@ class CreateReqCubit extends Cubit<CreateReqState> {
             SetOptions(merge: true),
           );
         });
-        // ──────────────────────────────────────────────────────────────────
+        emit(CreateReqSuccessState("Request sent to broker successfully!"));
       } else {
         emit(CreateReqErrorState("No data available from user"));
       }
-      // If the request is successful, emit the success state
-      // emit(CreateReqSuccessState("Request created successfully!"));
     } catch (e) {
       // If there's an error, emit the error state with the error message
       emit(CreateReqErrorState("Failed to create request: ${e.toString()}"));
     }
+  }
+
+  void resetState() {
+    currentRequest = null;
+    emit(CreateReqInitialState());
   }
 }

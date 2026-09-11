@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
 import 'package:trucklinkai_orignal/Features/Transporter Module/Pages/driverAlertPage.dart';
+import 'package:trucklinkai_orignal/Features/Transporter Module/Pages/driverOfferDetailPage.dart';
 import 'package:trucklinkai_orignal/Features/Transporter Module/Pages/driverOrdersPage.dart';
 import 'package:trucklinkai_orignal/Features/Transporter Module/Pages/driverSettingsPage.dart';
 import 'package:trucklinkai_orignal/Features/Transporter Module/Pages/driverTruckDetailsPage.dart';
@@ -181,13 +182,19 @@ class _TransporterHomePageState extends State<TransporterHomePage> {
                         .collection("Driver")
                         .doc(currentDriverUid)
                         .collection("Notifications")
-                        .where("read", isEqualTo: false)
                         .snapshots()
                     : const Stream.empty(),
                 builder: (context, snapshot) {
                   int unreadCount = 0;
                   if (snapshot.hasData && snapshot.data != null) {
-                    unreadCount = snapshot.data!.docs.length;
+                    unreadCount = snapshot.data!.docs.where((doc) {
+                      final data = doc.data() as Map<String, dynamic>?;
+                      if (data == null) return false;
+                      final isRead = data['is_read'] == true ||
+                          data['read'] == true ||
+                          data['isRead'] == true;
+                      return !isRead;
+                    }).length;
                   }
 
                   return Badge(
@@ -1129,148 +1136,162 @@ class _IncomingOfferCard extends StatelessWidget {
     final String fare = (offer['fare'] ?? '0').toString();
     final String date = (offer['date'] ?? 'Recent').toString();
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
         borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Top Row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Order #$orderNo",
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.black87,
-                ),
-              ),
-              Text(
-                "PKR $fare",
-                style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w900,
-                  color: Appcolors.tertiaryGreen,
-                ),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => DriverOfferDetailPage(offer: offer),
+            ),
+          );
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
               ),
             ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            "Broker: $brokerName • $date",
-            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-          ),
-
-          const SizedBox(height: 12),
-          Divider(height: 1, color: Colors.grey.withOpacity(0.15)),
-          const SizedBox(height: 12),
-
-          // Route (Responsive flexible layout to prevent RenderFlex overflow)
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.circle, size: 10, color: Appcolors.tertiaryGreen),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  pickupCity,
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 6),
-                child: Icon(Icons.arrow_forward, size: 14, color: Colors.grey),
-              ),
-              const Icon(Icons.location_on, size: 13, color: Colors.redAccent),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  dropCity,
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 10),
-
-          // Item + Vehicle Spec
-          Text(
-            "$itemType • $weight kg • Required: $vehicleType",
-            style: TextStyle(fontSize: 12, color: Colors.grey[700]),
-          ),
-
-          const SizedBox(height: 16),
-
-          // Accept / Reject Actions on Card
-          Row(
-            children: [
-              Expanded(
-                child: SizedBox(
-                  height: 44,
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.red[700],
-                      side: BorderSide(color: Colors.red.withOpacity(0.35)),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(22),
-                      ),
-                    ),
-                    onPressed: () {
-                      context.read<DriverOffersCubit>().rejectOffer(offer: offer);
-                    },
-                    child: const Text(
-                      "Reject",
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+              // Top Row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Order #$orderNo",
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.black87,
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: SizedBox(
-                  height: 44,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Appcolors.tertiaryGreen,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(22),
-                      ),
+                  Text(
+                    "PKR $fare",
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w900,
+                      color: Appcolors.tertiaryGreen,
                     ),
-                    onPressed: () {
-                      context.read<DriverOffersCubit>().acceptOffer(offer: offer);
-                    },
-                    child: const Text(
-                      "Accept",
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                "Broker: $brokerName • $date",
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              ),
+
+              const SizedBox(height: 12),
+              Divider(height: 1, color: Colors.grey.withOpacity(0.15)),
+              const SizedBox(height: 12),
+
+              // Route (City-level summary only)
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Icon(Icons.circle, size: 10, color: Appcolors.tertiaryGreen),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      pickupCity,
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 6),
+                    child: Icon(Icons.arrow_forward, size: 14, color: Colors.grey),
+                  ),
+                  const Icon(Icons.location_on, size: 13, color: Colors.redAccent),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      dropCity,
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 10),
+
+              // Item + Vehicle Spec
+              Text(
+                "$itemType • $weight kg • Required: $vehicleType",
+                style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Accept / Reject Actions on Card
+              Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 44,
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.red[700],
+                          side: BorderSide(color: Colors.red.withOpacity(0.35)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(22),
+                          ),
+                        ),
+                        onPressed: () {
+                          context.read<DriverOffersCubit>().rejectOffer(offer: offer);
+                        },
+                        child: const Text(
+                          "Reject",
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                        ),
                       ),
                     ),
                   ),
-                ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: SizedBox(
+                      height: 44,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Appcolors.tertiaryGreen,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(22),
+                          ),
+                        ),
+                        onPressed: () {
+                          context.read<DriverOffersCubit>().acceptOffer(offer: offer);
+                        },
+                        child: const Text(
+                          "Accept",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }
