@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/Pages/brokerAlertPage.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/Pages/orderDetailPage.dart';
+import 'package:trucklinkai_orignal/Features/Transporter%20Module/Pages/driverAlertPage.dart';
 import 'package:trucklinkai_orignal/Features/Transporter%20Module/Pages/driverOfferDetailPage.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/Pages/brokerchatpage.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/Pages/orderTrackingPage.dart';
@@ -194,6 +195,11 @@ class NotificationNavigationService {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const BrokerAlertPage()),
+          );
+        } else if (role == 'Driver') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const DriverAlertPage()),
           );
         }
       }

@@ -404,6 +404,7 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
 
   double dropLat = 0;
   double dropLng = 0;
+  bool _isSubmitting = false;
   final List<String> itemTypes = [
     "Furniture",
     "Plastic",
@@ -714,7 +715,7 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
                   // -------- Continue (same validation/cubit logic) --------
                   BlocBuilder<CreateReqCubit, CreateReqState>(
                     builder: (context, state) {
-                      final isLoading = state is CreateReqLoadingState;
+                      final isLoading = state is CreateReqLoadingState || _isSubmitting;
 
                       return SizedBox(
                         width: double.infinity,
@@ -775,39 +776,51 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
                                     return;
                                   }
 
-                                  await context
-                                      .read<CreateReqCubit>()
-                                      .createInitialRequest(
-                                        uid,
-                                        pickupCity,
-                                        dropCity,
-                                        pickupComp,
-                                        dropComp,
-                                        selectedItemType,
-                                        selectedVehicleType,
-                                        additionalDetailsController.text,
-                                        int.tryParse(weightController.text) ??
-                                            0,
-                                        int.tryParse(
-                                              quantityController.text,
-                                            ) ??
-                                            0,
-                                        pickupLat: pickupLat,
-                                        pickupLng: pickupLng,
-                                        dropLat: dropLat,
-                                        dropLng: dropLng,
-                                      );
+                                  setState(() {
+                                    _isSubmitting = true;
+                                  });
 
-                                  if (!mounted) return;
+                                  try {
+                                    await context
+                                        .read<CreateReqCubit>()
+                                        .createInitialRequest(
+                                          uid,
+                                          pickupCity,
+                                          dropCity,
+                                          pickupComp,
+                                          dropComp,
+                                          selectedItemType,
+                                          selectedVehicleType,
+                                          additionalDetailsController.text,
+                                          int.tryParse(weightController.text) ??
+                                              0,
+                                          int.tryParse(
+                                                quantityController.text,
+                                              ) ??
+                                              0,
+                                          pickupLat: pickupLat,
+                                          pickupLng: pickupLng,
+                                          dropLat: dropLat,
+                                          dropLng: dropLng,
+                                        );
 
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => BrokerSelectionPage(
-                                        requiredVehicleType: selectedVehicleType,
+                                    if (!mounted) return;
+
+                                    await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => BrokerSelectionPage(
+                                          requiredVehicleType: selectedVehicleType,
+                                        ),
                                       ),
-                                    ),
-                                  );
+                                    );
+                                  } finally {
+                                    if (mounted) {
+                                      setState(() {
+                                        _isSubmitting = false;
+                                      });
+                                    }
+                                  }
                                 },
                           child: isLoading
                               ? const SizedBox(

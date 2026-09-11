@@ -264,11 +264,12 @@ class DriverSettingsPage extends StatelessWidget {
                       onTap: () async {
                         await context.read<AuthCubit>().logOut(context);
                         if (context.mounted) {
-                          Navigator.pushReplacement(
+                          Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(
                               builder: (context) => const RoleSelectionPage(),
                             ),
+                            (route) => false,
                           );
                         }
                       },

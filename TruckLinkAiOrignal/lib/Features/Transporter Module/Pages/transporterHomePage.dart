@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
+import 'package:trucklinkai_orignal/Features/Transporter Module/Pages/driverAlertPage.dart';
 import 'package:trucklinkai_orignal/Features/Transporter Module/Pages/driverOrdersPage.dart';
 import 'package:trucklinkai_orignal/Features/Transporter Module/Pages/driverSettingsPage.dart';
 import 'package:trucklinkai_orignal/Features/Transporter Module/Pages/driverTruckDetailsPage.dart';
@@ -38,136 +39,180 @@ class _TransporterHomePageState extends State<TransporterHomePage> {
   Widget build(BuildContext context) {
     final String currentDriverUid = FirebaseAuth.instance.currentUser?.uid ?? '';
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
-      floatingActionButton: StreamBuilder<QuerySnapshot>(
-        stream: currentDriverUid.isNotEmpty
-            ? FirebaseFirestore.instance
-                .collection("chats")
-                .where("participants", arrayContains: currentDriverUid)
-                .snapshots()
-            : const Stream.empty(),
-        builder: (context, chatSnap) {
-          int totalUnreadChats = 0;
-          if (chatSnap.hasData && chatSnap.data != null) {
-            for (var doc in chatSnap.data!.docs) {
-              final data = doc.data() as Map<String, dynamic>;
-              final int unread =
-                  (data['unreadCount_$currentDriverUid'] as num?)?.toInt() ?? 0;
-              if (unread > 0) {
-                totalUnreadChats += unread;
+    return PopScope(
+      canPop: _selectedIndex == 0,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop && _selectedIndex != 0) {
+          setState(() {
+            _selectedIndex = 0;
+          });
+        }
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF5F6FA),
+        floatingActionButton: StreamBuilder<QuerySnapshot>(
+          stream: currentDriverUid.isNotEmpty
+              ? FirebaseFirestore.instance
+                  .collection("chats")
+                  .where("participants", arrayContains: currentDriverUid)
+                  .snapshots()
+              : const Stream.empty(),
+          builder: (context, chatSnap) {
+            int totalUnreadChats = 0;
+            if (chatSnap.hasData && chatSnap.data != null) {
+              for (var doc in chatSnap.data!.docs) {
+                final data = doc.data() as Map<String, dynamic>;
+                final int unread =
+                    (data['unreadCount_$currentDriverUid'] as num?)?.toInt() ?? 0;
+                if (unread > 0) {
+                  totalUnreadChats += unread;
+                }
               }
             }
-          }
 
-          return FloatingActionButton.extended(
-            backgroundColor: Appcolors.tertiaryGreen,
-            elevation: 4,
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const UserChatInboxPage(),
-                ),
-              );
-            },
-            icon: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                const Icon(
-                  Icons.chat_bubble_outline_rounded,
-                  color: Colors.white,
-                  size: 20,
-                ),
-                if (totalUnreadChats > 0)
-                  Positioned(
-                    top: -6,
-                    right: -8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.redAccent,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      constraints: const BoxConstraints(
-                        minWidth: 16,
-                        minHeight: 16,
-                      ),
-                      child: Text(
-                        totalUnreadChats > 99 ? '99+' : '$totalUnreadChats',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
+            return FloatingActionButton.extended(
+              backgroundColor: Appcolors.tertiaryGreen,
+              elevation: 4,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const UserChatInboxPage(),
+                  ),
+                );
+              },
+              icon: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  const Icon(
+                    Icons.chat_bubble_outline_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  if (totalUnreadChats > 0)
+                    Positioned(
+                      top: -6,
+                      right: -8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.redAccent,
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        textAlign: TextAlign.center,
+                        constraints: const BoxConstraints(
+                          minWidth: 16,
+                          minHeight: 16,
+                        ),
+                        child: Text(
+                          totalUnreadChats > 99 ? '99+' : '$totalUnreadChats',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
-                  ),
-              ],
-            ),
-            label: Text(
-              totalUnreadChats > 0 ? "Chats ($totalUnreadChats)" : "Chats",
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-                fontSize: 13,
+                ],
               ),
-            ),
-          );
-        },
-      ),
-      body: BlocListener<DriverCubit, DriverState>(
-        listener: (context, state) {
-          if (state is DriverLoadedState) {
-            final driver = state.driver;
-            if (!driver.isTruckDetailsComplete) {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const DriverTruckDetailsPage(isFirstLogin: true),
+              label: Text(
+                totalUnreadChats > 0 ? "Chats ($totalUnreadChats)" : "Chats",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
                 ),
-              );
+              ),
+            );
+          },
+        ),
+        body: BlocListener<DriverCubit, DriverState>(
+          listener: (context, state) {
+            if (state is DriverLoadedState) {
+              final driver = state.driver;
+              if (!driver.isTruckDetailsComplete) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const DriverTruckDetailsPage(isFirstLogin: true),
+                  ),
+                );
+              }
             }
-          }
-        },
-        child: IndexedStack(
-          index: _selectedIndex,
-          children: [
-            _buildHomeDashboard(context),
-            const DriverOrdersPage(),
-            const DriverSettingsPage(),
+          },
+          child: IndexedStack(
+            index: _selectedIndex,
+            children: [
+              _buildHomeDashboard(context),
+              const DriverOrdersPage(),
+              const DriverAlertPage(),
+              const DriverSettingsPage(),
+            ],
+          ),
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          onTap: (index) {
+            setState(() {
+              _selectedIndex = index;
+            });
+          },
+          selectedItemColor: Appcolors.tertiaryGreen,
+          unselectedItemColor: Colors.grey,
+          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.white,
+          elevation: 8,
+          items: [
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.home_rounded),
+              label: 'Home',
+            ),
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.assignment_outlined),
+              label: 'Orders',
+            ),
+            BottomNavigationBarItem(
+              icon: StreamBuilder<QuerySnapshot>(
+                stream: currentDriverUid.isNotEmpty
+                    ? FirebaseFirestore.instance
+                        .collection("Driver")
+                        .doc(currentDriverUid)
+                        .collection("Notifications")
+                        .where("read", isEqualTo: false)
+                        .snapshots()
+                    : const Stream.empty(),
+                builder: (context, snapshot) {
+                  int unreadCount = 0;
+                  if (snapshot.hasData && snapshot.data != null) {
+                    unreadCount = snapshot.data!.docs.length;
+                  }
+
+                  return Badge(
+                    isLabelVisible: unreadCount > 0,
+                    label: Text(
+                      unreadCount > 99 ? '99+' : '$unreadCount',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    backgroundColor: Colors.redAccent,
+                    child: const Icon(Icons.notifications_outlined),
+                  );
+                },
+              ),
+              label: 'Alerts',
+            ),
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.settings_outlined),
+              label: 'Settings',
+            ),
           ],
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        selectedItemColor: Appcolors.tertiaryGreen,
-        unselectedItemColor: Colors.grey,
-        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
-        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        elevation: 8,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_rounded),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.assignment_outlined),
-            label: 'Orders',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings_outlined),
-            label: 'Settings',
-          ),
-        ],
       ),
     );
   }
@@ -304,27 +349,38 @@ class _TransporterHomePageState extends State<TransporterHomePage> {
                                 Builder(
                                   builder: (context) {
                                     if (activeRide != null) {
-                                      return Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                        decoration: BoxDecoration(
-                                          color: Colors.orange.withOpacity(0.12),
-                                          borderRadius: BorderRadius.circular(20),
-                                          border: Border.all(color: Colors.orange.withOpacity(0.4)),
-                                        ),
-                                        child: const Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(Icons.directions_bus, size: 13, color: Colors.orange),
-                                            SizedBox(width: 4),
-                                            Text(
-                                              "On Ride",
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w800,
-                                                color: Colors.orange,
-                                              ),
+                                      return InkWell(
+                                        borderRadius: BorderRadius.circular(20),
+                                        onTap: () {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(
+                                              content: Text("You are currently on an active shipment ride. Complete or deliver the order before changing availability."),
+                                              backgroundColor: Colors.orange,
                                             ),
-                                          ],
+                                          );
+                                        },
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                          decoration: BoxDecoration(
+                                            color: Colors.orange.withOpacity(0.12),
+                                            borderRadius: BorderRadius.circular(20),
+                                            border: Border.all(color: Colors.orange.withOpacity(0.4)),
+                                          ),
+                                          child: const Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(Icons.directions_bus, size: 13, color: Colors.orange),
+                                              SizedBox(width: 4),
+                                              Text(
+                                                "On Ride",
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w800,
+                                                  color: Colors.orange,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       );
                                     }

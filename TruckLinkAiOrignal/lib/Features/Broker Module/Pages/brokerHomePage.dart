@@ -581,13 +581,14 @@ class _BrokerHomePageState extends State<BrokerHomePage> {
                                     pendingList.length - 1 - index;
                                 final request = pendingList[reversedIndex];
 
+                                final pickupCity = (request["pickupCity"] ?? request["pickup_city"] ?? "N/A").toString();
+                                final dropCity = (request["dropCity"] ?? request["drop_city"] ?? "N/A").toString();
+
                                 return BrokerIcomingReqContainer(
                                   orderNumber:
                                       (request["orderNo"] ?? "").toString(),
-                                  pickupLocation:
-                                      (request["pickupCity"] ?? "").toString(),
-                                  dropLocation:
-                                      (request["dropCity"] ?? "").toString(),
+                                  pickupLocation: pickupCity,
+                                  dropLocation: dropCity,
                                   date: (request["createdAt"] ??
                                           request["date"] ??
                                           "")
@@ -601,6 +602,8 @@ class _BrokerHomePageState extends State<BrokerHomePage> {
                                           0,
                                   itemType:
                                       (request["itemType"] ?? "").toString(),
+                                  vehicleType:
+                                      (request["vehicleType"] ?? request["vehicle_type"] ?? "").toString(),
                                   orderId:
                                       (request["orderId"] ?? "").toString(),
                                   onTap: () {

@@ -242,21 +242,11 @@ class _DriverOrdersPageState extends State<DriverOrdersPage>
 
   Widget _buildOrderCard(Map<String, dynamic> offer) {
     final String orderNo = (offer["order_no"] ?? offer["orderNo"] ?? offer["order_id"] ?? offer["orderId"] ?? "").toString();
-    final String pickup = (offer["pickup_city"] ?? offer["pickupCity"] ?? "N/A").toString();
-    final String drop = (offer["drop_city"] ?? offer["dropCity"] ?? "N/A").toString();
+    
+    final String pickupCity = (offer["pickup_city"] ?? offer["pickupCity"] ?? "N/A").toString();
+    final String dropCity = (offer["drop_city"] ?? offer["dropCity"] ?? "N/A").toString();
     final String date = (offer["date"] ?? offer["created_at"] ?? "Recent").toString();
     final String rawStatus = (offer["status"] ?? "pending").toString().toLowerCase();
-
-    String displayStatus = "Pending";
-    if (rawStatus == 'accepted_by_driver' || rawStatus == 'accepted') {
-      displayStatus = "Accepted";
-    } else if (rawStatus == 'in_transit' || rawStatus == 'in_progress' || rawStatus == 'arrived_at_pickup' || rawStatus == 'heading_to_drop') {
-      displayStatus = "In Transit";
-    } else if (rawStatus == 'completed' || rawStatus == 'delivered') {
-      displayStatus = "Delivered";
-    } else if (rawStatus == 'rejected_by_driver' || rawStatus == 'cancelled' || rawStatus == 'rejected') {
-      displayStatus = "Cancelled";
-    }
 
     return OrderContainer(
       onTap: () {
@@ -268,10 +258,10 @@ class _DriverOrdersPageState extends State<DriverOrdersPage>
         );
       },
       orderNumber: orderNo,
-      pickupLocation: pickup,
-      dropLocation: drop,
+      pickupLocation: pickupCity,
+      dropLocation: dropCity,
       date: date,
-      status: displayStatus,
+      status: rawStatus,
     );
   }
 

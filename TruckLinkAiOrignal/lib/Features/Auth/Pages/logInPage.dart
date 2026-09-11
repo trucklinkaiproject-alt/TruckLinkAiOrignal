@@ -47,21 +47,22 @@ class _LogInPageState extends State<LogInPage> {
     return BlocListener<AuthCubit, AuthState>(
       listener: (context, state) {
         if (state is AuthSuccess) {
-          Navigator.pushReplacement(
+          Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
               builder: (context) {
                 if (state.role == "User") {
-                  return ShipperBottomNavBar();
+                  return const ShipperBottomNavBar();
                 } else if (state.role == "Broker") {
-                  return BrokerBottomNavBar();
+                  return const BrokerBottomNavBar();
                 } else if (state.role == "Driver") {
-                  return TransporterHomePage();
+                  return const TransporterHomePage();
                 } else {
-                  return ShipperBottomNavBar();
+                  return const ShipperBottomNavBar();
                 }
               },
             ),
+            (route) => false,
           );
         }
 
@@ -240,21 +241,8 @@ class _LogInPageState extends State<LogInPage> {
                       PillTextField(
                         controller: passwordController,
                         hintText: "********",
-                        obscureText: obscurePassword,
+                        isPassword: true,
                         filled: false,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            obscurePassword
-                                ? Icons.visibility_off_outlined
-                                : Icons.visibility_outlined,
-                            color: Colors.grey,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              obscurePassword = !obscurePassword;
-                            });
-                          },
-                        ),
                       ),
 
                       const SizedBox(height: 14),

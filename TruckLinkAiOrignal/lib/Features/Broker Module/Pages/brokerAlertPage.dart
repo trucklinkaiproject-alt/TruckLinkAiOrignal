@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
 import 'package:trucklinkai_orignal/Core/Services/notificationNavigationService.dart';
 import 'package:trucklinkai_orignal/Core/Services/notificationService.dart';
-import 'package:trucklinkai_orignal/Features/Broker%20Module/Pages/brokerChatInboxPage.dart';
 
 class BrokerAlertPage extends StatefulWidget {
   const BrokerAlertPage({super.key});

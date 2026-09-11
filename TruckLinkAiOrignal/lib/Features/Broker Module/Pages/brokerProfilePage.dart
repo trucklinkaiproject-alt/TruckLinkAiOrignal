@@ -178,14 +178,17 @@ class BrokerProfilePage extends StatelessWidget {
                 icon: Icons.logout,
                 title: 'Log Out',
                 isDestructive: true,
-                onTap: () {
-                  context.read<AuthCubit>().logOut(context);
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => RoleSelectionPage(),
-                    ),
-                  );
+                onTap: () async {
+                  await context.read<AuthCubit>().logOut(context);
+                  if (context.mounted) {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const RoleSelectionPage(),
+                      ),
+                      (route) => false,
+                    );
+                  }
                 },
               ),
             ]),

@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
+import 'package:trucklinkai_orignal/Core/Constants/statusColors.dart';
 import 'package:trucklinkai_orignal/Core/Services/reviewService.dart';
 import 'package:trucklinkai_orignal/Core/Widgets/backArrowButton.dart';
 import 'package:trucklinkai_orignal/Features/Broker Module/Pages/brokerAssignDriverPage.dart';
@@ -82,8 +83,21 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
 
     final String userUid = (data["userUid"] ?? data["userId"] ?? data["user_uid"] ?? data["shipperId"] ?? "").toString();
 
-    final pickup = (data["pickupCity"] ?? data["pickup_city"] ?? "Pickup city not available").toString();
-    final drop = (data["dropCity"] ?? data["drop_city"] ?? "Drop city not available").toString();
+    final pickupCity = (data["pickupCity"] ?? data["pickup_city"] ?? "").toString();
+    final pickupAddress = (data["pickupComp"] ?? data["pickup_comp"] ?? data["pickupAddress"] ?? data["pickup_address"] ?? data["pickupLocation"] ?? "").toString();
+    final pickup = pickupAddress.isNotEmpty
+        ? (pickupCity.isNotEmpty && !pickupAddress.toLowerCase().contains(pickupCity.toLowerCase())
+            ? "$pickupAddress, $pickupCity"
+            : pickupAddress)
+        : (pickupCity.isNotEmpty ? pickupCity : "Pickup address not specified");
+
+    final dropCity = (data["dropCity"] ?? data["drop_city"] ?? "").toString();
+    final dropAddress = (data["dropComp"] ?? data["drop_comp"] ?? data["dropAddress"] ?? data["drop_address"] ?? data["dropLocation"] ?? "").toString();
+    final drop = dropAddress.isNotEmpty
+        ? (dropCity.isNotEmpty && !dropAddress.toLowerCase().contains(dropCity.toLowerCase())
+            ? "$dropAddress, $dropCity"
+            : dropAddress)
+        : (dropCity.isNotEmpty ? dropCity : "Drop address not specified");
 
     final itemType = (data["itemType"] ?? data["item_type"] ?? "Unknown").toString();
     final weight = (data["weight"] ?? "0").toString();
@@ -282,19 +296,104 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
 
                   SizedBox(height: isMobile ? 22 : 26),
 
-                  // -------- Route --------
-                  const _SectionLabel("Route"),
+                  // -------- Route (Full Addresses) --------
+                  const _SectionLabel("Complete Route"),
                   const SizedBox(height: 10),
                   _InfoCard(
-                    icon: Icons.location_on_outlined,
+                    icon: Icons.alt_route_rounded,
                     iconColor: Appcolors.secondaryPurple,
-                    child: Text(
-                      "$pickup  ➜  $drop",
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              margin: const EdgeInsets.only(top: 3),
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: Appcolors.tertiaryGreen,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "PICKUP LOCATION",
+                                    style: TextStyle(
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.grey,
+                                      letterSpacing: 0.4,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    pickup,
+                                    style: const TextStyle(
+                                      fontSize: 13.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 3.5, top: 4, bottom: 4),
+                          child: Container(
+                            width: 1.5,
+                            height: 16,
+                            color: Colors.grey.withOpacity(0.35),
+                          ),
+                        ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              margin: const EdgeInsets.only(top: 3),
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: Colors.redAccent,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "DROP LOCATION",
+                                    style: TextStyle(
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.grey,
+                                      letterSpacing: 0.4,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    drop,
+                                    style: const TextStyle(
+                                      fontSize: 13.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
 
@@ -476,87 +575,70 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
 
                             SizedBox(height: isMobile ? 20 : 24),
                           ],                          // -------- BROKER REQUEST STATUS SECTION --------
-                          const _SectionLabel("Broker Request Status"),
+                          const _SectionLabel("Order & Shipment Status"),
                           const SizedBox(height: 10),
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: (rawStatus == 'rejected' || rawStatus == 'cancelled')
-                                  ? Colors.red.withOpacity(0.08)
-                                  : isPending
-                                      ? Colors.amber.withOpacity(0.08)
-                                      : Appcolors.secondaryPurple.withOpacity(0.08),
-                              borderRadius: BorderRadius.circular(18),
-                              border: Border.all(
-                                color: (rawStatus == 'rejected' || rawStatus == 'cancelled')
-                                    ? Colors.red.withOpacity(0.3)
-                                    : isPending
-                                        ? Colors.amber.withOpacity(0.3)
-                                        : Appcolors.secondaryPurple.withOpacity(0.3),
-                                width: 1.2,
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: (rawStatus == 'rejected' || rawStatus == 'cancelled')
-                                        ? Colors.red
-                                        : isPending
-                                            ? Colors.amber[700]
-                                            : Appcolors.secondaryPurple,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    (rawStatus == 'rejected' || rawStatus == 'cancelled')
-                                        ? Icons.cancel_rounded
-                                        : isPending
-                                            ? Icons.hourglass_top_rounded
-                                            : Icons.check_circle_rounded,
-                                    color: Colors.white,
-                                    size: 18,
+                          Builder(
+                            builder: (context) {
+                              final statusConfig = StatusColors.getStatusConfig(rawStatus);
+                              return Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: statusConfig.backgroundColor,
+                                  borderRadius: BorderRadius.circular(18),
+                                  border: Border.all(
+                                    color: statusConfig.borderColor,
+                                    width: 1.2,
                                   ),
                                 ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        (rawStatus == 'rejected' || rawStatus == 'cancelled')
-                                            ? "Request Rejected"
-                                            : isPending
-                                                ? "Pending Broker Action"
-                                                : "Accepted by Broker",
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w800,
-                                          color: (rawStatus == 'rejected' || rawStatus == 'cancelled')
-                                              ? Colors.red[800]
-                                              : isPending
-                                                  ? Colors.amber[900]
-                                                  : Appcolors.secondaryPurple,
-                                        ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: statusConfig.color,
+                                        shape: BoxShape.circle,
                                       ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        (rawStatus == 'rejected' || rawStatus == 'cancelled')
-                                            ? "This request was declined."
-                                            : isPending
-                                                ? "Submit a quote or accept the request to proceed."
-                                                : "Order is confirmed and active under your management.",
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey[700],
-                                        ),
+                                      child: Icon(
+                                        statusConfig.icon,
+                                        color: Colors.white,
+                                        size: 18,
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            statusConfig.label,
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w800,
+                                              color: statusConfig.color,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            (rawStatus == 'rejected' || rawStatus == 'cancelled')
+                                                ? "This request was declined."
+                                                : isPending
+                                                    ? "Submit a quote or accept the request to proceed."
+                                                    : rawStatus == 'fare_offered'
+                                                        ? "Quote has been sent to customer. Waiting for customer approval."
+                                                        : "Order is confirmed and active under your management.",
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey[700],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
+                              );
+                            },
                           ),
 
                           SizedBox(height: isMobile ? 22 : 26),

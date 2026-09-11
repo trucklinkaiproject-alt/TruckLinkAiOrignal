@@ -1,465 +1,6 @@
-// // // import 'package:flutter/material.dart';
-// // // import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
-
-// // // class BrokerIcomingReqContainer extends StatelessWidget {
-// // //   const BrokerIcomingReqContainer({
-// // //     super.key,
-// // //     required this.orderNumber,
-// // //     required this.pickupLocation,
-// // //     required this.dropLocation,
-// // //     required this.date,
-// // //     required this.status,
-// // //     required this.weight,
-// // //     required this.itemType,
-// // //     this.onTap, required this.orderId,
-// // //   });
-// // //   final String orderNumber;
-// // //   final String pickupLocation;
-// // //   final String dropLocation;
-// // //   final String date;
-// // //   final int weight;
-// // //   final String itemType;
-// // //   final String status;
-// // //   final String orderId;
-// // //   final VoidCallback? onTap;
-
-// // //   @override
-// // //   Widget build(BuildContext context) {
-// // //     return InkWell(
-// // //       onTap: onTap,
-// // //       child: Container(
-// // //         margin: EdgeInsets.only(bottom: 10, left: 5, right: 5),
-// // //         decoration: BoxDecoration(
-// // //           color: const Color.fromARGB(255, 252, 253, 255),
-// // //           borderRadius: BorderRadius.circular(10),
-// // //           boxShadow: [
-// // //             BoxShadow(
-// // //               color: Colors.grey.withOpacity(0.3),
-// // //               spreadRadius: 1,
-// // //               blurRadius: 1,
-// // //               offset: Offset(0, 1), // changes position of shadow
-// // //             ),
-// // //           ],
-// // //         ),
-// // //         width: double.infinity,
-// // //         //height: 80,
-// // //         padding: EdgeInsets.symmetric(horizontal: 10),
-
-// // //         child: Column(
-// // //           mainAxisAlignment: MainAxisAlignment.center,
-// // //           crossAxisAlignment: CrossAxisAlignment.start,
-
-// // //           children: [
-// // //             Text(
-// // //               "Order #$orderNumber",
-// // //               style: TextStyle(
-// // //                 color: Colors.black,
-// // //                 fontSize: 14,
-// // //                 fontWeight: FontWeight.bold,
-// // //               ),
-// // //             ),
-// // //             Flexible(
-
-// // //               child: Row(
-// // //                 children: [
-// // //                   Text(
-// // //                     pickupLocation,
-// // //                     overflow: TextOverflow.ellipsis,
-// // //                     style: TextStyle(
-// // //                       color: const Color.fromARGB(255, 123, 123, 123),
-// // //                       fontSize: 11,
-// // //                     ),
-// // //                   ),
-// // //                   Icon(
-// // //                     Icons.arrow_forward,
-// // //                     size: 11,
-// // //                     color: const Color.fromARGB(255, 123, 123, 123),
-// // //                   ),
-// // //                   Text(
-// // //                     dropLocation,
-// // //                     overflow: TextOverflow.ellipsis,
-// // //                     style: TextStyle(
-// // //                       color: const Color.fromARGB(255, 123, 123, 123),
-// // //                       fontSize: 11,
-// // //                     ),
-// // //                   ),
-// // //                   Spacer(),
-// // //                   Container(
-// // //                     padding: EdgeInsets.all(4),
-// // //                     decoration: BoxDecoration(
-// // //                       borderRadius: BorderRadius.circular(5),
-// // //                       color: const Color.fromARGB(255, 224, 215, 245),
-// // //                     ),
-// // //                     child: Text(
-// // //                       "New",
-// // //                       style: TextStyle(
-// // //                         color: Appcolors.secondaryPurple,
-// // //                         fontWeight: FontWeight.bold,
-// // //                         fontSize: 11,
-// // //                       ),
-// // //                     ),
-// // //                   ),
-// // //                 ],
-// // //               ),
-// // //             ),
-// // //             Row(
-// // //               children: [
-// // //                 Text(
-// // //                   weight.toString(),
-// // //                   style: TextStyle(
-// // //                     fontWeight: FontWeight.bold,
-// // //                     color: Colors.black,
-// // //                     fontSize: 11,
-// // //                   ),
-// // //                 ),
-// // //                 Icon(
-// // //                   Icons.linear_scale_sharp,
-// // //                   size: 11,
-// // //                   color: const Color.fromARGB(255, 51, 51, 51),
-// // //                 ),
-// // //                 Text(
-// // //                   itemType,
-// // //                   style: TextStyle(
-// // //                     color: Colors.black,
-// // //                     fontSize: 11,
-// // //                     fontWeight: FontWeight.bold,
-// // //                   ),
-// // //                 ),
-// // //               ],
-// // //             ),
-// // //             Text(
-// // //               date,
-// // //               style: TextStyle(
-// // //                 color: const Color.fromARGB(255, 123, 123, 123),
-// // //                 fontSize: 11,
-// // //               ),
-// // //             ),
-// // //           ],
-// // //         ),
-// // //       ),
-// // //     );
-// // //   }
-// // // }
-// // import 'package:flutter/material.dart';
-// // import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
-
-// // class BrokerIcomingReqContainer extends StatelessWidget {
-// //   const BrokerIcomingReqContainer({
-// //     super.key,
-// //     required this.orderNumber,
-// //     required this.pickupLocation,
-// //     required this.dropLocation,
-// //     required this.date,
-// //     required this.status,
-// //     required this.weight,
-// //     required this.itemType,
-// //     this.onTap,
-// //     required this.orderId,
-// //   });
-// //   final String orderNumber;
-// //   final String pickupLocation;
-// //   final String dropLocation;
-// //   final String date;
-// //   final int weight;
-// //   final String itemType;
-// //   final String status;
-// //   final String orderId;
-// //   final VoidCallback? onTap;
-
-// //   @override
-// //   Widget build(BuildContext context) {
-// //     return InkWell(
-// //       onTap: onTap,
-// //       child: Container(
-// //         margin: const EdgeInsets.only(bottom: 10, left: 5, right: 5),
-// //         decoration: BoxDecoration(
-// //           color: const Color.fromARGB(255, 252, 253, 255),
-// //           borderRadius: BorderRadius.circular(10),
-// //           boxShadow: [
-// //             BoxShadow(
-// //               color: Colors.grey.withOpacity(0.3),
-// //               spreadRadius: 1,
-// //               blurRadius: 1,
-// //               offset: const Offset(0, 1),
-// //             ),
-// //           ],
-// //         ),
-// //         width: double.infinity,
-// //         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-// //         child: Column(
-// //           mainAxisAlignment: MainAxisAlignment.center,
-// //           crossAxisAlignment: CrossAxisAlignment.start,
-// //           children: [
-// //             Text(
-// //               "Order #$orderNumber",
-// //               overflow: TextOverflow.ellipsis,
-// //               maxLines: 1,
-// //               style: const TextStyle(
-// //                 color: Colors.black,
-// //                 fontSize: 14,
-// //                 fontWeight: FontWeight.bold,
-// //               ),
-// //             ),
-// //             Row(
-// //               children: [
-// //                 Flexible(
-// //                   child: Text(
-// //                     pickupLocation,
-// //                     overflow: TextOverflow.ellipsis,
-// //                     maxLines: 1,
-// //                     style: const TextStyle(
-// //                       color: Color.fromARGB(255, 123, 123, 123),
-// //                       fontSize: 11,
-// //                     ),
-// //                   ),
-// //                 ),
-// //                 const Icon(
-// //                   Icons.arrow_forward,
-// //                   size: 11,
-// //                   color: Color.fromARGB(255, 123, 123, 123),
-// //                 ),
-// //                 Flexible(
-// //                   child: Text(
-// //                     dropLocation,
-// //                     overflow: TextOverflow.ellipsis,
-// //                     maxLines: 1,
-// //                     style: const TextStyle(
-// //                       color: Color.fromARGB(255, 123, 123, 123),
-// //                       fontSize: 11,
-// //                     ),
-// //                   ),
-// //                 ),
-// //                 const SizedBox(width: 8),
-// //                 Container(
-// //                   padding: const EdgeInsets.all(4),
-// //                   decoration: BoxDecoration(
-// //                     borderRadius: BorderRadius.circular(5),
-// //                     color: const Color.fromARGB(255, 224, 215, 245),
-// //                   ),
-// //                   child: Text(
-// //                     "New",
-// //                     style: TextStyle(
-// //                       color: Appcolors.secondaryPurple,
-// //                       fontWeight: FontWeight.bold,
-// //                       fontSize: 11,
-// //                     ),
-// //                   ),
-// //                 ),
-// //               ],
-// //             ),
-// //             const SizedBox(height: 4),
-// //             Row(
-// //               children: [
-// //                 Text(
-// //                   weight.toString(),
-// //                   style: const TextStyle(
-// //                     fontWeight: FontWeight.bold,
-// //                     color: Colors.black,
-// //                     fontSize: 11,
-// //                   ),
-// //                 ),
-// //                 const Icon(
-// //                   Icons.linear_scale_sharp,
-// //                   size: 11,
-// //                   color: Color.fromARGB(255, 51, 51, 51),
-// //                 ),
-// //                 const SizedBox(width: 4),
-// //                 Flexible(
-// //                   child: Text(
-// //                     itemType,
-// //                     overflow: TextOverflow.ellipsis,
-// //                     maxLines: 1,
-// //                     style: const TextStyle(
-// //                       color: Colors.black,
-// //                       fontSize: 11,
-// //                       fontWeight: FontWeight.bold,
-// //                     ),
-// //                   ),
-// //                 ),
-// //               ],
-// //             ),
-// //             const SizedBox(height: 4),
-// //             Text(
-// //               date,
-// //               overflow: TextOverflow.ellipsis,
-// //               maxLines: 1,
-// //               style: const TextStyle(
-// //                 color: Color.fromARGB(255, 123, 123, 123),
-// //                 fontSize: 11,
-// //               ),
-// //             ),
-// //           ],
-// //         ),
-// //       ),
-// //     );
-// //   }
-// // }
-
-// import 'package:flutter/material.dart';
-// import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
-
-// class BrokerIcomingReqContainer extends StatelessWidget {
-//   const BrokerIcomingReqContainer({
-//     super.key,
-//     required this.orderNumber,
-//     required this.pickupLocation,
-//     required this.dropLocation,
-//     required this.date,
-//     required this.status,
-//     required this.weight,
-//     required this.itemType,
-//     this.onTap,
-//     required this.orderId,
-//   });
-//   final String orderNumber;
-//   final String pickupLocation;
-//   final String dropLocation;
-//   final String date;
-//   final int weight;
-//   final String itemType;
-//   final String status;
-//   final String orderId;
-//   final VoidCallback? onTap;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return InkWell(
-//       onTap: onTap,
-//       child: Container(
-//         margin: const EdgeInsets.only(bottom: 10, left: 5, right: 5),
-//         decoration: BoxDecoration(
-//           color: const Color.fromARGB(255, 252, 253, 255),
-//           borderRadius: BorderRadius.circular(10),
-//           boxShadow: [
-//             BoxShadow(
-//               color: Colors.grey.withOpacity(0.3),
-//               spreadRadius: 1,
-//               blurRadius: 1,
-//               offset: const Offset(0, 1),
-//             ),
-//           ],
-//         ),
-//         width: double.infinity,
-//         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-//         child: Column(
-//           mainAxisAlignment: MainAxisAlignment.center,
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             Text(
-//               "Order #$orderNumber",
-//               overflow: TextOverflow.ellipsis,
-//               maxLines: 1,
-//               style: const TextStyle(
-//                 color: Colors.black,
-//                 fontSize: 14,
-//                 fontWeight: FontWeight.bold,
-//               ),
-//             ),
-//             Row(
-//               children: [
-//                 // Everything before the badge shares this fixed space,
-//                 // so the badge always lands at the far right edge.
-//                 Expanded(
-//                   child: Row(
-//                     children: [
-//                       Flexible(
-//                         child: Text(
-//                           pickupLocation,
-//                           overflow: TextOverflow.ellipsis,
-//                           maxLines: 1,
-//                           style: const TextStyle(
-//                             color: Color.fromARGB(255, 123, 123, 123),
-//                             fontSize: 11,
-//                           ),
-//                         ),
-//                       ),
-//                       const Icon(
-//                         Icons.arrow_forward,
-//                         size: 14,
-
-//                         color: Color.fromARGB(255, 30, 30, 30),
-//                       ),
-//                       Flexible(
-//                         child: Text(
-//                           dropLocation,
-//                           overflow: TextOverflow.ellipsis,
-//                           maxLines: 1,
-//                           style: const TextStyle(
-//                             color: Color.fromARGB(255, 123, 123, 123),
-//                             fontSize: 11,
-//                           ),
-//                         ),
-//                       ),
-//                     ],
-//                   ),
-//                 ),
-//                 const SizedBox(width: 8),
-//                 Container(
-//                   padding: const EdgeInsets.all(4),
-//                   decoration: BoxDecoration(
-//                     borderRadius: BorderRadius.circular(5),
-//                     color: const Color.fromARGB(255, 224, 215, 245),
-//                   ),
-//                   child: Text(
-//                     "New",
-//                     style: TextStyle(
-//                       color: Appcolors.secondaryPurple,
-//                       fontWeight: FontWeight.bold,
-//                       fontSize: 11,
-//                     ),
-//                   ),
-//                 ),
-//               ],
-//             ),
-//             const SizedBox(height: 4),
-//             Row(
-//               children: [
-//                 Text(
-//                   weight.toString(),
-//                   style: const TextStyle(
-//                     fontWeight: FontWeight.bold,
-//                     color: Colors.black,
-//                     fontSize: 11,
-//                   ),
-//                 ),
-//                 const Icon(
-//                   Icons.linear_scale_sharp,
-//                   size: 11,
-//                   color: Color.fromARGB(255, 51, 51, 51),
-//                 ),
-//                 const SizedBox(width: 4),
-//                 Flexible(
-//                   child: Text(
-//                     itemType,
-//                     overflow: TextOverflow.ellipsis,
-//                     maxLines: 1,
-//                     style: const TextStyle(
-//                       color: Colors.black,
-//                       fontSize: 11,
-//                       fontWeight: FontWeight.bold,
-//                     ),
-//                   ),
-//                 ),
-//               ],
-//             ),
-//             const SizedBox(height: 4),
-//             Text(
-//               date,
-//               overflow: TextOverflow.ellipsis,
-//               maxLines: 1,
-//               style: const TextStyle(
-//                 color: Color.fromARGB(255, 123, 123, 123),
-//                 fontSize: 11,
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
 import 'package:flutter/material.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
+import 'package:trucklinkai_orignal/Core/Constants/statusColors.dart';
 
 class BrokerIcomingReqContainer extends StatelessWidget {
   const BrokerIcomingReqContainer({
@@ -471,18 +12,21 @@ class BrokerIcomingReqContainer extends StatelessWidget {
     required this.status,
     required this.weight,
     required this.itemType,
+    this.vehicleType,
     this.onTap,
     required this.orderId,
     this.onAccept,
     this.onSubmitQuote,
     this.onReject,
   });
+
   final String orderNumber;
   final String pickupLocation;
   final String dropLocation;
   final String date;
   final int weight;
   final String itemType;
+  final String? vehicleType;
   final String status;
   final String orderId;
   final VoidCallback? onTap;
@@ -493,200 +37,233 @@ class BrokerIcomingReqContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final quoteAction = onSubmitQuote ?? onAccept;
+    final Color statusColor = StatusColors.getColor(status);
+    final String statusLabel = StatusColors.getLabel(status, role: 'Broker');
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(18),
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white,
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 14, left: 4, right: 4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(18),
+        child: InkWell(
           borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // -------- Order # + New badge --------
-            Row(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Text(
-                    "Order #$orderNumber",
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                    style: const TextStyle(
-                      color: Colors.black87,
-                      fontSize: 14.5,
-                      fontWeight: FontWeight.w800,
+                // -------- Order # + Status badge --------
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        "Order #$orderNumber",
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: const TextStyle(
+                          color: Colors.black87,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        color: statusColor.withOpacity(0.12),
+                      ),
+                      child: Text(
+                        statusLabel,
+                        style: TextStyle(
+                          color: statusColor,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
+
+                const SizedBox(height: 12),
+
+                // -------- CITY-LEVEL ROUTE --------
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: Appcolors.secondaryPurple.withOpacity(0.12),
+                    color: const Color(0xFFF8F9FA),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Text(
-                    "New",
-                    style: TextStyle(
-                      color: Appcolors.secondaryPurple,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 11,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 8),
-
-            // -------- Route --------
-            Row(
-              children: [
-                Icon(Icons.circle, size: 7, color: Appcolors.secondaryPurple),
-                const SizedBox(width: 6),
-                Flexible(
-                  child: Text(
-                    pickupLocation,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
-                  child: Icon(
-                    Icons.arrow_forward,
-                    size: 13,
-                    color: Colors.grey[400],
-                  ),
-                ),
-                Icon(Icons.location_on, size: 12, color: Colors.grey[500]),
-                const SizedBox(width: 4),
-                Flexible(
-                  child: Text(
-                    dropLocation,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 10),
-            Divider(height: 1, color: Colors.grey.withOpacity(0.12)),
-            const SizedBox(height: 10),
-
-            // -------- Weight / item type / date --------
-            Row(
-              children: [
-                Icon(Icons.scale_outlined, size: 14, color: Colors.grey[500]),
-                const SizedBox(width: 4),
-                Text(
-                  "$weight kg",
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black87,
-                    fontSize: 11.5,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Icon(
-                  Icons.inventory_2_outlined,
-                  size: 13,
-                  color: Colors.grey[500],
-                ),
-                const SizedBox(width: 4),
-                Flexible(
-                  child: Text(
-                    itemType,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                    style: const TextStyle(
-                      color: Colors.black87,
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  date,
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                  style: TextStyle(color: Colors.grey[400], fontSize: 11),
-                ),
-              ],
-            ),
-
-            if (quoteAction != null || onReject != null) ...[
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  if (onReject != null)
-                    Expanded(
-                      child: SizedBox(
-                        height: 38,
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.red[700],
-                            side: BorderSide(color: Colors.red.withOpacity(0.4)),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(19),
-                            ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.trip_origin_rounded,
+                        size: 13,
+                        color: Appcolors.secondaryPurple,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          pickupLocation.isNotEmpty ? pickupLocation : "Pickup",
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                            color: Colors.black87,
                           ),
-                          onPressed: onReject,
-                          child: const Text(
-                            "Reject",
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
-                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                    ),
-                  if (quoteAction != null && onReject != null) const SizedBox(width: 10),
-                  if (quoteAction != null)
-                    Expanded(
-                      child: SizedBox(
-                        height: 38,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Appcolors.secondaryPurple,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(19),
-                            ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 6),
+                        child: Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 14,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      const Icon(
+                        Icons.location_on_rounded,
+                        size: 15,
+                        color: Colors.redAccent,
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          dropLocation.isNotEmpty ? dropLocation : "Drop",
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                            color: Colors.black87,
                           ),
-                          onPressed: quoteAction,
-                          child: const Text(
-                            "Submit Quote",
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // -------- Weight / Item / Vehicle / Date --------
+                Row(
+                  children: [
+                    Icon(Icons.inventory_2_outlined, size: 14, color: Colors.grey[600]),
+                    const SizedBox(width: 4),
+                    Text(
+                      itemType,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black87,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Icon(Icons.scale_outlined, size: 14, color: Colors.grey[600]),
+                    const SizedBox(width: 4),
+                    Text(
+                      "$weight kg",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                        fontSize: 12,
+                      ),
+                    ),
+                    if (vehicleType != null && vehicleType!.isNotEmpty) ...[
+                      const SizedBox(width: 10),
+                      Icon(Icons.local_shipping_outlined, size: 14, color: Colors.grey[600]),
+                      const SizedBox(width: 4),
+                      Text(
+                        vehicleType!,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                    const Spacer(),
+                    Text(
+                      date,
+                      style: TextStyle(color: Colors.grey[500], fontSize: 11),
+                    ),
+                  ],
+                ),
+
+                // -------- Single-Tap Action Buttons --------
+                if (quoteAction != null || onReject != null) ...[
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      if (onReject != null)
+                        Expanded(
+                          child: SizedBox(
+                            height: 40,
+                            child: OutlinedButton(
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.red[700],
+                                side: BorderSide(color: Colors.red.withOpacity(0.4)),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
+                              onPressed: onReject,
+                              child: const Text(
+                                "Reject",
+                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
+                      if (quoteAction != null && onReject != null) const SizedBox(width: 10),
+                      if (quoteAction != null)
+                        Expanded(
+                          child: SizedBox(
+                            height: 40,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Appcolors.secondaryPurple,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
+                              onPressed: quoteAction,
+                              child: const Text(
+                                "Submit Quote",
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ],
-              ),
-            ],
-          ],
+              ],
+            ),
+          ),
         ),
       ),
     );

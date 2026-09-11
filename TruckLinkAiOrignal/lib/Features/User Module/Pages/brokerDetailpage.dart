@@ -730,13 +730,19 @@ class _BrokerDetailPageState extends State<BrokerDetailPage> {
 
                                       if (!mounted) return;
 
-                                      Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              const ShipperBottomNavBar(),
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text("Request sent to broker successfully!"),
+                                          backgroundColor: Appcolors.tertiaryGreen,
                                         ),
                                       );
+
+                                      if (Navigator.canPop(context)) {
+                                        Navigator.pop(context);
+                                      }
+                                      if (Navigator.canPop(context)) {
+                                        Navigator.pop(context);
+                                      }
                                     },
                             );
                           },

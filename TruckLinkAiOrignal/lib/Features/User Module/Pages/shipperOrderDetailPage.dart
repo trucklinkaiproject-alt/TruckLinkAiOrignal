@@ -1,12 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
+import 'package:trucklinkai_orignal/Core/Constants/statusColors.dart';
 import 'package:trucklinkai_orignal/Core/Services/reviewService.dart';
 import 'package:trucklinkai_orignal/Core/Widgets/backArrowButton.dart';
 import 'package:trucklinkai_orignal/Core/Widgets/builtyPage.dart';
 import 'package:trucklinkai_orignal/Features/User Module/Pages/orderTrackingPage.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/Pages/brokerchatpage.dart';
+import 'package:trucklinkai_orignal/Features/User%20Module/bloc/userBloc/usercubit.dart';
 
 class ShipperOrderDetailPage extends StatefulWidget {
   final Map<String, dynamic> orderDetails;
@@ -595,6 +598,47 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                                                 color: Colors.grey[600],
                                               ),
                                             ),
+                                            if (driverUid.isNotEmpty && driverUid != 'N/A') ...[
+                                              const SizedBox(height: 12),
+                                              SizedBox(
+                                                width: double.infinity,
+                                                height: 42,
+                                                child: ElevatedButton.icon(
+                                                  style: ElevatedButton.styleFrom(
+                                                    backgroundColor: Appcolors.tertiaryGreen,
+                                                    elevation: 0,
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(21),
+                                                    ),
+                                                  ),
+                                                  onPressed: () {
+                                                    final String orderNoStr = (orderDetails["orderNo"] ?? orderId).toString();
+                                                    final String chatId = getDeterministicChatId(userUid, driverUid);
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (_) => BrokerChatPage(
+                                                          chatId: chatId,
+                                                          receiverId: driverUid,
+                                                          receiverName: driverName.isNotEmpty ? driverName : 'Driver',
+                                                          receiverRole: 'Driver',
+                                                          orderId: orderNoStr,
+                                                        ),
+                                                      ),
+                                                    );
+                                                  },
+                                                  icon: const Icon(Icons.chat_bubble_outline_rounded, size: 17, color: Colors.white),
+                                                  label: const Text(
+                                                    "Chat with Driver",
+                                                    style: TextStyle(
+                                                      fontSize: 13.5,
+                                                      fontWeight: FontWeight.w700,
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
                                           ],
                                         ),
                                       ),
@@ -667,65 +711,237 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
 
                       SizedBox(height: isMobile ? 30 : 36),
 
-                      const _SectionLabel("Accepted Amount"),
+                      const _SectionLabel("Shipment Quote & Status"),
                       const SizedBox(height: 10),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 22,
-                          horizontal: 20,
-                        ),
-                        decoration: BoxDecoration(
-                          color: status != "rejected"
-                              ? Appcolors.tertiaryGreen.withOpacity(0.08)
-                              : Colors.red.withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border.all(
-                            color: status != "rejected"
-                                ? Appcolors.tertiaryGreen.withOpacity(0.3)
-                                : Colors.red.withOpacity(0.3),
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  status != "rejected"
-                                      ? Icons.check_circle
-                                      : Icons.remove_circle_outline_sharp,
-                                  color: status != "rejected"
-                                      ? Appcolors.tertiaryGreen
-                                      : Colors.red,
-                                  size: 18,
+                      Builder(
+                        builder: (context) {
+                          final String rawStatusLower = status.toLowerCase();
+                          final bool isPending = rawStatusLower == "pending" || rawStatusLower == "waiting";
+                          final bool isQuoteOffered = rawStatusLower == "fare_offered" || rawStatusLower == "counter_quote";
+                          final bool isAccepted = rawStatusLower == "accepted" ||
+                              rawStatusLower == "accepted_by_user" ||
+                              rawStatusLower == "driver_assigned" ||
+                              rawStatusLower == "driver_offer_sent" ||
+                              rawStatusLower == "accepted_by_driver" ||
+                              rawStatusLower == "in_transit" ||
+                              rawStatusLower == "completed";
+                          final bool isRejected = rawStatusLower == "rejected" || rawStatusLower == "cancelled";
+
+                          if (isPending) {
+                            return Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(18),
+                              decoration: BoxDecoration(
+                                color: StatusColors.amberWarning.withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(18),
+                                border: Border.all(
+                                  color: StatusColors.amberWarning.withOpacity(0.35),
                                 ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  status != "rejected"
-                                      ? "Broker accepted your quote at"
-                                      : "Broker rejected Your quote",
-                                  style: TextStyle(
-                                    fontSize: 12.5,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.grey[700],
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(
+                                        Icons.hourglass_top_rounded,
+                                        color: StatusColors.amberDark,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        "Waiting for broker response",
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.amber[900],
+                                        ),
+                                      ),
+                                    ],
                                   ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    "The broker has received your shipment request and will submit a quote shortly.",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey[700],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+
+                          if (isQuoteOffered) {
+                            return Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(18),
+                              decoration: BoxDecoration(
+                                color: Appcolors.primaryBlue.withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(18),
+                                border: Border.all(
+                                  color: Appcolors.primaryBlue.withOpacity(0.35),
                                 ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            status != "rejected"
-                                ? Text(
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(
+                                        Icons.local_offer_rounded,
+                                        color: Appcolors.primaryBlue,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      const Text(
+                                        "Broker sent a quote",
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w700,
+                                          color: Appcolors.primaryBlue,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    "Quoted Amount: PKR ${_formatCurrency(acceptedAmount)}",
+                                    style: const TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w900,
+                                      color: Appcolors.primaryBlue,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: OutlinedButton(
+                                          style: OutlinedButton.styleFrom(
+                                            foregroundColor: Colors.red[700],
+                                            side: BorderSide(color: Colors.red.withOpacity(0.4)),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(14),
+                                            ),
+                                          ),
+                                          onPressed: () {
+                                            context.read<UserCubit>().rejectOffer(orderId);
+                                          },
+                                          child: const Text(
+                                            "Decline",
+                                            style: TextStyle(fontWeight: FontWeight.w700),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Appcolors.tertiaryGreen,
+                                            elevation: 0,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(14),
+                                            ),
+                                          ),
+                                          onPressed: () {
+                                            context.read<UserCubit>().acceptOffer(orderId);
+                                          },
+                                          child: const Text(
+                                            "Accept Quote",
+                                            style: TextStyle(fontWeight: FontWeight.w800, color: Colors.white),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+
+                          if (isAccepted && acceptedAmount > 0) {
+                            return Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 22,
+                                horizontal: 20,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Appcolors.tertiaryGreen.withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(18),
+                                border: Border.all(
+                                  color: Appcolors.tertiaryGreen.withOpacity(0.3),
+                                ),
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(
+                                        Icons.check_circle,
+                                        color: Appcolors.tertiaryGreen,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        "Broker accepted your shipment at",
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.grey[800],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
                                     "PKR ${_formatCurrency(acceptedAmount)}",
                                     style: const TextStyle(
                                       fontSize: 28,
                                       fontWeight: FontWeight.w900,
                                       color: Appcolors.tertiaryGreen,
                                     ),
-                                  )
-                                : const Text(""),
-                          ],
-                        ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+
+                          // Rejected / cancelled fallback
+                          return Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(18),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(18),
+                              border: Border.all(
+                                color: Colors.red.withOpacity(0.3),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.remove_circle_outline_sharp,
+                                  color: Colors.red,
+                                  size: 18,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  isRejected ? "Request Declined" : "Waiting for Quote",
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: isRejected ? Colors.red[800] : Colors.grey[700],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
                       ),
 
                       SizedBox(height: isMobile ? 30 : 36),

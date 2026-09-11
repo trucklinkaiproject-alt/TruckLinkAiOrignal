@@ -182,43 +182,16 @@ class _SignUpPageState extends State<SignUpPage> {
                       PillTextField(
                         controller: passwordController,
                         hintText: "********",
-                        obscureText: obscurePassword,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            obscurePassword
-                                ? Icons.visibility_off_outlined
-                                : Icons.visibility_outlined,
-                            color: Colors.grey,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              obscurePassword = !obscurePassword;
-                            });
-                          },
-                        ),
+                        isPassword: true,
                       ),
 
-                      const SizedBox(height: 16),
-                      const SectionLabel("Confirm Password"),
-                      const SizedBox(height: 8),
+                       const SizedBox(height: 16),
+                       const SectionLabel("Confirm Password"),
+                       const SizedBox(height: 8),
                       PillTextField(
                         controller: confirmPasswordController,
                         hintText: "********",
-                        obscureText: obscureConfirmPassword,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            obscureConfirmPassword
-                                ? Icons.visibility_off_outlined
-                                : Icons.visibility_outlined,
-                            color: Colors.grey,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              obscureConfirmPassword =
-                                  !obscureConfirmPassword;
-                            });
-                          },
-                        ),
+                        isPassword: true,
                       ),
 
                       SizedBox(height: isMobile ? 26 : 32),

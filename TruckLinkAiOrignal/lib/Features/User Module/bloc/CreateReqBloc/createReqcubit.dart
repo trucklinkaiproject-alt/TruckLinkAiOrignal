@@ -61,13 +61,11 @@ class CreateReqCubit extends Cubit<CreateReqState> {
         status: orderStatus,
         date: DateFormat('dd-MM-yyyy, hh:mm a').format(DateTime.now()),
       );
-      // If the request is successful, emit the success state
-      emit(CreateReqSuccessState("Request created successfully!"));
-
       await _firestore.collection("AppData").doc("appVariables").update({
-        'orderNo': (int.parse(orderNo) + 1)
-            .toString(), // Increment order number for next request
+        'orderNo': (int.parse(orderNo) + 1).toString(),
       });
+
+      emit(CreateReqSuccessState("Request created successfully!"));
     } catch (e) {
       // If there's an error, emit the error state with the error message
       emit(CreateReqErrorState("Failed to create request: ${e.toString()}"));

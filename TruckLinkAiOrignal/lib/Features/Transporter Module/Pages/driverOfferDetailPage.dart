@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
+import 'package:trucklinkai_orignal/Core/Constants/statusColors.dart';
 import 'package:trucklinkai_orignal/Core/Widgets/backArrowButton.dart';
 import 'package:trucklinkai_orignal/Features/Transporter Module/bloc/driverOffersBloc/driverOffersCubit.dart';
 import 'package:trucklinkai_orignal/Features/Transporter Module/bloc/driverOffersBloc/driverOffersState.dart';
@@ -40,10 +41,22 @@ class DriverOfferDetailPage extends StatelessWidget {
 
             final String brokerName = (liveOffer['broker_name'] ?? 'Broker').toString();
             final String brokerId = (liveOffer['broker_id'] ?? '').toString();
-            final String pickupCity = (liveOffer['pickup_city'] ?? 'N/A').toString();
-            final String dropCity = (liveOffer['drop_city'] ?? 'N/A').toString();
-            final String pickupComp = (liveOffer['pickup_comp'] ?? '').toString();
-            final String dropComp = (liveOffer['drop_comp'] ?? '').toString();
+            final String pickupCity = (liveOffer['pickup_city'] ?? liveOffer['pickupCity'] ?? '').toString();
+            final String pickupAddress = (liveOffer['pickup_comp'] ?? liveOffer['pickupComp'] ?? liveOffer['pickup_address'] ?? liveOffer['pickupAddress'] ?? '').toString();
+            final String pickup = pickupAddress.isNotEmpty
+                ? (pickupCity.isNotEmpty && !pickupAddress.toLowerCase().contains(pickupCity.toLowerCase())
+                    ? "$pickupAddress, $pickupCity"
+                    : pickupAddress)
+                : (pickupCity.isNotEmpty ? pickupCity : "Pickup address not specified");
+
+            final String dropCity = (liveOffer['drop_city'] ?? liveOffer['dropCity'] ?? '').toString();
+            final String dropAddress = (liveOffer['drop_comp'] ?? liveOffer['dropComp'] ?? liveOffer['drop_address'] ?? liveOffer['dropAddress'] ?? '').toString();
+            final String drop = dropAddress.isNotEmpty
+                ? (dropCity.isNotEmpty && !dropAddress.toLowerCase().contains(dropCity.toLowerCase())
+                    ? "$dropAddress, $dropCity"
+                    : dropAddress)
+                : (dropCity.isNotEmpty ? dropCity : "Drop address not specified");
+
             final String itemType = (liveOffer['item_type'] ?? 'General Cargo').toString();
             final String weight = (liveOffer['weight'] ?? 0).toString();
             final String quantity = (liveOffer['quantity'] ?? 0).toString();
@@ -126,32 +139,33 @@ class DriverOfferDetailPage extends StatelessWidget {
                                   ],
                                 ),
                               ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                decoration: BoxDecoration(
-                                  color: isCompleted
-                                      ? Appcolors.tertiaryGreen.withOpacity(0.12)
-                                      : isInTransit
-                                          ? Appcolors.primaryBlue.withOpacity(0.12)
-                                          : isCancelled
-                                              ? Colors.red.withOpacity(0.12)
-                                              : Colors.amber.withOpacity(0.12),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  rawStatus.replaceAll('_', ' ').toUpperCase(),
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w800,
-                                    color: isCompleted
-                                        ? Appcolors.tertiaryGreen
-                                        : isInTransit
-                                            ? Appcolors.primaryBlue
-                                            : isCancelled
-                                                ? Colors.red[700]
-                                                : Colors.amber[800],
-                                  ),
-                                ),
+                              Builder(
+                                builder: (context) {
+                                  final cfg = StatusColors.getStatusConfig(rawStatus);
+                                  return Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                    decoration: BoxDecoration(
+                                      color: cfg.backgroundColor,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: cfg.borderColor, width: 1),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(cfg.icon, size: 12, color: cfg.color),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          cfg.label.toUpperCase(),
+                                          style: TextStyle(
+                                            fontSize: 10.5,
+                                            fontWeight: FontWeight.w800,
+                                            color: cfg.color,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
                               ),
                             ],
                           ),
@@ -284,49 +298,96 @@ class DriverOfferDetailPage extends StatelessWidget {
                           const SizedBox(height: 18),
 
                           // -------- Route Details --------
-                          const _SectionLabel("Route"),
+                          const _SectionLabel("Complete Route"),
                           const SizedBox(height: 8),
                           _detailCard(
-                            icon: Icons.location_on_outlined,
+                            icon: Icons.alt_route_rounded,
                             iconColor: Appcolors.primaryBlue,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Icon(Icons.circle, size: 10, color: Appcolors.tertiaryGreen),
+                                    Container(
+                                      margin: const EdgeInsets.only(top: 3),
+                                      width: 8,
+                                      height: 8,
+                                      decoration: const BoxDecoration(
+                                        color: Appcolors.tertiaryGreen,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
                                     const SizedBox(width: 8),
                                     Expanded(
-                                      child: Text(
-                                        "Pickup: $pickupCity ${pickupComp.isNotEmpty ? '($pickupComp)' : ''}",
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w700,
-                                          color: Colors.black87,
-                                        ),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            "PICKUP LOCATION",
+                                            style: TextStyle(
+                                              fontSize: 10.5,
+                                              fontWeight: FontWeight.w700,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            pickup,
+                                            style: const TextStyle(
+                                              fontSize: 13.5,
+                                              fontWeight: FontWeight.w700,
+                                              color: Colors.black87,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ],
                                 ),
-                                const Padding(
-                                  padding: EdgeInsets.only(left: 4),
-                                  child: SizedBox(
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 3.5, top: 4, bottom: 4),
+                                  child: Container(
+                                    width: 1.5,
                                     height: 16,
-                                    child: VerticalDivider(thickness: 1.5, color: Colors.grey),
+                                    color: Colors.grey.withOpacity(0.35),
                                   ),
                                 ),
                                 Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Icon(Icons.location_on, size: 12, color: Colors.redAccent),
+                                    Container(
+                                      margin: const EdgeInsets.only(top: 3),
+                                      width: 8,
+                                      height: 8,
+                                      decoration: const BoxDecoration(
+                                        color: Colors.redAccent,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
                                     const SizedBox(width: 8),
                                     Expanded(
-                                      child: Text(
-                                        "Drop: $dropCity ${dropComp.isNotEmpty ? '($dropComp)' : ''}",
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w700,
-                                          color: Colors.black87,
-                                        ),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            "DROP LOCATION",
+                                            style: TextStyle(
+                                              fontSize: 10.5,
+                                              fontWeight: FontWeight.w700,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            drop,
+                                            style: const TextStyle(
+                                              fontSize: 13.5,
+                                              fontWeight: FontWeight.w700,
+                                              color: Colors.black87,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ],

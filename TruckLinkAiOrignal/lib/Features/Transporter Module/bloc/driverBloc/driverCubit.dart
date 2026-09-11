@@ -270,6 +270,14 @@ class DriverCubit extends Cubit<DriverState> {
 
       final bool isOnline = status == 'online';
 
+      // Active trip protection: driver cannot go offline while on an active ride
+      if (!isOnline && (_currentDriver?.isOnRide == true || _currentDriver?.availabilityStatus == 'on_ride')) {
+        if (!isClosed) {
+          emit(DriverErrorState("Cannot switch to offline while an active shipment ride is in progress."));
+        }
+        return;
+      }
+
       await _firestore.collection("Driver").doc(uid).set({
         'availability_status': status,
         'status': isOnline ? 'active' : 'offline',

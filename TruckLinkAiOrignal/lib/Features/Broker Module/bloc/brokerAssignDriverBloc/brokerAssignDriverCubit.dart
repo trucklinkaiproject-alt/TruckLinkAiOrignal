@@ -9,7 +9,7 @@ class BrokerAssignDriverCubit extends Cubit<BrokerAssignDriverState> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   /// Fetches drivers from the current Broker's Driver Network whose vehicle_type
-  /// matches the User Order's required vehicle type.
+  /// matches the User Order's required vehicle type and who are currently online and available.
   Future<void> fetchEligibleDrivers({
     required String brokerId,
     required String requiredVehicleType,
@@ -29,17 +29,35 @@ class BrokerAssignDriverCubit extends Cubit<BrokerAssignDriverState> {
       final List<Map<String, dynamic>> eligible = [];
       for (var doc in snapshot.docs) {
         final data = doc.data();
+        final driverId = doc.id;
         final driverVehicleType =
             (data['vehicle_type'] ?? '').toString().trim().toLowerCase();
 
-        // PART 13 & 14: Match Driver.vehicle_type == Order.required_vehicle_type
-        if (targetVehicleType.isEmpty ||
+        // Check availability status
+        final rawAvailability = (data['availability_status'] ?? data['status'] ?? 'offline').toString().toLowerCase();
+
+        // Match Driver.vehicle_type == Order.required_vehicle_type
+        final bool vehicleMatches = targetVehicleType.isEmpty ||
             driverVehicleType == targetVehicleType ||
             driverVehicleType.contains(targetVehicleType) ||
-            targetVehicleType.contains(driverVehicleType)) {
+            targetVehicleType.contains(driverVehicleType);
+
+        if (vehicleMatches) {
+          // Verify with live Driver document in case background availability changed
+          String liveStatus = rawAvailability;
+          try {
+            final driverDoc = await _firestore.collection("Driver").doc(driverId).get();
+            if (driverDoc.exists) {
+              final dData = driverDoc.data() ?? {};
+              liveStatus = (dData['availability_status'] ?? dData['status'] ?? rawAvailability).toString().toLowerCase();
+            }
+          } catch (_) {}
+
           eligible.add({
-            'id': doc.id,
+            'id': driverId,
             ...data,
+            'is_online': liveStatus == 'online' || liveStatus == 'active',
+            'availability_status': liveStatus,
           });
         }
       }

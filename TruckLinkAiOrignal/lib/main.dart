@@ -36,7 +36,7 @@ void main() async {
 
   if (kIsWeb) {
     try {
-      await FirebaseAuth.instance.setPersistence(Persistence.SESSION);
+      await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
     } catch (_) {}
   }
 
