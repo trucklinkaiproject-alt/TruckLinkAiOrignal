@@ -13,7 +13,7 @@ class GetBrokerCubit extends Cubit<GetBrokerState> {
   StreamSubscription<QuerySnapshot>? _brokerSubscription;
   String? _activeVehicleTypeFilter;
 
-  /// Helper to check if a broker is currently online
+
   static bool isBrokerOnline(Map<String, dynamic> brokerData) {
     final rawStatus = (brokerData['availability_status'] ??
             brokerData['status'] ??
@@ -29,7 +29,7 @@ class GetBrokerCubit extends Cubit<GetBrokerState> {
     return !isOffline;
   }
 
-  /// Normalizes vehicle type strings for safe case-insensitive comparison
+
   static bool matchesVehicleType(String? driverVehicleType, String requiredVehicleType) {
     if (driverVehicleType == null || driverVehicleType.trim().isEmpty) return false;
     final cleanDriver = driverVehicleType
@@ -47,9 +47,9 @@ class GetBrokerCubit extends Cubit<GetBrokerState> {
 
     if (cleanDriver == cleanReq) return true;
 
-    // Handle compound names like "Trailer Truck" vs "Trailer"
+
     if (cleanDriver.contains(cleanReq) || cleanReq.contains(cleanDriver)) {
-      // Ensure it's not a misleading partial match like "Van" in "Caravan"
+
       if (cleanDriver.startsWith(cleanReq) || cleanDriver.endsWith(cleanReq)) {
         return true;
       }
@@ -58,7 +58,7 @@ class GetBrokerCubit extends Cubit<GetBrokerState> {
     return false;
   }
 
-  /// Checks if the Broker has at least one driver in their network with the required vehicle type
+
   static Future<bool> brokerHasRequiredVehicle({
     required FirebaseFirestore firestore,
     required String brokerId,
@@ -67,7 +67,7 @@ class GetBrokerCubit extends Cubit<GetBrokerState> {
     if (brokerId.isEmpty || requiredVehicleType.isEmpty) return false;
 
     try {
-      // 1. Check Broker's DriverNetwork subcollection
+
       final networkSnap = await firestore
           .collection("Broker")
           .doc(brokerId)
@@ -82,7 +82,7 @@ class GetBrokerCubit extends Cubit<GetBrokerState> {
         }
       }
 
-      // 2. Also check Driver collection where broker_id == brokerId
+
       final driversSnap = await firestore
           .collection("Driver")
           .where("broker_id", isEqualTo: brokerId)
@@ -102,9 +102,7 @@ class GetBrokerCubit extends Cubit<GetBrokerState> {
     return false;
   }
 
-  /// Fetches and listens to brokers filtered by:
-  /// 1. Broker is currently ONLINE
-  /// 2. Broker has at least ONE driver in their network with the required vehicle type
+
   void listenToEligibleBrokers(String requiredVehicleType) {
     try {
       if (isClosed) return;
@@ -128,12 +126,12 @@ class GetBrokerCubit extends Cubit<GetBrokerState> {
           final List<Map<String, dynamic>> eligibleBrokers = [];
 
           for (final broker in allBrokers) {
-            // CONDITION 1: Broker must be currently Online
+
             if (!isBrokerOnline(broker)) {
               continue;
             }
 
-            // CONDITION 2: Broker must have at least one driver with required vehicle type
+
             final String brokerId = (broker['brokerId'] ?? broker['uid'] ?? broker['id'] ?? '').toString();
             if (brokerId.isEmpty) continue;
 
@@ -166,7 +164,7 @@ class GetBrokerCubit extends Cubit<GetBrokerState> {
     }
   }
 
-  /// Real-time stream of all Broker profiles from Firebase (for general browsing)
+
   void listenToBrokers() {
     try {
       if (isClosed) return;

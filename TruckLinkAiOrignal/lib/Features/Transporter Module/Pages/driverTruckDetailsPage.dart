@@ -315,7 +315,7 @@ class _DriverTruckDetailsPageState extends State<DriverTruckDetailsPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // -------- Header --------
+
                       Row(
                         children: [
                           if (!widget.isFirstLogin)
@@ -357,7 +357,7 @@ class _DriverTruckDetailsPageState extends State<DriverTruckDetailsPage> {
 
                       const SizedBox(height: 20),
 
-                      // -------- Welcome / First Login Banner --------
+
                       if (widget.isFirstLogin) ...[
                         Container(
                           width: double.infinity,
@@ -420,7 +420,7 @@ class _DriverTruckDetailsPageState extends State<DriverTruckDetailsPage> {
                         const SizedBox(height: 20),
                       ],
 
-                      // -------- Assigned Broker (Read-Only) --------
+
                       const Text(
                         "Assigned Broker",
                         style: TextStyle(
@@ -513,7 +513,7 @@ class _DriverTruckDetailsPageState extends State<DriverTruckDetailsPage> {
 
                       const SizedBox(height: 20),
 
-                      // -------- Vehicle Information Card --------
+
                       Container(
                         width: double.infinity,
                         padding: EdgeInsets.all(isMobile ? 16 : 22),
@@ -570,7 +570,7 @@ class _DriverTruckDetailsPageState extends State<DriverTruckDetailsPage> {
                               ],
                             ),
                             const SizedBox(height: 20),
-                            // Side by side on tablet/desktop, stacked on mobile
+
                             if (width >= 700)
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -591,7 +591,7 @@ class _DriverTruckDetailsPageState extends State<DriverTruckDetailsPage> {
 
                       const SizedBox(height: 32),
 
-                      // -------- Save Button --------
+
                       SizedBox(
                         width: double.infinity,
                         height: 52,

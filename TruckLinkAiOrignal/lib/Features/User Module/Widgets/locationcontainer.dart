@@ -59,7 +59,7 @@ class LocationContainer extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             Icon(Icons.edit, color: clr, size: 25),
           ],
         ),

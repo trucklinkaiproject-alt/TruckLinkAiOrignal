@@ -66,7 +66,7 @@ class BrokerIcomingReqContainer extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // -------- Order # + Status badge --------
+
                 Row(
                   children: [
                     Expanded(
@@ -105,7 +105,7 @@ class BrokerIcomingReqContainer extends StatelessWidget {
 
                 const SizedBox(height: 12),
 
-                // -------- CITY-LEVEL ROUTE --------
+
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -163,7 +163,7 @@ class BrokerIcomingReqContainer extends StatelessWidget {
 
                 const SizedBox(height: 12),
 
-                // -------- Weight / Item / Vehicle / Date --------
+
                 Row(
                   children: [
                     Icon(Icons.inventory_2_outlined, size: 14, color: Colors.grey[600]),
@@ -208,7 +208,7 @@ class BrokerIcomingReqContainer extends StatelessWidget {
                   ],
                 ),
 
-                // -------- Single-Tap Action Buttons --------
+
                 if (quoteAction != null || onReject != null) ...[
                   const SizedBox(height: 14),
                   Row(

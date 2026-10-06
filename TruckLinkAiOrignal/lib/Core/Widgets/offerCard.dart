@@ -152,7 +152,7 @@ class _OfferCardState extends State<OfferCard> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // ── HEADER: BROKER INFO & QUOTE ───────────────────────
+
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -238,7 +238,7 @@ class _OfferCardState extends State<OfferCard> {
                           ],
                         ),
                       ),
-                      // Quote Amount Badge
+
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                         decoration: BoxDecoration(
@@ -273,12 +273,12 @@ class _OfferCardState extends State<OfferCard> {
                   ),
                 ),
 
-                // ── BODY: SHIPMENT & ROUTE DETAILS ───────────────────
+
                 Padding(
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     children: [
-                      // Route row
+
                       if (widget.pickupLocation != null && widget.dropLocation != null) ...[
                         Container(
                           padding: const EdgeInsets.all(12),
@@ -307,7 +307,7 @@ class _OfferCardState extends State<OfferCard> {
                         const SizedBox(height: 10),
                       ],
 
-                      // Item & Vehicle row
+
                       if (widget.itemType != null || widget.vehicleType != null) ...[
                         Row(
                           children: [
@@ -364,7 +364,7 @@ class _OfferCardState extends State<OfferCard> {
                         const SizedBox(height: 10),
                       ],
 
-                      // Estimated Route Duration
+
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
@@ -395,7 +395,7 @@ class _OfferCardState extends State<OfferCard> {
 
                       const SizedBox(height: 20),
 
-                      // ── ACTIONS: ACCEPT & REJECT ────────────────────────
+
                       Row(
                         children: [
                           Expanded(

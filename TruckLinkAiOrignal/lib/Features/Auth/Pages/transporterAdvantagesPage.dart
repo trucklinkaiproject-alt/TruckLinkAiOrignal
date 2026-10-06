@@ -42,7 +42,7 @@ class TransporterAdvantagesPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                   
+
                     BackArrowButton(onTap: () => Navigator.pop(context)),
 
                     SizedBox(height: isMobile ? 20 : 28),
@@ -107,7 +107,7 @@ class TransporterAdvantagesPage extends StatelessWidget {
 
                     SizedBox(height: isMobile ? 30 : 40),
 
-              
+
                     FeatureCard(
                       color: Appcolors.tertiaryGreen,
                       items: const [
@@ -120,7 +120,7 @@ class TransporterAdvantagesPage extends StatelessWidget {
 
                     SizedBox(height: isMobile ? 30 : 44),
 
-                  
+
                     SizedBox(
                       width: double.infinity,
                       height: 54,

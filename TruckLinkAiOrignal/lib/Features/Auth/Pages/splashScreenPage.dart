@@ -30,7 +30,7 @@ class _SplashPageState extends State<SplashPage> {
     try {
       final splashDelay = Future.delayed(const Duration(milliseconds: 1500));
 
-      // 1. Retrieve existing authenticated user from Firebase Auth persistence
+
       User? user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         user = await FirebaseAuth.instance
@@ -55,7 +55,7 @@ class _SplashPageState extends State<SplashPage> {
         return;
       }
 
-      // Check email verification if required
+
       await user.reload();
       final refreshedUser = FirebaseAuth.instance.currentUser;
       if (refreshedUser != null && !refreshedUser.emailVerified) {
@@ -73,7 +73,7 @@ class _SplashPageState extends State<SplashPage> {
 
       final uid = user.uid;
 
-      // 2. Query Firestore role collections in parallel to quickly determine role
+
       final results = await Future.wait([
         FirebaseFirestore.instance.collection("User").doc(uid).get(),
         FirebaseFirestore.instance.collection("Broker").doc(uid).get(),
@@ -125,7 +125,7 @@ class _SplashPageState extends State<SplashPage> {
         return;
       }
 
-      // If auth account has no associated role document, sign out and go to RoleSelectionPage
+
       await FirebaseAuth.instance.signOut();
       if (!mounted) return;
 

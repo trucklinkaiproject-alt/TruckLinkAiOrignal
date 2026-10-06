@@ -219,7 +219,7 @@ class _DriverOrdersPageState extends State<DriverOrdersPage>
               return _buildErrorState(state.errorMessage);
             }
 
-            // Action-success states are transient; the live list is always available on the cubit.
+
             if (state is DriverOffersLoadedState ||
                 state is DriverOffersActionSuccessState) {
               final List<Map<String, dynamic>> offers =
@@ -255,7 +255,7 @@ class _DriverOrdersPageState extends State<DriverOrdersPage>
               );
             }
 
-            // Initial/unknown state: show a spinner instead of a blank screen
+
             return const Center(
               child: CircularProgressIndicator(
                 strokeWidth: 2.5,
@@ -270,7 +270,7 @@ class _DriverOrdersPageState extends State<DriverOrdersPage>
 
   Widget _buildOrderCard(Map<String, dynamic> offer) {
     final String orderNo = (offer["order_no"] ?? offer["orderNo"] ?? offer["order_id"] ?? offer["orderId"] ?? "").toString();
-    
+
     final String pickupCity = (offer["pickup_city"] ?? offer["pickupCity"] ?? "N/A").toString();
     final String dropCity = (offer["drop_city"] ?? offer["dropCity"] ?? "N/A").toString();
     final String date = (offer["date"] ?? offer["created_at"] ?? "Recent").toString();

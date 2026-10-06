@@ -21,7 +21,7 @@ class BrokerDriversNetworkPage extends StatefulWidget {
 
 class _BrokerDriversNetworkPageState extends State<BrokerDriversNetworkPage> {
   final TextEditingController _searchController = TextEditingController();
-  int _selectedFilter = 0; // 0=All, 1=Available, 2=On Trip, 3=Offline
+  int _selectedFilter = 0;
 
   @override
   void initState() {
@@ -67,7 +67,7 @@ class _BrokerDriversNetworkPageState extends State<BrokerDriversNetworkPage> {
                   allDrivers = state.drivers;
                 }
 
-                // Filter drivers by search query and availability filter
+
                 final query = _searchController.text.trim().toLowerCase();
                 final filteredDrivers = allDrivers.where((d) {
                   final name =
@@ -101,7 +101,7 @@ class _BrokerDriversNetworkPageState extends State<BrokerDriversNetworkPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // -------- Header --------
+
                       Padding(
                         padding: EdgeInsets.fromLTRB(
                           horizontalPadding,
@@ -171,7 +171,7 @@ class _BrokerDriversNetworkPageState extends State<BrokerDriversNetworkPage> {
                         ),
                       ),
 
-                      // -------- Pending Join Requests --------
+
                       Padding(
                         padding: EdgeInsets.fromLTRB(
                           horizontalPadding,
@@ -182,7 +182,7 @@ class _BrokerDriversNetworkPageState extends State<BrokerDriversNetworkPage> {
                         child: const BrokerDriverRequestsWidget(),
                       ),
 
-                      // -------- Search --------
+
                       Padding(
                         padding: EdgeInsets.symmetric(
                           horizontal: horizontalPadding,
@@ -195,7 +195,7 @@ class _BrokerDriversNetworkPageState extends State<BrokerDriversNetworkPage> {
 
                       const SizedBox(height: 14),
 
-                      // -------- Filter chips --------
+
                       SizedBox(
                         height: 38,
                         child: ListView(
@@ -237,7 +237,7 @@ class _BrokerDriversNetworkPageState extends State<BrokerDriversNetworkPage> {
 
                       const SizedBox(height: 14),
 
-                      // -------- Driver Network List / Loading / Empty --------
+
                       if (state is BrokerDriverNetworkLoadingState) ...[
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 40),
@@ -460,7 +460,7 @@ class _NetworkDriverCard extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // -------- Avatar --------
+
                 Container(
                   width: 50,
                   height: 50,
@@ -480,7 +480,7 @@ class _NetworkDriverCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
 
-                // -------- Details --------
+
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -681,7 +681,7 @@ class _AddDriverSheetState extends State<_AddDriverSheet> {
     final String password = passwordController.text.trim();
     final String confirmPassword = confirmPasswordController.text.trim();
 
-    // Validations
+
     if (name.isEmpty) {
       _showToast("Please enter driver name");
       return;
@@ -706,8 +706,8 @@ class _AddDriverSheetState extends State<_AddDriverSheet> {
     setState(() => _isLoading = true);
 
     try {
-      // 1. Create Driver Auth using a temporary secondary FirebaseApp instance
-      // This guarantees the active Broker session is NOT logged out!
+
+
       final String tempAppName = 'DriverAuth_${DateTime.now().millisecondsSinceEpoch}';
       final tempApp = await Firebase.initializeApp(
         name: tempAppName,
@@ -720,7 +720,7 @@ class _AddDriverSheetState extends State<_AddDriverSheet> {
         password: password,
       );
 
-      // Send verification email directly to Driver's email address
+
       await userCredential.user!.sendEmailVerification();
 
       final String newDriverUid = userCredential.user!.uid;
@@ -754,10 +754,10 @@ class _AddDriverSheetState extends State<_AddDriverSheet> {
         'updated_at': FieldValue.serverTimestamp(),
       };
 
-      // 2. Write to main Driver collection
+
       await FirebaseFirestore.instance.collection("Driver").doc(newDriverUid).set(driverData);
 
-      // 3. Write to Broker's DriverNetwork subcollection
+
       if (brokerId.isNotEmpty) {
         await FirebaseFirestore.instance
             .collection("Broker")
@@ -767,7 +767,7 @@ class _AddDriverSheetState extends State<_AddDriverSheet> {
             .set(driverData);
       }
 
-      // 4. Clean up temporary FirebaseApp auth instance
+
       await tempAuth.signOut();
       await tempApp.delete();
 

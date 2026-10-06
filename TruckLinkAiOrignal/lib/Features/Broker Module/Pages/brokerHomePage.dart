@@ -126,7 +126,7 @@ class _BrokerHomePageState extends State<BrokerHomePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // -------- Dashboard Top Header --------
+
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(18),
@@ -197,7 +197,7 @@ class _BrokerHomePageState extends State<BrokerHomePage> {
                           ),
                         ),
 
-                        // Notification Bell with Real Unread Badge
+
                         StreamBuilder<QuerySnapshot>(
                           stream: currentBrokerId.isNotEmpty
                               ? FirebaseFirestore.instance
@@ -267,7 +267,7 @@ class _BrokerHomePageState extends State<BrokerHomePage> {
                           },
                         ),
 
-                        // Real-Time Broker Availability Control (Online / Offline)
+
                         StreamBuilder<DocumentSnapshot>(
                           stream: currentBrokerId.isNotEmpty
                               ? FirebaseFirestore.instance
@@ -364,7 +364,7 @@ class _BrokerHomePageState extends State<BrokerHomePage> {
 
                   SizedBox(height: isMobile ? 22 : 28),
 
-                  // -------- Live Real-Time Firebase Metrics --------
+
                   StreamBuilder<QuerySnapshot>(
                     stream: currentBrokerId.isNotEmpty
                         ? FirebaseFirestore.instance
@@ -413,7 +413,7 @@ class _BrokerHomePageState extends State<BrokerHomePage> {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Stat Cards Row with fixed flexible layout (0 pixel overflow)
+
                           Row(
                             children: [
                               Expanded(
@@ -459,7 +459,7 @@ class _BrokerHomePageState extends State<BrokerHomePage> {
 
                           SizedBox(height: isMobile ? 24 : 30),
 
-                          // -------- Incoming Requests Feed --------
+
                           Row(
                             children: [
                               const Text(
@@ -738,5 +738,4 @@ class _StatCard extends StatelessWidget {
     );
   }
 }
-
 

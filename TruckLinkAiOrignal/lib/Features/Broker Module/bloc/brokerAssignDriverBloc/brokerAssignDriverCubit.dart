@@ -3,12 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:trucklinkai_orignal/Core/Services/notificationService.dart';
 import 'package:trucklinkai_orignal/Features/Broker Module/bloc/brokerAssignDriverBloc/brokerAssignDriverState.dart';
 
-/// Canonical comparison key for vehicle types (case/space/punctuation-insensitive),
-/// so "Pickup Truck" and "PickUp Truck" compare equal while "Truck" != "PickUp Truck".
+
 String normalizeVehicleType(String? value) =>
     (value ?? '').toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
 
-/// Offer statuses (Driver/{id}/ReceivedOffers) that mean the driver is on an active trip.
+
 const List<String> kActiveDriverTripStatuses = [
   'accepted_by_driver',
   'accepted',
@@ -23,7 +22,7 @@ class BrokerAssignDriverCubit extends Cubit<BrokerAssignDriverState> {
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  /// True if the driver currently has an accepted/in-transit trip.
+
   Future<bool> _hasActiveTrip(String driverId) async {
     try {
       final snap = await _firestore
@@ -39,8 +38,7 @@ class BrokerAssignDriverCubit extends Cubit<BrokerAssignDriverState> {
     }
   }
 
-  /// Fetches drivers from the current Broker's Driver Network whose vehicle_type
-  /// matches the User Order's required vehicle type and who are currently online and available.
+
   Future<void> fetchEligibleDrivers({
     required String brokerId,
     required String requiredVehicleType,
@@ -65,25 +63,24 @@ class BrokerAssignDriverCubit extends Cubit<BrokerAssignDriverState> {
           (data['vehicle_type'] ?? data['vehicleType'] ?? '').toString(),
         );
 
-        // Check availability status
+
         final rawAvailability = (data['availability_status'] ?? data['status'] ?? 'offline').toString().toLowerCase();
 
-        // Exact (normalized) match: Driver.vehicle_type == Order.vehicle_type.
-        // No substring matching, so "Truck" never matches "PickUp Truck".
+
         final bool vehicleMatches =
             targetVehicleType.isEmpty || driverVehicleType == targetVehicleType;
 
         if (!vehicleMatches) continue;
 
-        // Verify with the live Driver document (account must exist) and live availability.
+
         String liveStatus = rawAvailability;
         try {
           final driverDoc = await _firestore.collection("Driver").doc(driverId).get();
-          if (!driverDoc.exists) continue; // account no longer valid
+          if (!driverDoc.exists) continue;
           final dData = driverDoc.data() ?? {};
           liveStatus = (dData['availability_status'] ?? dData['status'] ?? rawAvailability).toString().toLowerCase();
 
-          // Live vehicle type is the source of truth if it differs from the network copy.
+
           final liveType = normalizeVehicleType(
             (dData['vehicle_type'] ?? dData['vehicleType'] ?? '').toString(),
           );
@@ -92,7 +89,7 @@ class BrokerAssignDriverCubit extends Cubit<BrokerAssignDriverState> {
           }
         } catch (_) {}
 
-        // Skip drivers already occupied by an active trip/order.
+
         if (liveStatus == 'on_ride') continue;
         if (await _hasActiveTrip(driverId)) continue;
 
@@ -117,8 +114,7 @@ class BrokerAssignDriverCubit extends Cubit<BrokerAssignDriverState> {
     }
   }
 
-  /// Sends a Broker -> Driver Offer Request for an Order.
-  /// Enforces duplicate active offer protection and updates Order status.
+
   Future<void> sendDriverOffer({
     required String brokerId,
     required Map<String, dynamic> orderData,
@@ -149,7 +145,7 @@ class BrokerAssignDriverCubit extends Cubit<BrokerAssignDriverState> {
 
       emit(BrokerAssignDriverSendingState(driverId));
 
-      // PART 28: Duplicate Active Offer Protection
+
       final existingOfferCheck = await _firestore
           .collection("Orders")
           .doc(orderId)
@@ -183,7 +179,7 @@ class BrokerAssignDriverCubit extends Cubit<BrokerAssignDriverState> {
         'fare': fareAmount,
         'status': 'pending',
         'created_at': FieldValue.serverTimestamp(),
-        // Complete Order Details Snapshot (PART 19)
+
         'user_uid': userUid,
         'pickup_city': orderData['pickupCity'] ?? orderData['pickup_city'] ?? '',
         'drop_city': orderData['dropCity'] ?? orderData['drop_city'] ?? '',
@@ -201,7 +197,6 @@ class BrokerAssignDriverCubit extends Cubit<BrokerAssignDriverState> {
       };
 
 
-      // Write Offer under Orders/{orderId}/DriverOffers/{offerId}
       await _firestore
           .collection("Orders")
           .doc(orderId)
@@ -209,7 +204,7 @@ class BrokerAssignDriverCubit extends Cubit<BrokerAssignDriverState> {
           .doc(offerId)
           .set(offerPayload);
 
-      // Write mirrored record under Driver/{driverId}/ReceivedOffers/{offerId} for fast indexing
+
       await _firestore
           .collection("Driver")
           .doc(driverId)
@@ -217,7 +212,7 @@ class BrokerAssignDriverCubit extends Cubit<BrokerAssignDriverState> {
           .doc(offerId)
           .set(offerPayload);
 
-      // Notify Driver of assignment
+
       try {
         final String driverNotifId = "driver_offer_${orderId}_$offerId";
         await NotificationService().sendNotification(
@@ -240,8 +235,7 @@ class BrokerAssignDriverCubit extends Cubit<BrokerAssignDriverState> {
 
       final String driverPhone = (driverData['phone'] ?? driverData['driver_phone'] ?? '').toString();
 
-      // Update Order Status in Broker/IncomingRequests and User/Requests
-      // Preserve customer_fare/brokerOffer - store driver payment in driver_fare / assigned_fare
+
       final updateData = {
         'status': 'driver_offer_sent',
         'assigned_driver_id': driverId,
@@ -261,7 +255,7 @@ class BrokerAssignDriverCubit extends Cubit<BrokerAssignDriverState> {
           .doc(orderId)
           .update(updateData);
 
-      // Broker Notification for driver assignment
+
       try {
         final String brokerNotifId = "driver_asgn_${orderId}_$driverId";
         await NotificationService().sendNotification(

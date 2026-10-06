@@ -75,7 +75,7 @@ class BrokerProfilePage extends StatelessWidget {
             AppBarContainer(title: "My Profile",backArrow: false,),
             const SizedBox(height: 16),
 
-            // Profile Header
+
             Center(
               child: Column(
                 children: [
@@ -103,10 +103,6 @@ class BrokerProfilePage extends StatelessWidget {
                     },
                   ),
 
-                  // const Text(
-                  //   'John Doe',
-                  //   style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                  // ),
 
                   const SizedBox(height: 4),
 
@@ -117,7 +113,7 @@ class BrokerProfilePage extends StatelessWidget {
 
             const SizedBox(height: 32),
 
-            // First Section
+
             buildSection([
               buildProfileOption(
                 icon: Icons.person_outline,
@@ -139,7 +135,7 @@ class BrokerProfilePage extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            // Second Section
+
             buildSection([
               buildProfileOption(
                 icon: Icons.star_rate_rounded,
@@ -172,7 +168,7 @@ class BrokerProfilePage extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            // Logout Section
+
             buildSection([
               buildProfileOption(
                 icon: Icons.logout,

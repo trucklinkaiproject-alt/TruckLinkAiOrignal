@@ -25,7 +25,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController confirmPasswordController =
       TextEditingController();
 
- 
+
   bool obscurePassword = true;
   bool obscureConfirmPassword = true;
 
@@ -101,23 +101,23 @@ class _SignUpPageState extends State<SignUpPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                     
+
                       BackArrowButton(onTap: () => Navigator.pop(context)),
 
                       SizedBox(height: isMobile ? 20 : 28),
 
-                     
+
                       Center(
                         child: Column(
                           children: [
                             Container(
                               width: logoSize,
                               height: logoSize,
-                              
+
                               child: Image.asset(
                                 "assets/Images/TruckLink AI.png",
                                 fit: BoxFit.contain,
-                                
+
                               ),
                             ),
                             const SizedBox(height: 16),
@@ -145,7 +145,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
                       SizedBox(height: isMobile ? 26 : 34),
 
-                      
+
                       const SectionLabel("Name"),
                       const SizedBox(height: 8),
                       PillTextField(
@@ -155,7 +155,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
                       const SizedBox(height: 16),
 
-                      
+
                       const SectionLabel("Email"),
                       const SizedBox(height: 8),
                       PillTextField(
@@ -166,7 +166,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
                       const SizedBox(height: 16),
 
-                     
+
                       const SectionLabel("Phone Number"),
                       const SizedBox(height: 8),
                       PillTextField(
@@ -196,7 +196,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
                       SizedBox(height: isMobile ? 26 : 32),
 
-                     
+
                       BlocBuilder<AuthCubit, AuthState>(
                         builder: (context, state) {
                           final bool loading = state is AuthLoading;
@@ -298,7 +298,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
                       SizedBox(height: isMobile ? 18 : 24),
 
-                    
+
                       Center(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,

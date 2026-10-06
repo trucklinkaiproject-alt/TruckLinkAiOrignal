@@ -69,7 +69,7 @@ class BrokerDriverDetailsPage extends StatelessWidget {
     );
   }
 
-  /// Confirms, then removes the driver from THIS broker's network only (driver account stays intact).
+
   Future<void> _confirmRemoveFromNetwork(
     BuildContext context,
     String driverId,
@@ -228,7 +228,7 @@ class BrokerDriverDetailsPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // -------- Header --------
+
                       Row(
                         children: [
                           BackArrowButton(onTap: () => Navigator.pop(context)),
@@ -277,7 +277,7 @@ class BrokerDriverDetailsPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 20),
 
-                      // -------- Profile Identity Card --------
+
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(20),
@@ -339,7 +339,7 @@ class BrokerDriverDetailsPage extends StatelessWidget {
                             ),
                             const SizedBox(height: 16),
 
-                            // Action Buttons (Call & Chat)
+
                             Row(
                               children: [
                                 Expanded(
@@ -403,7 +403,7 @@ class BrokerDriverDetailsPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 18),
 
-                      // -------- Stats Strip --------
+
                       Row(
                         children: [
                           Expanded(
@@ -436,7 +436,7 @@ class BrokerDriverDetailsPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 20),
 
-                      // -------- Vehicle Information Card --------
+
                       const Text(
                         "Vehicle Details",
                         style: TextStyle(
@@ -496,7 +496,7 @@ class BrokerDriverDetailsPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 24),
 
-                      // -------- Driver Reviews Stream --------
+
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [

@@ -81,7 +81,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                      
+
                         Container(
                           width: badgeSize,
                           height: badgeSize,
@@ -135,7 +135,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
 
                         const SizedBox(height: 34),
 
-                        
+
                         BlocBuilder<AuthCubit, AuthState>(
                           builder: (context, state) {
                             final isLoading = state is AuthLoading;
@@ -233,7 +233,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                                           if (context.mounted) {
                                             Navigator.pop(
                                               context,
-                                            ); // back to SignUpPage, form still filled
+                                            );
                                           }
                                         },
                                   child: const Text(

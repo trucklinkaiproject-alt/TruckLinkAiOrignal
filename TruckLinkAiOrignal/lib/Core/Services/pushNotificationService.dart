@@ -7,7 +7,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:trucklinkai_orignal/Core/Services/notificationNavigationService.dart';
 import '../../Core/Constants/firebase_options.dart';
 
-/// Top-level background message handler for FCM
+
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   try {
@@ -37,16 +37,16 @@ class PushNotificationService {
 
   bool _isInitialized = false;
 
-  /// Initialize Firebase Messaging & Flutter Local Notifications
+
   Future<void> initialize() async {
     if (_isInitialized) return;
     _isInitialized = true;
 
     try {
-      // 1. Request notification permissions
+
       await requestPermissions();
 
-      // 2. Configure Foreground Presentation Options
+
       try {
         await _messaging.setForegroundNotificationPresentationOptions(
           alert: true,
@@ -57,21 +57,21 @@ class PushNotificationService {
         debugPrint('[PushNotificationService] setForegroundNotificationPresentationOptions error: $e');
       }
 
-      // 3. Initialize Flutter Local Notifications (Mobile only)
+
       if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
         await _initLocalNotifications();
       }
 
-      // 4. Listen to foreground FCM messages
+
       FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
 
-      // 5. Listen to background message tap events
+
       FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
         debugPrint('[PushNotificationService] App opened from background notification tap');
         NotificationNavigationService().handleNotificationTap(message.data);
       });
 
-      // 6. Check for initial message from terminated state
+
       final RemoteMessage? initialMessage = await _messaging.getInitialMessage();
       if (initialMessage != null) {
         debugPrint('[PushNotificationService] App launched from terminated notification tap');
@@ -82,7 +82,7 @@ class PushNotificationService {
     }
   }
 
-  /// Request Notification Permissions (Handles Android 13+ & iOS)
+
   Future<bool> requestPermissions() async {
     try {
       final settings = await _messaging.requestPermission(
@@ -113,7 +113,7 @@ class PushNotificationService {
     }
   }
 
-  /// Initialize Local Notification Plugin & Android Channel
+
   Future<void> _initLocalNotifications() async {
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosSettings = DarwinInitializationSettings(
@@ -142,7 +142,7 @@ class PushNotificationService {
       },
     );
 
-    // Create high-importance Android Notification Channel
+
     if (Platform.isAndroid) {
       const androidChannel = AndroidNotificationChannel(
         channelId,
@@ -160,7 +160,7 @@ class PushNotificationService {
     }
   }
 
-  /// Display a heads-up local notification when FCM arrives in Foreground
+
   Future<void> _handleForegroundMessage(RemoteMessage message) async {
     debugPrint('[PushNotificationService] Foreground FCM received: ${message.messageId}');
 

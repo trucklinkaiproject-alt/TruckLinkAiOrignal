@@ -53,7 +53,7 @@ class _BrokerOrderPageState extends State<BrokerOrderPage>
   void _fetchForCurrentTab() {
     _getBrokerOrderDetailCubit.fetchAllBrokerOrderDetails(
       context.read<BrokerCubit>().brokerId,
-      _tabStatusFilters[_tabController.index], // no more force-unwrap
+      _tabStatusFilters[_tabController.index],
     );
   }
 
@@ -110,7 +110,7 @@ class _BrokerOrderPageState extends State<BrokerOrderPage>
         IconButton(
           icon: const Icon(Icons.search, color: Colors.black87),
           onPressed: () {
-            // TODO: implement search
+
           },
         ),
         const SizedBox(width: 4),

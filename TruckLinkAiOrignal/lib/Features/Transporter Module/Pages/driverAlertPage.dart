@@ -352,7 +352,7 @@ class _DriverAlertPageState extends State<DriverAlertPage> {
                           child: InkWell(
                             borderRadius: BorderRadius.circular(16),
                             onTap: () async {
-                              // Mark as read immediately
+
                               if (!isRead) {
                                 await NotificationService().markAsRead(
                                   collectionName: "Driver",
@@ -361,7 +361,7 @@ class _DriverAlertPageState extends State<DriverAlertPage> {
                                 );
                               }
 
-                              // Deep link navigation
+
                               await NotificationNavigationService().handleNotificationTap(data);
                             },
                             child: Container(

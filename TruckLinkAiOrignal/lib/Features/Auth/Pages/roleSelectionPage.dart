@@ -44,19 +44,18 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                 
+
                   Container(
                     width: logoSize,
                     height: logoSize,
-                    
+
                     child: Image.asset(
                       "assets/Images/Only Logo.png",
                       fit: BoxFit.fill,
-                     
+
                     ),
                   ),
 
-                 
 
                   Text(
                     "Smart Logistics",
@@ -81,7 +80,7 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
 
                   SizedBox(height: screenHeight * 0.035),
 
-                  
+
                   BlocBuilder<AuthCubit, AuthState>(
                     builder: (context, state) {
                       return RoleListTile(
@@ -110,7 +109,7 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
 
                   const SizedBox(height: 14),
 
-                 
+
                   BlocBuilder<AuthCubit, AuthState>(
                     builder: (context, state) {
                       return RoleListTile(
@@ -139,7 +138,7 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
 
                   const SizedBox(height: 14),
 
-                  
+
                   BlocBuilder<AuthCubit, AuthState>(
                     builder: (context, state) {
                       return RoleListTile(
@@ -184,5 +183,4 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
     );
   }
 }
-
 

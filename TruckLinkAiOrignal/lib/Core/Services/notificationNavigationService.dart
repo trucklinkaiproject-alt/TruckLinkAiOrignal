@@ -22,13 +22,13 @@ class NotificationNavigationService {
   Map<String, dynamic>? _pendingPayload;
   bool _isNavigating = false;
 
-  /// Store pending payload from terminated state
+
   void setPendingNotification(Map<String, dynamic> payload) {
     _pendingPayload = payload;
     debugPrint('[NotificationNavigationService] Pending notification stored: $payload');
   }
 
-  /// Process any pending notification payload once UI / auth is ready
+
   Future<void> processPendingNotification() async {
     if (_pendingPayload == null) return;
     final payload = Map<String, dynamic>.from(_pendingPayload!);
@@ -36,7 +36,7 @@ class NotificationNavigationService {
     await handleNotificationTap(payload);
   }
 
-  /// Resolve current logged-in user role
+
   Future<String> _resolveUserRole(String uid) async {
     try {
       final results = await Future.wait([
@@ -54,7 +54,7 @@ class NotificationNavigationService {
     return '';
   }
 
-  /// Central notification tap dispatcher
+
   Future<void> handleNotificationTap(Map<String, dynamic> data) async {
     if (_isNavigating) return;
     _isNavigating = true;
@@ -86,7 +86,7 @@ class NotificationNavigationService {
 
       debugPrint('[NotificationNavigationService] Navigating for type: $type | role: $role | orderId: $orderId | chatId: $chatId');
 
-      // ── CHAT NOTIFICATIONS ──────────────────────────────────────────────
+
       if (type == 'chat' || type == 'new_message') {
         final String targetChatId = chatId.isNotEmpty
             ? chatId
@@ -109,10 +109,10 @@ class NotificationNavigationService {
         return;
       }
 
-      // ── SHIPMENT & ORDER NOTIFICATIONS ──────────────────────────────────
+
       if (orderId.isNotEmpty) {
         if (role == 'User') {
-          // If in transit or delivered, allow tracking or order detail
+
           if (type == 'trip_started' || type == 'in_transit' || type == 'driver_at_pickup') {
             if (context.mounted) {
               Navigator.push(
@@ -184,7 +184,7 @@ class NotificationNavigationService {
         }
       }
 
-      // ── FALLBACK: ROLE NOTIFICATION / ALERT CENTER ───────────────────────
+
       if (context.mounted) {
         if (role == 'User') {
           Navigator.push(

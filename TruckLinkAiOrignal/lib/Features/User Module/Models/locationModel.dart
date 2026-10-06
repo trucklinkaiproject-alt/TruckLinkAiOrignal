@@ -82,4 +82,4 @@ class LocationModel {
   String toString() {
     return 'LocationModel(city: $city, address: $address, lat: ${latitude.toStringAsFixed(6)}, lng: ${longitude.toStringAsFixed(6)})';
   }
-}
+}

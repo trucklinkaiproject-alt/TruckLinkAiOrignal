@@ -32,13 +32,13 @@ class DriverLocationService {
   Position? _lastRecordedPosition;
   DateTime? _lastFirebaseUpdateTime;
 
-  /// Arrival proximity threshold in meters (250m)
+
   static const double arrivalThresholdMeters = 250.0;
 
-  /// Minimum interval between Firebase GPS writes to avoid excessive battery drain and writes (approx 60s)
+
   static const Duration minFirebaseUpdateInterval = Duration(seconds: 45);
 
-  /// Starts real-time GPS tracking for an active ride.
+
   Future<bool> startTracking({
     required String orderId,
     required String driverId,
@@ -51,7 +51,7 @@ class DriverLocationService {
     double? dropLng,
   }) async {
     try {
-      // If already tracking another order, stop it first
+
       if (_isTracking) {
         await stopTracking();
       }
@@ -87,7 +87,7 @@ class DriverLocationService {
       _dropLng = dropLng;
       _isTracking = true;
 
-      // Get initial position immediately
+
       try {
         final initialPos = await Geolocator.getCurrentPosition(
           locationSettings: const LocationSettings(
@@ -102,7 +102,7 @@ class DriverLocationService {
         debugPrint("DriverLocationService: Initial pos error: $e");
       }
 
-      // Listen to position stream with distance filter of 20 meters
+
       const locationSettings = LocationSettings(
         accuracy: LocationAccuracy.high,
         distanceFilter: 20,
@@ -115,13 +115,13 @@ class DriverLocationService {
           _lastRecordedPosition = position;
           final now = DateTime.now();
 
-          // Push to Firebase if interval has passed
+
           if (_lastFirebaseUpdateTime == null ||
               now.difference(_lastFirebaseUpdateTime!) >= minFirebaseUpdateInterval) {
             await _pushLocationToFirebase(position);
           }
 
-          // Evaluate proximity to pickup or drop
+
           await _evaluateProximity(position);
         },
         onError: (error) {
@@ -129,7 +129,7 @@ class DriverLocationService {
         },
       );
 
-      // Periodic timer ensuring coordinates push at least every 60 seconds even if stationary
+
       _periodicTimer = Timer.periodic(const Duration(seconds: 60), (timer) async {
         if (!_isTracking) {
           timer.cancel();
@@ -154,7 +154,7 @@ class DriverLocationService {
     }
   }
 
-  /// Pushes coordinates to Driver, Orders, Broker, and User documents
+
   Future<void> _pushLocationToFirebase(Position position, {bool force = false}) async {
     if (!_isTracking || _activeDriverId == null || _activeOrderId == null) return;
 
@@ -177,20 +177,20 @@ class DriverLocationService {
     };
 
     try {
-      // 1. Update Driver document
+
       await _firestore.collection("Driver").doc(_activeDriverId).update({
         'driver_latitude': position.latitude,
         'driver_longitude': position.longitude,
         'updated_at': FieldValue.serverTimestamp(),
       });
 
-      // 2. Update Order under Orders
+
       await _firestore.collection("Orders").doc(_activeOrderId).set(
         locationPayload,
         SetOptions(merge: true),
       );
 
-      // 3. Update Broker IncomingRequests
+
       if (_activeBrokerId != null && _activeBrokerId!.isNotEmpty) {
         await _firestore
             .collection("Broker")
@@ -200,7 +200,7 @@ class DriverLocationService {
             .set(locationPayload, SetOptions(merge: true));
       }
 
-      // 4. Update User Requests
+
       if (_activeUserUid != null && _activeUserUid!.isNotEmpty) {
         await _firestore
             .collection("User")
@@ -214,7 +214,7 @@ class DriverLocationService {
     }
   }
 
-  /// Evaluates distance to Pickup and Drop and triggers one-time arrival events
+
   Future<void> _evaluateProximity(Position position) async {
     if (!_isTracking || _activeOrderId == null) return;
 
@@ -227,7 +227,7 @@ class DriverLocationService {
       final bool reachedPickupAlready = data['reached_pickup'] == true;
       final bool reachedDropAlready = data['reached_drop'] == true;
 
-      // Check Pickup Arrival
+
       if (!reachedPickupAlready && _pickupLat != null && _pickupLng != null &&
           _pickupLat != 0.0 && _pickupLng != 0.0) {
         final double distToPickup = Geolocator.distanceBetween(
@@ -242,7 +242,7 @@ class DriverLocationService {
         }
       }
 
-      // Check Drop Arrival
+
       if (!reachedDropAlready && _dropLat != null && _dropLng != null &&
           _dropLat != 0.0 && _dropLng != 0.0) {
         final double distToDrop = Geolocator.distanceBetween(
@@ -261,7 +261,7 @@ class DriverLocationService {
     }
   }
 
-  /// One-time event when Driver reaches pickup
+
   Future<void> _handlePickupArrival() async {
     if (_activeOrderId == null) return;
 
@@ -281,7 +281,7 @@ class DriverLocationService {
       'updated_at': FieldValue.serverTimestamp(),
     };
 
-    // Update Firestore collections
+
     await _firestore.collection("Orders").doc(orderId).set(updateData, SetOptions(merge: true));
 
     if (brokerId != null && brokerId.isNotEmpty) {
@@ -292,7 +292,7 @@ class DriverLocationService {
           .doc(orderId)
           .set(updateData, SetOptions(merge: true));
 
-      // Broker Notification (one-time)
+
       final String notifId = "pickup_arr_${orderId}_$driverId";
       await NotificationService().sendNotification(
         targetCollection: 'Broker',
@@ -316,7 +316,7 @@ class DriverLocationService {
           .doc(orderId)
           .set(updateData, SetOptions(merge: true));
 
-      // User Notification (one-time)
+
       final String notifId = "pickup_arr_${orderId}_$driverId";
       await NotificationService().sendNotification(
         targetCollection: 'User',
@@ -333,7 +333,7 @@ class DriverLocationService {
     }
   }
 
-  /// One-time event when Driver reaches drop location
+
   Future<void> _handleDropArrival() async {
     if (_activeOrderId == null) return;
 
@@ -363,7 +363,7 @@ class DriverLocationService {
           .doc(orderId)
           .set(updateData, SetOptions(merge: true));
 
-      // Broker Notification
+
       final String notifId = "drop_arr_${orderId}_$driverId";
       await NotificationService().sendNotification(
         targetCollection: 'Broker',
@@ -387,7 +387,7 @@ class DriverLocationService {
           .doc(orderId)
           .set(updateData, SetOptions(merge: true));
 
-      // User Notification
+
       final String notifId = "drop_arr_${orderId}_$driverId";
       await NotificationService().sendNotification(
         targetCollection: 'User',
@@ -404,7 +404,7 @@ class DriverLocationService {
     }
   }
 
-  /// Stops tracking cleanly and cancels timers/listeners.
+
   Future<void> stopTracking() async {
     _isTracking = false;
     await _positionSubscription?.cancel();

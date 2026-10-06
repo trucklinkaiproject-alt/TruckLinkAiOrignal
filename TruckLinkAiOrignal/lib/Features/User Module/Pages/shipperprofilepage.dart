@@ -71,7 +71,7 @@ class _ShipperProfilePageState extends State<ShipperProfilePage> {
             AppBarContainer(title: "My Profile", backArrow: false),
             const SizedBox(height: 16),
 
-            // Profile Header
+
             Center(
               child: Column(
                 children: [
@@ -88,7 +88,7 @@ class _ShipperProfilePageState extends State<ShipperProfilePage> {
 
                   BlocBuilder<UserCubit, UserState>(
                     builder: (context, state) {
-                      
+
                       return Text(
                         state is UserLoadedState ? state.userName : "Unknown",
                         style: TextStyle(
@@ -108,7 +108,7 @@ class _ShipperProfilePageState extends State<ShipperProfilePage> {
 
             const SizedBox(height: 32),
 
-            // First Section
+
             buildSection([
               buildProfileOption(
                 icon: Icons.person_outline,
@@ -130,7 +130,7 @@ class _ShipperProfilePageState extends State<ShipperProfilePage> {
 
             const SizedBox(height: 24),
 
-            // Second Section
+
             buildSection([
               buildProfileOption(
                 icon: Icons.help_outline,
@@ -145,7 +145,7 @@ class _ShipperProfilePageState extends State<ShipperProfilePage> {
 
             const SizedBox(height: 24),
 
-            // Logout Section
+
             buildSection([
               buildProfileOption(
                 icon: Icons.logout,

@@ -171,7 +171,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // -------- Header --------
+
                       Row(
                         children: [
                           BackArrowButton(onTap: () => Navigator.pop(context)),
@@ -214,7 +214,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
 
                       SizedBox(height: isMobile ? 24 : 30),
 
-                      // -------- Request ID & Status --------
+
                       Row(
                         children: [
                           Expanded(
@@ -336,7 +336,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
 
                       SizedBox(height: isMobile ? 24 : 30),
 
-                      // -------- FutureBuilder for Profiles --------
+
                       FutureBuilder<Map<String, dynamic>>(
                         future: _fetchProfiles(orderDetails),
                         builder: (context, profileSnapshot) {
@@ -356,7 +356,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // -------- BROKER INFORMATION --------
+
                               const _SectionLabel("Broker Information"),
                               const SizedBox(height: 10),
                               Container(
@@ -490,7 +490,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
 
                               SizedBox(height: isMobile ? 20 : 24),
 
-                              // -------- USER INFORMATION --------
+
                               const _SectionLabel("User Information"),
                               const SizedBox(height: 10),
                               Container(
@@ -542,7 +542,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                                 ),
                               ),
 
-                              // -------- DRIVER INFORMATION (WHEN ASSIGNED) --------
+
                               if (driverUid.isNotEmpty || driverName.isNotEmpty) ...[
                                 SizedBox(height: isMobile ? 20 : 24),
                                 const _SectionLabel("Driver Information"),
@@ -910,7 +910,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                             );
                           }
 
-                          // Rejected / cancelled fallback
+
                           return Container(
                             width: double.infinity,
                             padding: const EdgeInsets.all(18),
@@ -946,7 +946,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
 
                       SizedBox(height: isMobile ? 30 : 36),
 
-                      // -------- BUILTY SECTION (STRICT RULE: ONLY DISPLAYED AFTER DRIVER IS ASSIGNED) --------
+
                       if (status != "rejected" && driverUid.isNotEmpty && driverUid != 'N/A') ...[
                         const _SectionLabel("Builty / Consignment Note"),
                         const SizedBox(height: 10),
@@ -1081,7 +1081,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                         SizedBox(height: isMobile ? 30 : 36),
                       ],
 
-                      // -------- DELIVERY DURATION & TIMESTAMPS (WHEN COMPLETED) --------
+
                       if (status == "completed" || status == "delivered") ...[
                         const _SectionLabel("Delivery & Journey Summary"),
                         const SizedBox(height: 10),
@@ -1162,7 +1162,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                         ),
                         const SizedBox(height: 16),
 
-                        // Rate & Review Button
+
                         if (orderDetails['user_reviewed_broker'] != true || orderDetails['user_reviewed_driver'] != true) ...[
                           SizedBox(
                             width: double.infinity,
@@ -1321,7 +1321,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                   ),
                   const SizedBox(height: 18),
 
-                  // Broker Review Section
+
                   if (!userReviewedBroker && brokerId.isNotEmpty) ...[
                     Container(
                       padding: const EdgeInsets.all(14),
@@ -1385,7 +1385,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                     const SizedBox(height: 14),
                   ],
 
-                  // Driver Review Section
+
                   if (!userReviewedDriver && driverId.isNotEmpty) ...[
                     Container(
                       padding: const EdgeInsets.all(14),

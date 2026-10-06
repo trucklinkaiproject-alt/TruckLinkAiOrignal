@@ -9,9 +9,7 @@ class ReviewService {
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  /// Submits a review for a Broker by a User.
-  /// Enforces unique review per order (deterministic ID: review_order_{orderId}_user_{userId}_broker_{brokerId}).
-  /// Automatically recalculates the Broker's overall rating, review count, and star distribution.
+
   Future<bool> submitBrokerReview({
     required String orderId,
     required String brokerId,
@@ -33,7 +31,7 @@ class ReviewService {
           .collection("Reviews")
           .doc(reviewDocId);
 
-      // Check if review already exists
+
       final existingDoc = await reviewRef.get();
       if (existingDoc.exists) {
         debugPrint("ReviewService: Broker review already submitted for order #$orderId");
@@ -53,13 +51,13 @@ class ReviewService {
         'created_at': FieldValue.serverTimestamp(),
       };
 
-      // 1. Save the review document
+
       await reviewRef.set(reviewData);
 
-      // Also store in root Reviews collection for auditability
+
       await _firestore.collection("Reviews").doc(reviewDocId).set(reviewData, SetOptions(merge: true));
 
-      // 2. Query all reviews for this broker to recalculate rating and breakdown
+
       final allReviewsSnap = await _firestore
           .collection("Broker")
           .doc(brokerId)
@@ -88,7 +86,7 @@ class ReviewService {
 
       final double avgRating = count > 0 ? double.parse((totalRating / count).toStringAsFixed(1)) : 0.0;
 
-      // 3. Atomically update Broker document
+
       await _firestore.collection("Broker").doc(brokerId).set({
         'rating': avgRating,
         'overall_rating': avgRating,
@@ -103,7 +101,7 @@ class ReviewService {
         'updated_at': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
 
-      // 4. Update order flags to mark reviewed
+
       final orderUpdate = {
         'user_reviewed_broker': true,
         'broker_user_rating': rating,
@@ -130,7 +128,7 @@ class ReviewService {
             .set(orderUpdate, SetOptions(merge: true));
       } catch (_) {}
 
-      // 5. Send real-time notification to Broker
+
       final String notifId = "notif_brk_rev_${orderId}_$userId";
       await NotificationService().sendNotification(
         targetCollection: 'Broker',
@@ -156,15 +154,13 @@ class ReviewService {
     }
   }
 
-  /// Submits a review for a Driver by either a User or a Broker.
-  /// Enforces unique review per order/role (deterministic ID: review_order_{orderId}_{reviewerRole}_{reviewerId}_driver_{driverId}).
-  /// Automatically recalculates Driver's overall rating and total review count.
+
   Future<bool> submitDriverReview({
     required String orderId,
     required String driverId,
     required String reviewerId,
     required String reviewerName,
-    required String reviewerRole, // 'user' or 'broker'
+    required String reviewerRole,
     required double rating,
     required String comment,
     String? brokerId,
@@ -201,13 +197,13 @@ class ReviewService {
         'created_at': FieldValue.serverTimestamp(),
       };
 
-      // 1. Save the review
+
       await reviewRef.set(reviewData);
 
-      // Also store in root Reviews collection
+
       await _firestore.collection("Reviews").doc(reviewDocId).set(reviewData, SetOptions(merge: true));
 
-      // 2. Recalculate Driver rating
+
       final allDriverReviewsSnap = await _firestore
           .collection("Driver")
           .doc(driverId)
@@ -228,7 +224,7 @@ class ReviewService {
 
       final double avgRating = count > 0 ? double.parse((totalRating / count).toStringAsFixed(1)) : 0.0;
 
-      // 3. Update Driver document
+
       await _firestore.collection("Driver").doc(driverId).set({
         'driver_rating': avgRating,
         'rating': avgRating,
@@ -237,7 +233,7 @@ class ReviewService {
         'updated_at': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
 
-      // If Driver is in Broker's DriverNetwork, sync rating there too
+
       if (brokerId != null && brokerId.isNotEmpty) {
         try {
           await _firestore
@@ -253,7 +249,7 @@ class ReviewService {
         } catch (_) {}
       }
 
-      // 4. Update order flag
+
       final String flagKey = reviewerRole == 'broker' ? 'broker_reviewed_driver' : 'user_reviewed_driver';
       final orderUpdate = {
         flagKey: true,
@@ -282,7 +278,7 @@ class ReviewService {
         } catch (_) {}
       }
 
-      // 5. Send real-time notification to Driver
+
       final String notifId = "notif_drv_rev_${orderId}_$reviewerId";
       await NotificationService().sendNotification(
         targetCollection: 'Driver',

@@ -36,7 +36,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
       backgroundColor: const Color(0xFFF5F6FA),
       body: SafeArea(
         child: StreamBuilder<DocumentSnapshot>(
-          // Listen in real-time to Order updates
+
           stream: orderId.isNotEmpty
               ? FirebaseFirestore.instance.collection("Orders").doc(orderId).snapshots()
               : const Stream.empty(),
@@ -61,7 +61,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
             final double? driverLng = rawLng?.toDouble();
             final bool hasDriverGps = driverLat != null && driverLng != null && (driverLat != 0.0 || driverLng != 0.0);
 
-            // Pickup & Drop coordinates if available, otherwise fallback to reasonable regional defaults
+
             final double pLat = (order["pickup_lat"] ?? order["pickupLatitude"] ?? order["pickupLat"] as num?)?.toDouble() ?? 33.6844;
             final double pLng = (order["pickup_lng"] ?? order["pickupLongitude"] ?? order["pickupLng"] as num?)?.toDouble() ?? 73.0479;
             final double dLat = (order["drop_lat"] ?? order["dropLatitude"] ?? order["dropLat"] as num?)?.toDouble() ?? 31.5204;
@@ -72,7 +72,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
             final LatLng pickupLocation = LatLng(pLat, pLng);
             final LatLng dropLocation = LatLng(dLat, dLng);
 
-            // Status stage checks
+
             final bool isPending = rawStatus == 'pending' || rawStatus == 'driver_offer_sent';
             final bool isAccepted = rawStatus == 'accepted_by_driver' || rawStatus == 'accepted';
             final bool isInTransit = rawStatus == 'in_transit' || rawStatus == 'in_progress' || rawStatus == 'arrived_at_pickup' || rawStatus == 'heading_to_drop';
@@ -90,7 +90,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // -------- Header --------
+
                       Row(
                         children: [
                           BackArrowButton(onTap: () => Navigator.pop(context)),
@@ -147,7 +147,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
 
                       const SizedBox(height: 18),
 
-                      // -------- Real-Time Interactive Map View --------
+
                       Container(
                         height: isMobile ? 260 : 320,
                         width: double.infinity,
@@ -211,7 +211,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
                                 ),
                                 MarkerLayer(
                                   markers: [
-                                    // Pickup Marker
+
                                     Marker(
                                       point: pickupLocation,
                                       width: 44,
@@ -235,7 +235,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
                                         ),
                                       ),
                                     ),
-                                    // Drop Marker
+
                                     Marker(
                                       point: dropLocation,
                                       width: 44,
@@ -259,7 +259,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
                                         ),
                                       ),
                                     ),
-                                    // Driver Live GPS Marker
+
                                     if (hasDriverGps && !isCompleted)
                                       Marker(
                                         point: driverLocation,
@@ -289,7 +289,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
                                 ),
                               ],
                             ),
-                            // Map Control Floating Buttons (Zoom & Recenter)
+
                             Positioned(
                               right: 12,
                               bottom: 12,
@@ -337,7 +337,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
                                 ],
                               ),
                             ),
-                            // Real-time GPS status tag (hidden once completed)
+
                             if (!isCompleted)
                               Positioned(
                                 top: 12,
@@ -378,7 +378,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
                                   ),
                                 ),
                               ),
-                            // Map Legend for Marker Clarity
+
                             Positioned(
                               bottom: 12,
                               left: 12,
@@ -465,7 +465,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
 
                       const SizedBox(height: 20),
 
-                      // -------- Driver Info Card --------
+
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(16),
@@ -533,7 +533,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
 
                       const SizedBox(height: 22),
 
-                      // -------- Shipment Progress Timeline --------
+
                       const Text(
                         "Shipment Progress",
                         style: TextStyle(

@@ -16,10 +16,9 @@ class StatusConfig {
   });
 }
 
-/// Centralized status color and styling mapping for all 16 workflow states
-/// across User, Broker, and Driver modules in TruckLink AI.
+
 class StatusColors {
-  // Brand / Semantic Color Palette
+
   static const Color amberWarning = Color(0xFFF59E0B);
   static const Color amberDark = Color(0xFFD97706);
   static const Color bluePrimary = Color(0xFF0D6EFD);
@@ -30,12 +29,12 @@ class StatusColors {
   static const Color redDark = Color(0xFFDC2626);
   static const Color greyNeutral = Color(0xFF6B7280);
 
-  /// Returns the semantic background color for a given status string.
+
   static Color getColor(String? rawStatus) {
     final status = (rawStatus ?? '').trim().toLowerCase();
 
     switch (status) {
-      // 1. Pending / Waiting states -> Amber
+
       case 'pending':
       case 'waiting':
       case 'waiting_broker':
@@ -44,7 +43,7 @@ class StatusColors {
       case 'requested':
         return amberWarning;
 
-      // 2. Request / Offer / Fare sent -> Blue
+
       case 'request_sent':
       case 'offer_sent':
       case 'driver_offer_sent':
@@ -52,7 +51,7 @@ class StatusColors {
       case 'quote_sent':
         return bluePrimary;
 
-      // 3. Accepted states -> Green
+
       case 'accepted':
       case 'quote_accepted':
       case 'accepted_by_user':
@@ -62,7 +61,7 @@ class StatusColors {
       case 'driver_accepted':
         return greenSuccess;
 
-      // 4. In Transit / Active Ride states -> Purple/Blue
+
       case 'in_transit':
       case 'in_progress':
       case 'on_ride':
@@ -72,13 +71,13 @@ class StatusColors {
       case 'trip_started':
         return purpleTransit;
 
-      // 5. Completed -> Dark Green
+
       case 'completed':
       case 'delivered':
       case 'trip_completed':
         return greenDark;
 
-      // 6. Rejected -> Red
+
       case 'rejected':
       case 'rejected_by_user':
       case 'rejected_by_broker':
@@ -87,7 +86,7 @@ class StatusColors {
       case 'declined':
         return redDanger;
 
-      // 7. Cancelled -> Dark Red
+
       case 'cancelled':
       case 'canceled':
       case 'trip_cancelled':
@@ -98,7 +97,7 @@ class StatusColors {
     }
   }
 
-  /// Returns the human-readable UI label for a given status string.
+
   static String getLabel(String? rawStatus, {String? role}) {
     final status = (rawStatus ?? '').trim().toLowerCase();
 
@@ -133,7 +132,7 @@ class StatusColors {
     }
   }
 
-  /// Returns full UI configuration (color, label, icon, background, border)
+
   static StatusConfig getStatusConfig(String? rawStatus, {String? role}) {
     final status = (rawStatus ?? '').trim().toLowerCase();
     final color = getColor(status);

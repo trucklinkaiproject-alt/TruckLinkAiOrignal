@@ -119,23 +119,23 @@ class _LogInPageState extends State<LogInPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      
+
                       BackArrowButton(onTap: () => Navigator.pop(context)),
 
                       SizedBox(height: isMobile ? 24 : 32),
 
-                     
+
                       Center(
                         child: Column(
                           children: [
                             Container(
                               width: logoSize,
                               height: logoSize,
-                              
+
                               child: Image.asset(
                                 "assets/Images/TruckLink AI.png",
                                 fit: BoxFit.contain,
-                                
+
                               ),
                             ),
                             const SizedBox(height: 16),
@@ -163,7 +163,7 @@ class _LogInPageState extends State<LogInPage> {
 
                       SizedBox(height: isMobile ? 28 : 36),
 
-                     
+
                       const SectionLabel("Select Role"),
                       const SizedBox(height: 10),
                       Row(
@@ -223,7 +223,7 @@ class _LogInPageState extends State<LogInPage> {
 
                       SizedBox(height: isMobile ? 26 : 32),
 
-                      
+
                       const SectionLabel("Email"),
                       const SizedBox(height: 8),
                       PillTextField(
@@ -235,7 +235,7 @@ class _LogInPageState extends State<LogInPage> {
 
                       SizedBox(height: isMobile ? 18 : 22),
 
-                     
+
                       const SectionLabel("Password"),
                       const SizedBox(height: 8),
                       PillTextField(
@@ -247,7 +247,7 @@ class _LogInPageState extends State<LogInPage> {
 
                       const SizedBox(height: 14),
 
-                      
+
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -312,7 +312,7 @@ class _LogInPageState extends State<LogInPage> {
 
                       SizedBox(height: isMobile ? 22 : 28),
 
-                      // -------- Sign in button (same cubit logic) --------
+
                       BlocBuilder<AuthCubit, AuthState>(
                         builder: (context, state) {
                           final bool loading = state is AuthLoading;
@@ -371,7 +371,7 @@ class _LogInPageState extends State<LogInPage> {
 
                       SizedBox(height: isMobile ? 18 : 24),
 
-                     
+
                       Center(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -417,6 +417,4 @@ class _LogInPageState extends State<LogInPage> {
     );
   }
 }
-
-
 

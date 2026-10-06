@@ -66,7 +66,7 @@ class _ShipperOrderPageState extends State<ShipperOrderPage>
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: _orderDetailCubit,
-      
+
       child: Scaffold(
         backgroundColor: const Color(0xFFF5F6FA),
         appBar: _buildAppBar(context),
@@ -96,7 +96,7 @@ class _ShipperOrderPageState extends State<ShipperOrderPage>
       elevation: 0.5,
       shadowColor: Colors.black.withOpacity(0.05),
       surfaceTintColor: Colors.white,
-      
+
       title: const Text(
         "Order History",
         style: TextStyle(
@@ -110,7 +110,7 @@ class _ShipperOrderPageState extends State<ShipperOrderPage>
         IconButton(
           icon: const Icon(Icons.search, color: Colors.black87),
           onPressed: () {
-            // TODO: implement search
+
           },
         ),
         const SizedBox(width: 4),

@@ -217,7 +217,7 @@ class _ShipperAlertPageState extends State<ShipperAlertPage> {
 
                 return Column(
                   children: [
-                    // -------- Header --------
+
                     Padding(
                       padding: EdgeInsets.fromLTRB(
                         horizontalPadding,
@@ -288,7 +288,7 @@ class _ShipperAlertPageState extends State<ShipperAlertPage> {
                       ),
                     ),
 
-                    // -------- List --------
+
                     Expanded(
                       child: items.isEmpty
                           ? const _EmptyState()

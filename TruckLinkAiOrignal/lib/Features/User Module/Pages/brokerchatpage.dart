@@ -1,65 +1,4 @@
-// import 'package:flutter/material.dart';
-// import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
-// import 'package:trucklinkai_orignal/Features/User%20Module/Widgets/appBar.dart';
 
-// class BrokerChatPage extends StatefulWidget {
-//   const BrokerChatPage({super.key});
-
-//   @override
-//   State<BrokerChatPage> createState() => _BrokerChatPageState();
-// }
-
-// class _BrokerChatPageState extends State<BrokerChatPage> {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: SafeArea(
-//         child: Container(
-//           padding: EdgeInsets.symmetric(horizontal: 10),
-//           color:Appcolors.background,
-//           child: Column(
-            
-//             children: [
-//               AppBarContainer(title: "Chat with Broker",backArrow: true,),
-
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// broker_chat_page.dart
-//
-// Drop-in Flutter chat page: User ↔ Broker
-// Stack: Firebase Firestore + Cubit (no architecture layer)
-//
-// HOW TO INTEGRATE:
-//   1. Add dependencies in pubspec.yaml:
-//        flutter_bloc: ^8.1.5
-//        cloud_firestore: ^5.x.x
-//        firebase_auth: ^5.x.x
-//        intl: ^0.19.0
-//
-//   2. Firestore collection structure:
-//        /chats/{chatId}/messages/{messageId}
-//          - senderId   : String
-//          - text       : String
-//          - timestamp  : Timestamp
-//          - isRead     : bool
-//
-//   3. Navigate to this page:
-//        Navigator.push(context, MaterialPageRoute(
-//          builder: (_) => BrokerChatPage(
-//            chatId: 'your_chat_id',
-//            brokerId: 'broker_uid',
-//            brokerName: 'John Smith',
-//            brokerAvatar: 'https://...', // optional
-//          ),
-//        ));
-// ─────────────────────────────────────────────────────────────────────────────
 
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -69,9 +8,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:trucklinkai_orignal/Core/Services/notificationService.dart';
 
-// ══════════════════════════════════════════════════════════════════════════════
-// MODEL
-// ══════════════════════════════════════════════════════════════════════════════
 
 class ChatMessage {
   final String id;
@@ -141,9 +77,6 @@ class ChatMessage {
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// STATE
-// ══════════════════════════════════════════════════════════════════════════════
 
 abstract class ChatState {}
 
@@ -179,8 +112,7 @@ class ChatError extends ChatState {
   ChatError(this.message);
 }
 
-/// Generates a deterministic, symmetric conversation ID for any two user UIDs.
-/// Regardless of who initiates (A->B or B->A), the conversation ID is identical.
+
 String getDeterministicChatId(String userA, String userB) {
   final cleanA = userA.trim();
   final cleanB = userB.trim();
@@ -191,12 +123,9 @@ String getDeterministicChatId(String userA, String userB) {
   return "chat_${list[0]}_${list[1]}";
 }
 
-/// Standard helper alias for deterministic conversation ID generation.
+
 String getConversationId(String uid1, String uid2) => getDeterministicChatId(uid1, uid2);
 
-// ══════════════════════════════════════════════════════════════════════════════
-// CUBIT
-// ══════════════════════════════════════════════════════════════════════════════
 
 class ChatCubit extends Cubit<ChatState> {
   final String chatId;
@@ -219,11 +148,11 @@ class ChatCubit extends Cubit<ChatState> {
 
   String get currentUserId => _auth.currentUser?.uid ?? '';
 
-  /// Call once when the page opens.
+
   void initialize() {
     emit(ChatLoading());
 
-    // Listen ONLY to this conversation's dedicated messages subcollection
+
     _messagesSubscription = _firestore
         .collection('chats')
         .doc(chatId)
@@ -284,7 +213,7 @@ class ChatCubit extends Cubit<ChatState> {
         'conversationId': chatId,
       });
 
-      // Update parent conversation document metadata
+
       final Map<String, dynamic> convData = {
         'chatId': chatId,
         'conversationId': chatId,
@@ -310,7 +239,7 @@ class ChatCubit extends Cubit<ChatState> {
 
       await _firestore.collection('chats').doc(chatId).set(convData, SetOptions(merge: true));
 
-      // Deterministic notification to receiver
+
       if (receiverId.isNotEmpty) {
         String targetCollection = 'User';
         final String roleLower = receiverRole.toLowerCase();
@@ -378,9 +307,6 @@ class ChatCubit extends Cubit<ChatState> {
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// PAGE
-// ══════════════════════════════════════════════════════════════════════════════
 
 class BrokerChatPage extends StatelessWidget {
   final String chatId;
@@ -433,9 +359,6 @@ class BrokerChatPage extends StatelessWidget {
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// INTERNAL VIEW
-// ══════════════════════════════════════════════════════════════════════════════
 
 class _ChatView extends StatefulWidget {
   final String brokerName;
@@ -507,7 +430,7 @@ class _ChatViewState extends State<_ChatView> {
       ),
       body: Column(
         children: [
-          // ── Message list ──────────────────────────────────────────
+
           Expanded(
             child: BlocConsumer<ChatCubit, ChatState>(
               listener: (context, state) {
@@ -542,13 +465,13 @@ class _ChatViewState extends State<_ChatView> {
                     scrollController: _scrollController,
                   );
                 }
-                // ChatError handled via listener; show placeholder.
+
                 return const SizedBox.shrink();
               },
             ),
           ),
 
-          // ── Input bar ─────────────────────────────────────────────
+
           _InputBar(
             controller: _controller,
             canSend: _canSend,
@@ -560,9 +483,6 @@ class _ChatViewState extends State<_ChatView> {
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// APP BAR
-// ══════════════════════════════════════════════════════════════════════════════
 
 class _BrokerAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String brokerName;
@@ -624,7 +544,7 @@ class _BrokerAppBar extends StatelessWidget implements PreferredSizeWidget {
           icon: const Icon(Icons.phone_outlined, color: Color(0xFF4F46E5)),
           tooltip: 'Call $receiverRole',
           onPressed: () {
-            // Future calling logic
+
           },
         ),
       ],
@@ -632,9 +552,6 @@ class _BrokerAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// MESSAGE LIST
-// ══════════════════════════════════════════════════════════════════════════════
 
 class _MessageList extends StatelessWidget {
   final List<ChatMessage> messages;
@@ -657,7 +574,7 @@ class _MessageList extends StatelessWidget {
         final message = messages[index];
         final isMe = message.senderId == currentUserId;
 
-        // Show a date divider when the date changes.
+
         final showDivider = index == 0 ||
             !_isSameDay(messages[index - 1].timestamp, message.timestamp);
 
@@ -675,9 +592,6 @@ class _MessageList extends StatelessWidget {
       a.year == b.year && a.month == b.month && a.day == b.day;
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// MESSAGE BUBBLE
-// ══════════════════════════════════════════════════════════════════════════════
 
 class _MessageBubble extends StatelessWidget {
   final ChatMessage message;
@@ -687,7 +601,7 @@ class _MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const myColor = Color(0xFF4F46E5);   // indigo
+    const myColor = Color(0xFF4F46E5);
     const theirColor = Colors.white;
 
     return Align(
@@ -758,9 +672,6 @@ class _MessageBubble extends StatelessWidget {
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// DATE DIVIDER
-// ══════════════════════════════════════════════════════════════════════════════
 
 class _DateDivider extends StatelessWidget {
   final DateTime date;
@@ -801,9 +712,6 @@ class _DateDivider extends StatelessWidget {
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// EMPTY STATE
-// ══════════════════════════════════════════════════════════════════════════════
 
 class _EmptyChat extends StatelessWidget {
   final String brokerName;
@@ -856,9 +764,6 @@ class _EmptyChat extends StatelessWidget {
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// INPUT BAR
-// ══════════════════════════════════════════════════════════════════════════════
 
 class _InputBar extends StatelessWidget {
   final TextEditingController controller;
@@ -890,17 +795,17 @@ class _InputBar extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                // Attachment button
+
                 IconButton(
                   icon: const Icon(Icons.attach_file_rounded,
                       color: Color(0xFF9CA3AF)),
                   onPressed: () {
-                    // TODO: handle file/image attachment
+
                   },
                   tooltip: 'Attach file',
                 ),
 
-                // Text field
+
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
@@ -931,7 +836,7 @@ class _InputBar extends StatelessWidget {
 
                 const SizedBox(width: 8),
 
-                // Send button
+
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   width: 44,
@@ -971,9 +876,6 @@ class _InputBar extends StatelessWidget {
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// BROKER AVATAR WIDGET (reusable)
-// ══════════════════════════════════════════════════════════════════════════════
 
 class _BrokerAvatar extends StatelessWidget {
   final String? avatarUrl;
@@ -992,7 +894,7 @@ class _BrokerAvatar extends StatelessWidget {
         backgroundColor: const Color(0xFFE0E7FF),
       );
     }
-    // Initials fallback
+
     final initials = name.trim().split(' ').take(2).map((w) => w[0]).join();
     return CircleAvatar(
       radius: radius,

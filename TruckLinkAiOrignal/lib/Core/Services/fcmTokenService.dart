@@ -19,12 +19,12 @@ class FcmTokenService {
   String? _cachedDeviceId;
   bool _isListeningRefresh = false;
 
-  /// Generate a deterministic, safe document ID from token or device ID
+
   String _generateTokenDocId(String token, String deviceId) {
     return 'token_${deviceId}_${token.hashCode.abs()}';
   }
 
-  /// Retrieve device details safely across platforms
+
   Future<Map<String, String>> _getDeviceDetails() async {
     String platformName = 'unknown';
     String deviceId = 'unknown_device';
@@ -74,8 +74,7 @@ class FcmTokenService {
     };
   }
 
-  /// Register current device FCM token in Firestore under:
-  /// `{role}/{uid}/fcmTokens/{tokenId}`
+
   Future<void> registerToken({
     required String uid,
     required String role,
@@ -86,7 +85,7 @@ class FcmTokenService {
     _currentRole = role;
 
     try {
-      // On platforms where FCM push is supported (Android, iOS, Web)
+
       String? token;
       try {
         token = await _messaging.getToken();
@@ -103,7 +102,7 @@ class FcmTokenService {
       final deviceDetails = await _getDeviceDetails();
       final String docId = _generateTokenDocId(token, deviceDetails['deviceId']!);
 
-      // Save token document under role collection (User, Broker, or Driver)
+
       await _firestore
           .collection(role)
           .doc(uid)
@@ -127,7 +126,7 @@ class FcmTokenService {
     }
   }
 
-  /// Setup automatic token refresh listener
+
   void _startTokenRefreshListener() {
     if (_isListeningRefresh) return;
     _isListeningRefresh = true;
@@ -144,7 +143,7 @@ class FcmTokenService {
 
         final String newDocId = _generateTokenDocId(newToken, deviceDetails['deviceId']!);
 
-        // If docId changed, clean up old token doc
+
         if (oldDocId.isNotEmpty && oldDocId != newDocId) {
           try {
             await _firestore
@@ -158,7 +157,7 @@ class FcmTokenService {
 
         _cachedToken = newToken;
 
-        // Register new token document
+
         await _firestore
             .collection(_currentRole!)
             .doc(_currentUid!)
@@ -180,7 +179,7 @@ class FcmTokenService {
     });
   }
 
-  /// Remove only the current device's FCM token document on user logout
+
   Future<void> removeCurrentDeviceToken({
     required String uid,
     required String role,
@@ -202,7 +201,7 @@ class FcmTokenService {
         debugPrint('[FcmTokenService] Deleted token document ($docId) for $role: $uid');
       }
 
-      // Also clean up local token if supported
+
       try {
         await _messaging.deleteToken();
       } catch (_) {}

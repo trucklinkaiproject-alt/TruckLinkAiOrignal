@@ -54,7 +54,7 @@ class _BrokerSelectionPageState extends State<BrokerSelectionPage> {
                 AppBarContainer(title: "Choose Broker", backArrow: true),
                 const SizedBox(height: 16),
 
-                // ── Vehicle Requirement Badge ─────────────────────────
+
                 if (_effectiveVehicleType.isNotEmpty)
                   Container(
                     width: double.infinity,
@@ -150,7 +150,7 @@ class _BrokerSelectionPageState extends State<BrokerSelectionPage> {
                 ),
                 const SizedBox(height: 10),
 
-                // ── Real-Time Filtered Brokers Stream/State ─────────────
+
                 BlocBuilder<GetBrokerCubit, GetBrokerState>(
                   builder: (context, state) {
                     if (state is GetBrokerLoadingState) {
@@ -268,7 +268,7 @@ class _BrokerSelectionPageState extends State<BrokerSelectionPage> {
 
                 const SizedBox(height: 24),
 
-                // ── Browse More Link ───────────────────────────────────
+
                 InkWell(
                   onTap: () {
                     Navigator.push(

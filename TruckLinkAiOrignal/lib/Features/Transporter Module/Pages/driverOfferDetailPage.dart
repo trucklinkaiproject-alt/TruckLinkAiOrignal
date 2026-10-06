@@ -19,7 +19,7 @@ class DriverOfferDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final String orderNo = (offer['order_no'] ?? offer['orderNo'] ?? offer['order_id'] ?? '').toString();
     final String orderId = (offer['order_id'] ?? offer['orderId'] ?? orderNo).toString();
-    // ReceivedOffers documents are keyed by offer id (not order id)
+
     final String offerDocId = (offer['offer_id'] ?? offer['id'] ?? orderId).toString();
     final String currentDriverUid = FirebaseAuth.instance.currentUser?.uid ?? '';
 
@@ -113,7 +113,7 @@ class DriverOfferDetailPage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // -------- Header --------
+
                           Row(
                             children: [
                               BackArrowButton(onTap: () => Navigator.pop(context)),
@@ -174,7 +174,7 @@ class DriverOfferDetailPage extends StatelessWidget {
 
                           const SizedBox(height: 20),
 
-                          // -------- Fare Card --------
+
                           Container(
                             width: double.infinity,
                             padding: const EdgeInsets.all(18),
@@ -231,7 +231,7 @@ class DriverOfferDetailPage extends StatelessWidget {
 
                           const SizedBox(height: 20),
 
-                          // -------- Broker Info --------
+
                           const _SectionLabel("Broker Information"),
                           const SizedBox(height: 8),
                           _detailCard(
@@ -299,7 +299,7 @@ class DriverOfferDetailPage extends StatelessWidget {
 
                           const SizedBox(height: 18),
 
-                          // -------- Route Details --------
+
                           const _SectionLabel("Complete Route"),
                           const SizedBox(height: 8),
                           _detailCard(
@@ -400,7 +400,7 @@ class DriverOfferDetailPage extends StatelessWidget {
 
                           const SizedBox(height: 18),
 
-                          // -------- Cargo & Vehicle Details --------
+
                           const _SectionLabel("Cargo & Vehicle Requirements"),
                           const SizedBox(height: 8),
                           _detailCard(
@@ -433,9 +433,7 @@ class DriverOfferDetailPage extends StatelessWidget {
 
                           const SizedBox(height: 24),
 
-                          // =======================================================
-                          // STATE-SPECIFIC ACTIONS
-                          // =======================================================
+
                           if (isPending) ...[
                             ValueListenableBuilder<bool>(
                               valueListenable: context.read<DriverOffersCubit>().actionBusy,
@@ -458,7 +456,7 @@ class DriverOfferDetailPage extends StatelessWidget {
                                               : () async {
                                                   final nav = Navigator.of(context);
                                                   final ok = await context.read<DriverOffersCubit>().rejectOffer(offer: liveOffer);
-                                                  // Only leave the page after the write succeeded
+
                                                   if (ok && context.mounted && nav.canPop()) {
                                                     nav.pop();
                                                   }
@@ -487,7 +485,7 @@ class DriverOfferDetailPage extends StatelessWidget {
                                               : () async {
                                                   final nav = Navigator.of(context);
                                                   final ok = await context.read<DriverOffersCubit>().acceptOffer(offer: liveOffer);
-                                                  // Only leave the page after the write succeeded
+
                                                   if (ok && context.mounted && nav.canPop()) {
                                                     nav.pop();
                                                   }

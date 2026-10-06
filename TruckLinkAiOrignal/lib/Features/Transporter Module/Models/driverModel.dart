@@ -23,7 +23,7 @@ class DriverModel {
   final String? activeRequestBrokerId;
   final String? activeRequestBrokerName;
   final String? requestStatus;
-  final String availabilityStatus; // 'online', 'offline', 'on_ride'
+  final String availabilityStatus;
 
   DriverModel({
     required this.driverId,
@@ -51,7 +51,7 @@ class DriverModel {
     this.availabilityStatus = 'online',
   });
 
-  /// Business rule: Truck details are complete only when both vehicleNumber and vehicleType are present and non-empty.
+
   bool get isTruckDetailsComplete =>
       (truckDetailsCompleted || onboardingCompleted) ||
       (vehicleNumber != null &&
@@ -132,7 +132,7 @@ class DriverModel {
     };
   }
 
-  /// Initial map structure when a new Driver document is created in Firestore
+
   static Map<String, dynamic> createInitialData({
     required String uid,
     required String name,

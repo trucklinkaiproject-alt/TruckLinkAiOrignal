@@ -24,11 +24,9 @@ class NotificationService {
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  /// Creates a persistent notification document in Firestore.
-  /// This document serves as the single source of truth for the in-app
-  /// Notification Center and triggers the serverless FCM Cloud Function.
+
   Future<String?> sendNotification({
-    required String targetCollection, // 'User', 'Broker', or 'Driver'
+    required String targetCollection,
     required String recipientId,
     required String type,
     required String title,
@@ -86,7 +84,7 @@ class NotificationService {
     }
   }
 
-  /// Mark a single notification as read
+
   Future<void> markAsRead({
     required String collectionName,
     required String uid,
@@ -106,9 +104,9 @@ class NotificationService {
     }
   }
 
-  /// Deletes all notifications for a specific user/broker/driver in safe batches of up to 400 documents.
+
   Future<int> clearAllNotifications({
-    required String collectionName, // e.g. "User", "Broker", "Driver"
+    required String collectionName,
     required String uid,
     List<QueryDocumentSnapshot>? existingDocs,
   }) async {
@@ -127,7 +125,7 @@ class NotificationService {
     if (docs.isEmpty) return 0;
 
     int totalDeleted = 0;
-    const int batchSize = 400; // Firestore limit is 500 ops per batch
+    const int batchSize = 400;
 
     for (int i = 0; i < docs.length; i += batchSize) {
       final batch = _firestore.batch();
@@ -147,7 +145,7 @@ class NotificationService {
     return totalDeleted;
   }
 
-  /// Marks all unread notifications as read for a specific user/broker/driver.
+
   Future<void> markAllAsRead({
     required String collectionName,
     required String uid,

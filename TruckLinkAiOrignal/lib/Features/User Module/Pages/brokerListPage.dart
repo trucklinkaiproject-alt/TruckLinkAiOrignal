@@ -13,7 +13,7 @@ class BrokerListPage extends StatefulWidget {
 
 class _BrokerListPageState extends State<BrokerListPage> {
   final TextEditingController _searchController = TextEditingController();
-  int _selectedSort = 0; // 0=Top Rated, 1=Nearest, 2=Fastest
+  int _selectedSort = 0;
 
   List<Map<String, dynamic>> _filterAndSortBrokers(List<Map<String, dynamic>> rawBrokers) {
     final query = _searchController.text.trim().toLowerCase();
@@ -25,21 +25,21 @@ class _BrokerListPageState extends State<BrokerListPage> {
     }).toList();
 
     switch (_selectedSort) {
-      case 1: // Location/Nearest
+      case 1:
         list.sort((a, b) {
           final locA = (a['location'] ?? a['address'] ?? '').toString();
           final locB = (b['location'] ?? b['address'] ?? '').toString();
           return locA.compareTo(locB);
         });
         break;
-      case 2: // Fastest / Active
+      case 2:
         list.sort((a, b) {
           final timeA = (a['estimatedTime'] ?? '0').toString();
           final timeB = (b['estimatedTime'] ?? '0').toString();
           return timeA.compareTo(timeB);
         });
         break;
-      default: // Top Rated
+      default:
         list.sort((a, b) {
           final ratingA = (a['rating'] as num?)?.toDouble() ?? 0.0;
           final ratingB = (b['rating'] as num?)?.toDouble() ?? 0.0;
@@ -88,7 +88,7 @@ class _BrokerListPageState extends State<BrokerListPage> {
 
                 return Column(
                   children: [
-                    // -------- Header --------
+
                     Padding(
                       padding: EdgeInsets.fromLTRB(
                         horizontalPadding,
@@ -127,7 +127,7 @@ class _BrokerListPageState extends State<BrokerListPage> {
                       ),
                     ),
 
-                    // -------- Search --------
+
                     Padding(
                       padding: EdgeInsets.symmetric(
                         horizontal: horizontalPadding,
@@ -140,7 +140,7 @@ class _BrokerListPageState extends State<BrokerListPage> {
 
                     const SizedBox(height: 14),
 
-                    // -------- Sort chips --------
+
                     SizedBox(
                       height: 38,
                       child: ListView(
@@ -175,7 +175,7 @@ class _BrokerListPageState extends State<BrokerListPage> {
 
                     const SizedBox(height: 10),
 
-                    // -------- Real-Time Broker list --------
+
                     Expanded(
                       child: filteredBrokers.isEmpty
                           ? const _EmptyState()

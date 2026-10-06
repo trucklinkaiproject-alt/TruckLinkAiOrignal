@@ -224,7 +224,7 @@ class _BrokerAlertPageState extends State<BrokerAlertPage> {
 
                 return Column(
                   children: [
-                    // -------- Header --------
+
                     Padding(
                       padding: EdgeInsets.fromLTRB(
                         horizontalPadding,
@@ -315,7 +315,7 @@ class _BrokerAlertPageState extends State<BrokerAlertPage> {
                       ),
                     ),
 
-                    // -------- Notification List --------
+
                     Expanded(
                       child: docs.isEmpty
                           ? const _BrokerEmptyAlertState()

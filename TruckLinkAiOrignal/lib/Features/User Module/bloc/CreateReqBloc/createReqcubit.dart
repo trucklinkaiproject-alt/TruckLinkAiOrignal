@@ -36,11 +36,11 @@ class CreateReqCubit extends Cubit<CreateReqState> {
       ) {
         if (doc.exists) {
           orderNo = doc.data()?['orderNo'] ?? "1";
-        } 
+        }
       });
-      // Simulate a network request or any asynchronous operation
+
       String orderId = DateTime.now().millisecondsSinceEpoch.toString();
-      //
+
       currentRequest = UserRequestDataModel(
         userUid: userUid,
         pickupCity: pickupCity,
@@ -67,7 +67,7 @@ class CreateReqCubit extends Cubit<CreateReqState> {
 
       emit(CreateReqSuccessState("Request created successfully!"));
     } catch (e) {
-      // If there's an error, emit the error state with the error message
+
       emit(CreateReqErrorState("Failed to create request: ${e.toString()}"));
     }
   }
@@ -92,7 +92,7 @@ class CreateReqCubit extends Cubit<CreateReqState> {
             .doc(currentRequest!.orderId)
             .set(currentRequest!.toMap());
 
-        // Notify Broker of new shipment request
+
         try {
           final String notifId = "req_new_${currentRequest!.orderId}_${currentRequest!.userUid}";
           await NotificationService().sendNotification(
@@ -109,9 +109,7 @@ class CreateReqCubit extends Cubit<CreateReqState> {
           );
         } catch (_) {}
 
-        // ── AI STATS: increment total_requests atomically ──────────────────
-        // Using a transaction guarantees idempotency even if the stream fires
-        // multiple times; the counter only increments once per request write.
+
         await _firestore.runTransaction((txn) async {
           final brokerRef =
               _firestore.collection('Broker').doc(currentRequest!.brokerId);
@@ -135,7 +133,7 @@ class CreateReqCubit extends Cubit<CreateReqState> {
               'total_requests': total,
               'acceptance_rate': acceptanceRate,
               'cancellation_rate': cancellationRate,
-              // Ensure field exists for new/existing brokers
+
               'accepted_requests': accepted,
               'cancelled_requests': cancelled,
               'completed_requests':
@@ -154,7 +152,7 @@ class CreateReqCubit extends Cubit<CreateReqState> {
         emit(CreateReqErrorState("No data available from user"));
       }
     } catch (e) {
-      // If there's an error, emit the error state with the error message
+
       emit(CreateReqErrorState("Failed to create request: ${e.toString()}"));
     }
   }

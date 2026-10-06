@@ -20,9 +20,9 @@ class _UserChatInboxPageState extends State<UserChatInboxPage> {
 
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
-  String _selectedFilter = "All"; // "All", "Brokers", "Drivers"
+  String _selectedFilter = "All";
 
-  // In-memory cache for participant profiles
+
   static final Map<String, Map<String, dynamic>> _participantCache = {};
 
   @override
@@ -60,7 +60,7 @@ class _UserChatInboxPageState extends State<UserChatInboxPage> {
     };
 
     try {
-      // 1. Check Broker collection first
+
       final brokerDoc =
           await _firestore.collection('Broker').doc(participantId).get();
       if (brokerDoc.exists && brokerDoc.data() != null) {
@@ -78,7 +78,7 @@ class _UserChatInboxPageState extends State<UserChatInboxPage> {
         return result;
       }
 
-      // 2. Check Driver collection
+
       final driverDoc =
           await _firestore.collection('Driver').doc(participantId).get();
       if (driverDoc.exists && driverDoc.data() != null) {
@@ -96,7 +96,7 @@ class _UserChatInboxPageState extends State<UserChatInboxPage> {
         return result;
       }
 
-      // 3. Check User collection (if chatting with another shipper/user)
+
       final userDoc = await _firestore.collection('User').doc(participantId).get();
       if (userDoc.exists && userDoc.data() != null) {
         final u = userDoc.data()!;
@@ -174,7 +174,7 @@ class _UserChatInboxPageState extends State<UserChatInboxPage> {
 
             return Column(
               children: [
-                // ── Top Header ──────────────────────────────────────────
+
                 Padding(
                   padding: EdgeInsets.fromLTRB(
                     horizontalPadding,
@@ -196,7 +196,7 @@ class _UserChatInboxPageState extends State<UserChatInboxPage> {
                           ),
                         ),
                       ),
-                      // Real-time Total Unread Badge Stream
+
                       StreamBuilder<QuerySnapshot>(
                         stream: _firestore
                             .collection("chats")
@@ -238,7 +238,7 @@ class _UserChatInboxPageState extends State<UserChatInboxPage> {
                   ),
                 ),
 
-                // ── Search Bar ──────────────────────────────────────────
+
                 Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: horizontalPadding,
@@ -284,7 +284,7 @@ class _UserChatInboxPageState extends State<UserChatInboxPage> {
                   ),
                 ),
 
-                // ── Category Filter Pills ───────────────────────────────
+
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 6),
                   child: SingleChildScrollView(
@@ -305,7 +305,7 @@ class _UserChatInboxPageState extends State<UserChatInboxPage> {
 
                 const SizedBox(height: 6),
 
-                // ── Real-Time Conversations List ─────────────────────────
+
                 Expanded(
                   child: StreamBuilder<QuerySnapshot>(
                     stream: _firestore
@@ -345,21 +345,21 @@ class _UserChatInboxPageState extends State<UserChatInboxPage> {
                         );
                       }
 
-                      // Group all conversation documents strictly by other participant ID
+
                       final Map<String, _UserConversationItem> conversationMap = {};
 
                       for (final doc in docs) {
                         final data = doc.data() as Map<String, dynamic>;
                         final String rawChatId = doc.id;
 
-                        // Find the other participant ID
+
                         final List<dynamic> participants = data['participants'] ?? [];
                         String otherUserId = participants.firstWhere(
                           (p) => p.toString() != currentUserId && p.toString().isNotEmpty,
                           orElse: () => '',
                         ).toString();
 
-                        // Fallback if participants array was missing
+
                         if (otherUserId.isEmpty) {
                           if (data['receiverId'] != null && data['receiverId'].toString() != currentUserId) {
                             otherUserId = data['receiverId'].toString();
@@ -433,7 +433,7 @@ class _UserChatInboxPageState extends State<UserChatInboxPage> {
                         }
                       }
 
-                      // Unique 1-per-person conversations sorted descending by latest activity
+
                       final sortedConversations = conversationMap.values.toList()
                         ..sort((a, b) => b.latestDateTime.compareTo(a.latestDateTime));
 
@@ -472,7 +472,7 @@ class _UserChatInboxPageState extends State<UserChatInboxPage> {
                               final String role = profile['role'] ?? (conv.explicitRole.isNotEmpty ? conv.explicitRole : 'Broker');
                               final String? avatarUrl = profile['avatar'];
 
-                              // Apply Search Query Filter
+
                               if (_searchQuery.isNotEmpty) {
                                 final matchesName = displayName.toLowerCase().contains(_searchQuery);
                                 final matchesMessage = conv.lastMessage.toLowerCase().contains(_searchQuery);
@@ -482,7 +482,7 @@ class _UserChatInboxPageState extends State<UserChatInboxPage> {
                                 }
                               }
 
-                              // Apply Category Filter
+
                               if (_selectedFilter == "Brokers" && role.toLowerCase() != "broker") {
                                 return const SizedBox.shrink();
                               }
@@ -580,7 +580,7 @@ class _UserChatInboxPageState extends State<UserChatInboxPage> {
     return InkWell(
       borderRadius: BorderRadius.circular(18),
       onTap: () async {
-        // Mark conversation unread count for current user as 0
+
         try {
           await _firestore.collection('chats').doc(chatId).set({
             'unreadCount_$currentUserId': 0,
@@ -628,7 +628,7 @@ class _UserChatInboxPageState extends State<UserChatInboxPage> {
         ),
         child: Row(
           children: [
-            // ── Avatar ──────────────────────────────────────────────
+
             Stack(
               children: [
                 CircleAvatar(
@@ -669,7 +669,7 @@ class _UserChatInboxPageState extends State<UserChatInboxPage> {
 
             const SizedBox(width: 14),
 
-            // ── Name & Last Message ─────────────────────────────────
+
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -736,7 +736,7 @@ class _UserChatInboxPageState extends State<UserChatInboxPage> {
 
             const SizedBox(width: 10),
 
-            // ── Timestamp & Unread Badge ────────────────────────────
+
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [

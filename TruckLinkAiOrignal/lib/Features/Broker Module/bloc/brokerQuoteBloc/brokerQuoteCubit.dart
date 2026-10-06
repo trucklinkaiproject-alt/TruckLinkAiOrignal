@@ -15,7 +15,7 @@ class BrokerQuoteCubit extends Cubit<BrokerQuoteState> {
     emit(BrokerQuoteLoading());
 
     try {
-      // 1. Fetch real Broker details
+
       String brokerName = "Broker";
       String brokerPhone = "";
       String brokerAvatar = "";
@@ -49,7 +49,7 @@ class BrokerQuoteCubit extends Cubit<BrokerQuoteState> {
         "quote_submitted_at": FieldValue.serverTimestamp(),
       };
 
-      // 2. Update User Request
+
       await FirebaseFirestore.instance
           .collection("User")
           .doc(userUid)
@@ -57,7 +57,7 @@ class BrokerQuoteCubit extends Cubit<BrokerQuoteState> {
           .doc(orderId)
           .update(updateData);
 
-      // 3. Update Broker Incoming Request
+
       await FirebaseFirestore.instance
           .collection("Broker")
           .doc(brokerId)
@@ -65,7 +65,7 @@ class BrokerQuoteCubit extends Cubit<BrokerQuoteState> {
           .doc(orderId)
           .update(updateData);
 
-      // 4. Send Real Notification to User
+
       final notifId = 'broker_offer_$orderId';
       await NotificationService().sendNotification(
         targetCollection: 'User',

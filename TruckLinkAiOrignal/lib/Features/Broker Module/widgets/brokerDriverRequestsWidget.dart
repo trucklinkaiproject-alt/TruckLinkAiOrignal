@@ -173,7 +173,7 @@ class BrokerDriverRequestsWidget extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Header Row: Avatar, Name, Status Badge
+
                       Row(
                         children: [
                           CircleAvatar(
@@ -216,7 +216,7 @@ class BrokerDriverRequestsWidget extends StatelessWidget {
                             ),
                           ),
 
-                          // Pending Badge
+
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 10,
@@ -253,7 +253,7 @@ class BrokerDriverRequestsWidget extends StatelessWidget {
                       Divider(height: 1, color: Colors.grey.withValues(alpha: 0.2)),
                       const SizedBox(height: 10),
 
-                      // Truck Details: Type & Number
+
                       Row(
                         children: [
                           Icon(Icons.fire_truck_outlined, size: 15, color: Appcolors.secondaryPurple),
@@ -270,7 +270,7 @@ class BrokerDriverRequestsWidget extends StatelessWidget {
                       ),
                       const SizedBox(height: 6),
 
-                      // Info Row: Rating & Trip Statistics
+
                       Row(
                         children: [
                           Icon(Icons.star_rounded, size: 15, color: Colors.amber[700]),
@@ -314,7 +314,7 @@ class BrokerDriverRequestsWidget extends StatelessWidget {
 
                       const SizedBox(height: 14),
 
-                      // Action Buttons: Accept & Reject
+
                       Row(
                         children: [
                           Expanded(

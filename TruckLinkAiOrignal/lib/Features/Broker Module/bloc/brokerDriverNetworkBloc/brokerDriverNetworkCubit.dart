@@ -12,8 +12,7 @@ class BrokerDriverNetworkCubit extends Cubit<BrokerDriverNetworkState> {
 
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _networkSubscription;
 
-  /// Fetches and listens in real-time to accepted network Drivers belonging ONLY to the currently logged-in Broker.
-  /// Firestore Path: Broker/{currentBrokerId}/DriverNetwork
+
   Future<void> fetchNetworkDrivers() async {
     try {
       if (isClosed) return;
@@ -68,7 +67,7 @@ class BrokerDriverNetworkCubit extends Cubit<BrokerDriverNetworkState> {
 
   bool _removing = false;
 
-  /// Offer statuses that mean the driver is committed to a trip/assignment from this broker.
+
   static const List<String> _blockingOfferStatuses = [
     'pending',
     'driver_offer_sent',
@@ -80,13 +79,7 @@ class BrokerDriverNetworkCubit extends Cubit<BrokerDriverNetworkState> {
     'heading_to_drop',
   ];
 
-  /// Removes a driver from the CURRENT broker's network only.
-  ///
-  /// - Deletes Broker/{brokerId}/DriverNetwork/{driverId}
-  /// - Clears the driver's link to this broker (broker_id/brokerId/broker_name) ONLY if it
-  ///   still points at this broker. The Driver account/document itself is never deleted.
-  ///
-  /// Returns null on success, otherwise a user-facing error message.
+
   Future<String?> removeDriverFromNetwork(String driverId) async {
     if (_removing) return "A removal is already in progress.";
     final currentUser = _auth.currentUser;
@@ -97,7 +90,7 @@ class BrokerDriverNetworkCubit extends Cubit<BrokerDriverNetworkState> {
     try {
       final String brokerId = currentUser.uid;
 
-      // Active trip / order protection (only offers issued by THIS broker count)
+
       final offers = await _firestore
           .collection("Driver")
           .doc(driverId)

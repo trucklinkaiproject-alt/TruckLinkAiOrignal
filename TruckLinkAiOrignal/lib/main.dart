@@ -28,10 +28,10 @@ void main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // Register top-level background FCM message handler
+
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
-  // Initialize Push Notification Service (Channels, Local notifications, Permissions)
+
   await PushNotificationService().initialize();
 
   if (kIsWeb) {

@@ -12,13 +12,13 @@ class FindBrokerCubit extends Cubit<FindBrokerState> {
   Set<String> _requestedBrokerIds = {};
   String _currentQuery = '';
 
-  /// Fetches available brokers from existing "Broker" collection and checks for pending join requests.
+
   Future<void> fetchBrokers({required String driverId}) async {
     try {
       if (isClosed) return;
       emit(FindBrokerLoadingState());
 
-      // Fetch all brokers from the existing Broker collection
+
       final QuerySnapshot snapshot = await _firestore.collection("Broker").get();
 
       _allBrokers = snapshot.docs
@@ -28,7 +28,7 @@ class FindBrokerCubit extends Cubit<FindBrokerState> {
               })
           .toList();
 
-      // Check which brokers have pending requests from this driver
+
       _requestedBrokerIds = {};
       for (var broker in _allBrokers) {
         final String brokerId = broker["id"] as String;
@@ -57,7 +57,7 @@ class FindBrokerCubit extends Cubit<FindBrokerState> {
     }
   }
 
-  /// Filters brokers by name
+
   void searchBrokers(String query) {
     _currentQuery = query.trim().toLowerCase();
     _applyFilter();
@@ -79,9 +79,7 @@ class FindBrokerCubit extends Cubit<FindBrokerState> {
     ));
   }
 
-  /// Sends a join request from a Driver to a Broker following all business rules.
-  /// IMPORTANT: Sending a request DOES NOT add the Driver to the Broker's network.
-  /// The request is created in Firestore with status = "pending".
+
   Future<void> sendJoinRequest({
     required DriverModel driver,
     required Map<String, dynamic> broker,
@@ -89,7 +87,7 @@ class FindBrokerCubit extends Cubit<FindBrokerState> {
     final String brokerId = (broker['id'] ?? broker['uid'] ?? '').toString().trim();
     final String brokerName = (broker['name'] ?? 'Broker').toString();
 
-    // STRICT BUSINESS RULE: Driver MUST complete Truck details before requesting a Broker
+
     if (!driver.isTruckDetailsComplete) {
       emit(FindBrokerErrorState(
         "Please complete your truck details before joining a Broker.",
@@ -97,7 +95,7 @@ class FindBrokerCubit extends Cubit<FindBrokerState> {
       return;
     }
 
-    // RULE 1: Driver already connected to a Broker cannot request another Broker
+
     if (driver.brokerId != null && driver.brokerId!.trim().isNotEmpty) {
       emit(FindBrokerErrorState(
         "You are already connected to a Broker network. You cannot request another Broker.",
@@ -105,7 +103,7 @@ class FindBrokerCubit extends Cubit<FindBrokerState> {
       return;
     }
 
-    // RULE 2: Validate Broker ID
+
     if (brokerId.isEmpty) {
       emit(FindBrokerErrorState("Invalid Broker ID."));
       return;
@@ -118,13 +116,13 @@ class FindBrokerCubit extends Cubit<FindBrokerState> {
         return;
       }
 
-      // RULE 3: Driver cannot select himself as a Broker
+
       if (brokerId == driver.uid || brokerId == driver.driverId) {
         emit(FindBrokerErrorState("You cannot select yourself as a Broker."));
         return;
       }
 
-      // RULE 4: Prevent duplicate active requests
+
       if (driver.requestStatus == 'pending' || _requestedBrokerIds.isNotEmpty) {
         final String pendingName = driver.activeRequestBrokerName ?? 'a Broker';
         emit(FindBrokerErrorState(
@@ -135,8 +133,7 @@ class FindBrokerCubit extends Cubit<FindBrokerState> {
 
       emit(FindBrokerSendingRequestState(brokerId));
 
-      // Create Join Request document in Firestore under Broker/{brokerId}/DriverRequests/{requestId}
-      // Status is set to "pending". Note: driver.brokerId remains null/unchanged.
+
       await _firestore
           .collection("Broker")
           .doc(brokerId)
@@ -166,7 +163,7 @@ class FindBrokerCubit extends Cubit<FindBrokerState> {
         'cancelled_trips': driver.cancelledTrips,
       });
 
-      // Update Driver document with active request info (without setting broker_id)
+
       await _firestore.collection("Driver").doc(driver.uid).update({
         'active_request_broker_id': brokerId,
         'active_request_broker_name': brokerName,

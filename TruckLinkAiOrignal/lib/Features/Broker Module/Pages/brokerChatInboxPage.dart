@@ -20,9 +20,9 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
 
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
-  String _selectedFilter = "All"; // "All", "Customers", "Drivers"
+  String _selectedFilter = "All";
 
-  // In-memory cache for participant profiles to prevent redundant Firestore reads
+
   static final Map<String, Map<String, dynamic>> _participantCache = {};
 
   @override
@@ -60,7 +60,7 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
     };
 
     try {
-      // 1. Check User collection
+
       final userDoc = await _firestore.collection('User').doc(participantId).get();
       if (userDoc.exists && userDoc.data() != null) {
         final u = userDoc.data()!;
@@ -77,7 +77,7 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
         return result;
       }
 
-      // 2. Check Driver collection
+
       final driverDoc =
           await _firestore.collection('Driver').doc(participantId).get();
       if (driverDoc.exists && driverDoc.data() != null) {
@@ -95,7 +95,7 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
         return result;
       }
 
-      // 3. Check Broker collection (if chatting with another broker)
+
       final brokerDoc =
           await _firestore.collection('Broker').doc(participantId).get();
       if (brokerDoc.exists && brokerDoc.data() != null) {
@@ -133,9 +133,9 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
     } else if (difference == 1) {
       return "Yesterday";
     } else if (difference < 7) {
-      return DateFormat('EEE').format(dt); // e.g. Wed
+      return DateFormat('EEE').format(dt);
     } else {
-      return DateFormat('MMM d').format(dt); // e.g. Sep 5
+      return DateFormat('MMM d').format(dt);
     }
   }
 
@@ -168,7 +168,7 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
 
             return Column(
               children: [
-                // ── Top Header ──────────────────────────────────────────
+
                 Padding(
                   padding: EdgeInsets.fromLTRB(
                     horizontalPadding,
@@ -190,7 +190,7 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
                           ),
                         ),
                       ),
-                      // Real-time Total Unread Badge Stream
+
                       StreamBuilder<QuerySnapshot>(
                         stream: _firestore
                             .collection("chats")
@@ -228,7 +228,7 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
                   ),
                 ),
 
-                // ── Search & Filter Section ─────────────────────────────
+
                 Padding(
                   padding: EdgeInsets.fromLTRB(
                     horizontalPadding,
@@ -238,7 +238,7 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
                   ),
                   child: Column(
                     children: [
-                      // Search Bar
+
                       Container(
                         height: 46,
                         decoration: BoxDecoration(
@@ -276,7 +276,7 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
                       ),
                       const SizedBox(height: 10),
 
-                      // Filter Chips
+
                       Row(
                         children: [
                           _buildFilterChip("All"),
@@ -290,7 +290,7 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
                   ),
                 ),
 
-                // ── Real-Time Conversation List Stream ──────────────────
+
                 Expanded(
                   child: StreamBuilder<QuerySnapshot>(
                     stream: _firestore
@@ -323,21 +323,21 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
                         );
                       }
 
-                      // Group all conversation documents strictly by other participant ID
+
                       final Map<String, _BrokerConversationItem> conversationMap = {};
 
                       for (final doc in docs) {
                         final chatData = doc.data() as Map<String, dynamic>;
                         final String rawChatId = doc.id;
 
-                        // Extract other participant
+
                         final participants = (chatData['participants'] as List<dynamic>?) ?? [];
                         String otherId = participants.firstWhere(
                           (p) => p.toString() != currentBrokerId && p.toString().isNotEmpty,
                           orElse: () => '',
                         ).toString();
 
-                        // Fallback if participants array was missing
+
                         if (otherId.isEmpty) {
                           if (chatData['receiverId'] != null && chatData['receiverId'].toString() != currentBrokerId) {
                             otherId = chatData['receiverId'].toString();
@@ -420,7 +420,7 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
                         }
                       }
 
-                      // Unique 1-per-person conversations sorted descending by latest activity
+
                       final sortedConversations = conversationMap.values.toList()
                         ..sort((a, b) => b.latestDateTime.compareTo(a.latestDateTime));
 
@@ -457,7 +457,7 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
                               final String participantRole = profile['role'] ?? conv.inferredRole ?? 'Customer';
                               final String? avatarUrl = profile['avatar'];
 
-                              // Filter by search query
+
                               if (_searchQuery.isNotEmpty) {
                                 final matchesName = participantName.toLowerCase().contains(_searchQuery);
                                 final matchesOrder = conv.orderId.toLowerCase().contains(_searchQuery);
@@ -468,7 +468,7 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
                                 }
                               }
 
-                              // Filter by role chip
+
                               if (_selectedFilter == "Customers" && participantRole != "Customer") {
                                 return const SizedBox.shrink();
                               }
@@ -604,7 +604,7 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // ── Participant Avatar ──────────────────────────────────
+
               Stack(
                 children: [
                   Container(
@@ -673,7 +673,7 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
               ),
               const SizedBox(width: 13),
 
-              // ── Middle: Name, Role/Order Tag, Latest Message ─────────
+
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -692,7 +692,7 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        // Timestamp
+
                         Text(
                           _formatChatTimestamp(lastMessageTime),
                           style: TextStyle(
@@ -705,7 +705,7 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
                     ),
                     const SizedBox(height: 3),
 
-                    // Role & Order Chip Row
+
                     Row(
                       children: [
                         Container(
@@ -762,7 +762,7 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
                     ),
                     const SizedBox(height: 5),
 
-                    // Latest message preview
+
                     Row(
                       children: [
                         Expanded(

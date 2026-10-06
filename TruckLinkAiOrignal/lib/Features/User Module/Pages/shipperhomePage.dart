@@ -105,7 +105,7 @@ class _ShipperHomePageState extends State<ShipperHomePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    
+
                     Row(
                       children: [
                         Container(
@@ -152,7 +152,7 @@ class _ShipperHomePageState extends State<ShipperHomePage> {
                             ],
                           ),
                         ),
-                        // Real-time Chat Entry Point with Unread Badge
+
                         StreamBuilder<QuerySnapshot>(
                           stream: FirebaseAuth.instance.currentUser?.uid != null
                               ? FirebaseFirestore.instance
@@ -238,7 +238,7 @@ class _ShipperHomePageState extends State<ShipperHomePage> {
 
                     SizedBox(height: isMobile ? 26 : 34),
 
-                   
+
                     const Text(
                       "Book Your Shipment\nwith ease",
                       style: TextStyle(
@@ -251,7 +251,7 @@ class _ShipperHomePageState extends State<ShipperHomePage> {
 
                     const SizedBox(height: 18),
 
-                    
+
                     Row(
                       children: [
                         Expanded(
@@ -285,7 +285,7 @@ class _ShipperHomePageState extends State<ShipperHomePage> {
 
                     SizedBox(height: isMobile ? 28 : 34),
 
-                 
+
                     const Text(
                       "Quick Actions",
                       style: TextStyle(
@@ -316,7 +316,7 @@ class _ShipperHomePageState extends State<ShipperHomePage> {
                         Expanded(
                           child: _QuickActionCard(
                             onTap: () {
-                              // Navigate to Saved Address page
+
                             },
                             label: "Saved Address",
                             icon: Icons.bookmark_outline_rounded,
@@ -328,7 +328,7 @@ class _ShipperHomePageState extends State<ShipperHomePage> {
 
                     SizedBox(height: isMobile ? 28 : 34),
 
-                    
+
                     const Text(
                       "Recent Orders",
                       style: TextStyle(

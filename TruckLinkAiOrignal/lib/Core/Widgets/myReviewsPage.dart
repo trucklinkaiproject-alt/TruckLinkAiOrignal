@@ -7,7 +7,7 @@ import 'package:trucklinkai_orignal/Core/Widgets/backArrowButton.dart';
 
 class MyReviewsPage extends StatelessWidget {
   final String? userId;
-  final String userRole; // 'Driver' or 'Broker'
+  final String userRole;
   final String? userName;
 
   const MyReviewsPage({
@@ -66,7 +66,7 @@ class MyReviewsPage extends StatelessWidget {
 
             return Column(
               children: [
-                // ── Top Header ──────────────────────────────────────────
+
                 Padding(
                   padding: EdgeInsets.fromLTRB(
                     horizontalPadding,
@@ -110,7 +110,7 @@ class MyReviewsPage extends StatelessWidget {
 
                 const SizedBox(height: 6),
 
-                // ── Real-Time Reviews Stream ─────────────────────────────
+
                 Expanded(
                   child: StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
@@ -145,7 +145,7 @@ class MyReviewsPage extends StatelessWidget {
 
                       final docs = snapshot.data?.docs ?? [];
 
-                      // Calculate live statistics
+
                       int totalReviews = 0;
                       double sumRating = 0.0;
                       int star5 = 0, star4 = 0, star3 = 0, star2 = 0, star1 = 0;
@@ -187,7 +187,7 @@ class MyReviewsPage extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // ── Overall Rating Summary Card ────────────────
+
                             _buildRatingSummaryCard(
                               avgRating: avgRating,
                               totalReviews: totalReviews,
@@ -201,7 +201,7 @@ class MyReviewsPage extends StatelessWidget {
 
                             const SizedBox(height: 22),
 
-                            // ── Section Title ──────────────────────────────
+
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -227,7 +227,7 @@ class MyReviewsPage extends StatelessWidget {
 
                             const SizedBox(height: 12),
 
-                            // ── Review Cards List / Empty State ───────────
+
                             if (docs.isEmpty)
                               _buildEmptyReviews(primaryColor: primaryColor)
                             else
@@ -301,7 +301,7 @@ class MyReviewsPage extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Left side: Big Average Score
+
           Expanded(
             flex: 4,
             child: Column(
@@ -334,7 +334,7 @@ class MyReviewsPage extends StatelessWidget {
             ),
           ),
 
-          // Divider
+
           Container(
             height: 90,
             width: 1,
@@ -342,7 +342,7 @@ class MyReviewsPage extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 14),
           ),
 
-          // Right side: Star Breakdown Bars
+
           Expanded(
             flex: 6,
             child: Column(
@@ -454,7 +454,7 @@ class MyReviewsPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header: Reviewer Name, Role, Rating & Date
+
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -544,7 +544,7 @@ class MyReviewsPage extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          // Review Comment
+
           Text(
             comment.isNotEmpty ? comment : "No comment provided.",
             style: TextStyle(

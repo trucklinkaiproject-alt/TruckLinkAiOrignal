@@ -19,7 +19,7 @@ class UserCubit extends Cubit<UserState> {
 
   bool _isListening = false;
 
-  /// Fetch logged-in user information
+
   Future<void> fetchUserData() async {
     try {
       if (isClosed) return;
@@ -38,8 +38,7 @@ class UserCubit extends Cubit<UserState> {
       userId = currentUser.uid;
 
       final userDoc = await firestore.collection("User").doc(userId).get();
-      
-      
+
 
       if (!userDoc.exists) {
         if (!isClosed) {
@@ -138,7 +137,7 @@ class UserCubit extends Cubit<UserState> {
             .doc(requestId)
             .update(updatePayload);
 
-        // Notify Broker of quote acceptance
+
         try {
           final String notifId = "quote_acc_${requestId}_$userId";
           await NotificationService().sendNotification(
@@ -204,7 +203,7 @@ class UserCubit extends Cubit<UserState> {
             .doc(requestId)
             .update(updatePayload);
 
-        // Notify Broker of quote rejection
+
         try {
           final String notifId = "quote_rej_${requestId}_$userId";
           await NotificationService().sendNotification(

@@ -307,7 +307,7 @@ class _TransporterHomePageState extends State<TransporterHomePage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // -------- Header --------
+
                             Row(
                               children: [
                                 Container(
@@ -352,7 +352,7 @@ class _TransporterHomePageState extends State<TransporterHomePage> {
                                   ),
                                 ),
                                 const SizedBox(width: 8),
-                                // Driver Availability Toggle / Status Badge
+
                                 Builder(
                                   builder: (context) {
                                     if (activeRide != null) {
@@ -447,9 +447,7 @@ class _TransporterHomePageState extends State<TransporterHomePage> {
 
                             SizedBox(height: isMobile ? 18 : 24),
 
-                            // =======================================================
-                            // 1. ACTIVE RIDE SECTION (Primary Focus when Ride Active)
-                            // =======================================================
+
                             if (activeRide != null) ...[
                               _ActiveRideCard(
                                 ride: activeRide,
@@ -458,9 +456,7 @@ class _TransporterHomePageState extends State<TransporterHomePage> {
                               SizedBox(height: isMobile ? 22 : 28),
                             ],
 
-                            // =======================================================
-                            // 2. DRIVER PROFILE & BROKER NETWORK SECTION
-                            // =======================================================
+
                             if (activeRide == null) ...[
                               _DriverProfileCard(
                                 driver: driver,
@@ -544,9 +540,7 @@ class _TransporterHomePageState extends State<TransporterHomePage> {
 
                               SizedBox(height: isMobile ? 22 : 28),
 
-                              // =======================================================
-                              // 3. INCOMING REQUESTS SECTION (With Accept & Reject)
-                              // =======================================================
+
                               _IncomingRequestsSection(
                                 offers: offersState is DriverOffersLoadedState ? offersState.offers : [],
                                 driverId: driver.driverId,
@@ -573,9 +567,7 @@ class _TransporterHomePageState extends State<TransporterHomePage> {
   }
 }
 
-// =====================================================================
-// Active Ride Card (Displayed prominently on Driver Home after Accept)
-// =====================================================================
+
 class _ActiveRideCard extends StatelessWidget {
   final Map<String, dynamic> ride;
   final dynamic driver;
@@ -585,7 +577,7 @@ class _ActiveRideCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String orderNo = (ride['order_no'] ?? ride['order_id'] ?? '').toString();
-    // ignore: unused_local_variable
+
     final String orderId = (ride['order_id'] ?? ride['orderNo'] ?? '').toString();
     final String brokerName = (ride['broker_name'] ?? 'Broker').toString();
     final String brokerId = (ride['broker_id'] ?? '').toString();
@@ -641,7 +633,7 @@ class _ActiveRideCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // -------- Top Row: Order # + Live Tag --------
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -703,7 +695,7 @@ class _ActiveRideCard extends StatelessWidget {
           Divider(height: 1, color: Colors.grey.withOpacity(0.15)),
           const SizedBox(height: 14),
 
-          // -------- Route Details --------
+
           Row(
             children: [
               const Icon(Icons.circle, size: 12, color: Appcolors.tertiaryGreen),
@@ -746,7 +738,7 @@ class _ActiveRideCard extends StatelessWidget {
 
           const SizedBox(height: 14),
 
-          // -------- Cargo Info Chips --------
+
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -770,7 +762,7 @@ class _ActiveRideCard extends StatelessWidget {
 
           const SizedBox(height: 18),
 
-          // -------- Chat & Live Map Tracking Actions --------
+
           Row(
             children: [
               if (brokerId.isNotEmpty)
@@ -842,7 +834,7 @@ class _ActiveRideCard extends StatelessWidget {
 
           const SizedBox(height: 14),
 
-          // -------- Primary Flow Action Button --------
+
           if (isAcceptedAwaitingStart)
             SizedBox(
               width: double.infinity,
@@ -1015,9 +1007,7 @@ class _ActiveRideCard extends StatelessWidget {
   }
 }
 
-// =====================================================================
-// Incoming Requests Section Widget (With Accept / Reject on Home Card)
-// =====================================================================
+
 class _IncomingRequestsSection extends StatelessWidget {
   final List<Map<String, dynamic>> offers;
   final String driverId;
@@ -1117,9 +1107,7 @@ class _IncomingRequestsSection extends StatelessWidget {
   }
 }
 
-// =====================================================================
-// Incoming Offer Card with full details + Direct Accept & Reject
-// =====================================================================
+
 class _IncomingOfferCard extends StatelessWidget {
   final Map<String, dynamic> offer;
   const _IncomingOfferCard({required this.offer});
@@ -1164,7 +1152,7 @@ class _IncomingOfferCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Top Row
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -1196,7 +1184,7 @@ class _IncomingOfferCard extends StatelessWidget {
               Divider(height: 1, color: Colors.grey.withOpacity(0.15)),
               const SizedBox(height: 12),
 
-              // Route (City-level summary only)
+
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -1229,7 +1217,7 @@ class _IncomingOfferCard extends StatelessWidget {
 
               const SizedBox(height: 10),
 
-              // Item + Vehicle Spec
+
               Text(
                 "$itemType • $weight kg • Required: $vehicleType",
                 style: TextStyle(fontSize: 12, color: Colors.grey[700]),
@@ -1237,7 +1225,7 @@ class _IncomingOfferCard extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              // Accept / Reject Actions on Card
+
               Row(
                 children: [
                   Expanded(
@@ -1297,9 +1285,7 @@ class _IncomingOfferCard extends StatelessWidget {
   }
 }
 
-// =====================================================================
-// Driver Profile Card
-// =====================================================================
+
 class _DriverProfileCard extends StatelessWidget {
   final dynamic driver;
   final String? locationStatus;
@@ -1442,9 +1428,7 @@ class _DriverProfileCard extends StatelessWidget {
   }
 }
 
-// =====================================================================
-// Broker Network Connection State Widgets
-// =====================================================================
+
 class _NoBrokerStateWidget extends StatelessWidget {
   final bool isTruckDetailsComplete;
   final VoidCallback onFindBroker;

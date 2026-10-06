@@ -87,7 +87,7 @@ class DriverSettingsPage extends StatelessWidget {
                   AppBarContainer(title: "Driver Profile", backArrow: false),
                   const SizedBox(height: 16),
 
-                  // Profile Header (Matches User / Broker Profile)
+
                   Center(
                     child: Column(
                       children: [
@@ -136,7 +136,7 @@ class DriverSettingsPage extends StatelessWidget {
 
                   const SizedBox(height: 30),
 
-                  // Section 1: Personal & Contact Information
+
                   buildSection([
                     buildProfileOption(
                       icon: Icons.person_outline,
@@ -165,7 +165,7 @@ class DriverSettingsPage extends StatelessWidget {
 
                   const SizedBox(height: 24),
 
-                  // Section 2: Vehicle / Truck Details
+
                   buildSection([
                     buildProfileOption(
                       icon: Icons.local_shipping_outlined,
@@ -211,7 +211,7 @@ class DriverSettingsPage extends StatelessWidget {
 
                   const SizedBox(height: 24),
 
-                  // Section 3: Broker Network & Operations
+
                   buildSection([
                     buildProfileOption(
                       icon: Icons.business_outlined,
@@ -255,7 +255,7 @@ class DriverSettingsPage extends StatelessWidget {
 
                   const SizedBox(height: 24),
 
-                  // Section 4: Log Out (Destructive Section matching Broker / User)
+
                   buildSection([
                     buildProfileOption(
                       icon: Icons.logout,

@@ -91,7 +91,7 @@ class _BrokerAssignDriverPageState extends State<BrokerAssignDriverPage> {
                 ),
                 const SizedBox(height: 16),
 
-                // Driver Summary Card
+
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(14),
@@ -144,7 +144,7 @@ class _BrokerAssignDriverPageState extends State<BrokerAssignDriverPage> {
 
                 const SizedBox(height: 20),
 
-                // Fare Input Field
+
                 const Text(
                   "Offered Fare (PKR)",
                   style: TextStyle(
@@ -274,7 +274,7 @@ class _BrokerAssignDriverPageState extends State<BrokerAssignDriverPage> {
               builder: (context, state) {
                 return Column(
                   children: [
-                    // -------- Header --------
+
                     Padding(
                       padding: EdgeInsets.fromLTRB(
                         horizontalPadding,
@@ -313,7 +313,7 @@ class _BrokerAssignDriverPageState extends State<BrokerAssignDriverPage> {
                       ),
                     ),
 
-                    // -------- Required Vehicle Badge --------
+
                     Padding(
                       padding: EdgeInsets.symmetric(
                         horizontal: horizontalPadding,
@@ -346,7 +346,7 @@ class _BrokerAssignDriverPageState extends State<BrokerAssignDriverPage> {
 
                     const SizedBox(height: 8),
 
-                    // -------- Driver List --------
+
                     Expanded(
                       child: _buildDriverList(
                         context: context,

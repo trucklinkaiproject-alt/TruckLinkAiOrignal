@@ -17,7 +17,7 @@ class DriverCubit extends Cubit<DriverState> {
   DriverModel? _currentDriver;
   String? _lastLocationStatus;
 
-  /// Fetches and listens to the driver document from Firestore.
+
   Future<void> fetchDriverData() async {
     try {
       if (isClosed) return;
@@ -36,7 +36,7 @@ class DriverCubit extends Cubit<DriverState> {
 
       _driverSubscription?.cancel();
 
-      // Listen to Driver document in real-time
+
       _driverSubscription = _firestore
           .collection("Driver")
           .doc(uid)
@@ -49,7 +49,7 @@ class DriverCubit extends Cubit<DriverState> {
             _currentDriver = DriverModel.fromSnapshot(snapshot);
             await _evaluateAndEmitState();
           } else {
-            // Document does not exist yet. Initialize with required default values.
+
             final initialData = DriverModel.createInitialData(
               uid: uid,
               name: currentUser.displayName ?? '',
@@ -68,7 +68,7 @@ class DriverCubit extends Cubit<DriverState> {
         },
       );
 
-      // Trigger location initialization after fetching document
+
       updateDriverLocation();
     } catch (e) {
       if (!isClosed) {
@@ -77,7 +77,7 @@ class DriverCubit extends Cubit<DriverState> {
     }
   }
 
-  /// Evaluates relationship status from Driver document source of truth and emits DriverLoadedState
+
   Future<void> _evaluateAndEmitState() async {
     if (isClosed || _currentDriver == null) return;
 
@@ -88,7 +88,7 @@ class DriverCubit extends Cubit<DriverState> {
     String? targetBrokerId;
     String? targetBrokerName;
 
-    // STATE 4: CONNECTED — Driver document has a non-empty broker_id
+
     if (driver.brokerId != null && driver.brokerId!.trim().isNotEmpty) {
       relationshipStatus = DriverBrokerRelationshipStatus.connected;
       targetBrokerId = driver.brokerId;
@@ -104,7 +104,7 @@ class DriverCubit extends Cubit<DriverState> {
     } else if (driver.requestStatus == 'pending' &&
         driver.activeRequestBrokerId != null &&
         driver.activeRequestBrokerId!.trim().isNotEmpty) {
-      // STATE 2: REQUEST PENDING
+
       relationshipStatus = DriverBrokerRelationshipStatus.requestPending;
       targetBrokerId = driver.activeRequestBrokerId;
       targetBrokerName = driver.activeRequestBrokerName;
@@ -122,7 +122,7 @@ class DriverCubit extends Cubit<DriverState> {
     } else if (driver.requestStatus == 'rejected' &&
         driver.activeRequestBrokerId != null &&
         driver.activeRequestBrokerId!.trim().isNotEmpty) {
-      // STATE 3: REQUEST REJECTED
+
       relationshipStatus = DriverBrokerRelationshipStatus.requestRejected;
       targetBrokerId = driver.activeRequestBrokerId;
       targetBrokerName = driver.activeRequestBrokerName;
@@ -138,7 +138,7 @@ class DriverCubit extends Cubit<DriverState> {
         } catch (_) {}
       }
     } else {
-      // STATE 1: NO BROKER
+
       relationshipStatus = DriverBrokerRelationshipStatus.noBroker;
     }
 
@@ -154,9 +154,7 @@ class DriverCubit extends Cubit<DriverState> {
     }
   }
 
-  /// Requests device location permission, obtains current latitude and longitude,
-  /// and updates ONLY 'driver_latitude' and 'driver_longitude' in Firestore.
-  /// Strictly preserves all other fields (broker_id, vehicle_type, ratings, trips, etc.).
+
   Future<void> updateDriverLocation() async {
     try {
       final currentUser = _auth.currentUser;
@@ -183,7 +181,7 @@ class DriverCubit extends Cubit<DriverState> {
         return;
       }
 
-      // Permission granted — obtain position
+
       Position position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.high,
@@ -191,7 +189,7 @@ class DriverCubit extends Cubit<DriverState> {
         ),
       );
 
-      // Save ONLY driver_latitude and driver_longitude to Firestore
+
       await _firestore.collection("Driver").doc(uid).update({
         'driver_latitude': position.latitude,
         'driver_longitude': position.longitude,
@@ -203,8 +201,7 @@ class DriverCubit extends Cubit<DriverState> {
     }
   }
 
-  /// Saves vehicle_number and vehicle_type to Driver Firestore document.
-  /// Strictly preserves all other fields.
+
   Future<bool> saveTruckDetails({
     required String vehicleNumber,
     required String vehicleType,
@@ -234,7 +231,7 @@ class DriverCubit extends Cubit<DriverState> {
         'updated_at': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
 
-      // Also update linked broker's DriverNetwork subcollection if connected
+
       final effectiveBrokerId = _currentDriver?.brokerId;
       if (effectiveBrokerId != null && effectiveBrokerId.isNotEmpty) {
         try {
@@ -261,7 +258,7 @@ class DriverCubit extends Cubit<DriverState> {
     }
   }
 
-  /// Updates Driver's availability status ('online' vs 'offline')
+
   Future<void> updateDriverAvailability(String status) async {
     try {
       final currentUser = _auth.currentUser;
@@ -270,7 +267,7 @@ class DriverCubit extends Cubit<DriverState> {
 
       final bool isOnline = status == 'online';
 
-      // Active trip protection: driver cannot go offline while on an active ride
+
       if (!isOnline && (_currentDriver?.isOnRide == true || _currentDriver?.availabilityStatus == 'on_ride')) {
         if (!isClosed) {
           emit(DriverErrorState("Cannot switch to offline while an active shipment ride is in progress."));
@@ -285,7 +282,7 @@ class DriverCubit extends Cubit<DriverState> {
         'updated_at': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
 
-      // Also update linked broker's DriverNetwork if connected
+
       if (_currentDriver?.brokerId != null && _currentDriver!.brokerId!.isNotEmpty) {
         try {
           await _firestore

@@ -47,7 +47,7 @@ class AuthCubit extends Cubit<AuthState> {
 
       await userCredential.user?.sendEmailVerification();
 
-     
+
       Map<String, dynamic> userData = {
         'name': name,
         'email': email,
@@ -72,8 +72,8 @@ class AuthCubit extends Cubit<AuthState> {
       }
 
       if (selectedRole == 'Broker') {
-        // Initialize all AI training feature fields for new Broker accounts.
-        // These are maintained automatically by the system — never manually edited.
+
+
         userData.addAll({
           'broker_id': userCredential.user!.uid,
           'broker_rating': 0.0,
@@ -130,7 +130,7 @@ class AuthCubit extends Cubit<AuthState> {
         password: password,
       );
 
-      // Refresh currentUser state to verify email verification status
+
       final user = userCredential.user;
       if (user != null) {
         await user.reload();
@@ -142,7 +142,7 @@ class AuthCubit extends Cubit<AuthState> {
         }
       }
 
-      // Register device FCM token upon successful login
+
       if (user != null) {
         try {
           await FcmTokenService().registerToken(uid: user.uid, role: role);
@@ -247,7 +247,7 @@ Future<void> cancelSignUp({
         driverCubit.stopListening();
       } catch (_) {}
 
-      // Clean up current device FCM token
+
       final currentUid = _auth.currentUser?.uid;
       final roleToClean = selectedRole;
       if (currentUid != null && currentUid.isNotEmpty && roleToClean.isNotEmpty) {

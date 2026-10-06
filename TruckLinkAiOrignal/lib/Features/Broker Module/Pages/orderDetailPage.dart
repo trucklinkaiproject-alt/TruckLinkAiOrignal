@@ -125,7 +125,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // -------- Header --------
+
                   Row(
                     children: [
                       BackArrowButton(onTap: () => Navigator.pop(context)),
@@ -168,7 +168,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
 
                   SizedBox(height: isMobile ? 24 : 30),
 
-                  // -------- Order # + time --------
+
                   Text(
                     requestId,
                     style: const TextStyle(
@@ -185,7 +185,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
 
                   SizedBox(height: isMobile ? 24 : 30),
 
-                  // -------- Customer Information (REAL USER PROFILE FETCH) --------
+
                   const _SectionLabel("Customer Information"),
                   const SizedBox(height: 10),
                   FutureBuilder<DocumentSnapshot?>(
@@ -296,7 +296,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
 
                   SizedBox(height: isMobile ? 22 : 26),
 
-                  // -------- Route (Full Addresses) --------
+
                   const _SectionLabel("Complete Route"),
                   const SizedBox(height: 10),
                   _InfoCard(
@@ -399,7 +399,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
 
                   SizedBox(height: isMobile ? 22 : 26),
 
-                  // -------- Item Details --------
+
                   const _SectionLabel("Item Details"),
                   const SizedBox(height: 10),
                   _InfoCard(
@@ -446,7 +446,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
 
                   SizedBox(height: isMobile ? 26 : 32),
 
-                  // -------- Real-Time Stream for Status & Actions --------
+
                   StreamBuilder<DocumentSnapshot>(
                     stream: (brokerId.isNotEmpty && orderId.isNotEmpty)
                         ? FirebaseFirestore.instance
@@ -469,7 +469,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // -------- "Your Quote" section - ONLY shown when status == pending --------
+
                           if (isPending) ...[
                             const _SectionLabel("Your Quote (PKR)"),
                             const SizedBox(height: 10),
@@ -574,7 +574,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                             ),
 
                             SizedBox(height: isMobile ? 20 : 24),
-                          ],                          // -------- BROKER REQUEST STATUS SECTION --------
+                          ],
                           const _SectionLabel("Order & Shipment Status"),
                           const SizedBox(height: 10),
                           Builder(
@@ -643,7 +643,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
 
                           SizedBox(height: isMobile ? 22 : 26),
 
-                          // -------- SHIPMENT FINANCIALS (CUSTOMER FARE & DRIVER PAYMENT) --------
+
                           if (!isPending) ...[
                             const _SectionLabel("Shipment Financials"),
                             const SizedBox(height: 10),
@@ -720,7 +720,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                             SizedBox(height: isMobile ? 22 : 26),
                           ],
 
-                          // -------- DRIVER ASSIGNMENT & LIFECYCLE STATUS SECTION --------
+
                           const _SectionLabel("Driver Assignment & Status"),
                           const SizedBox(height: 10),
                           _buildDriverLifecycleCard(
@@ -733,7 +733,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
 
                           SizedBox(height: isMobile ? 22 : 26),
 
-                          // -------- DRIVER DETAILS CARD (If Driver Assigned) --------
+
                           if (assignedDriverId != null && assignedDriverId.toString().isNotEmpty) ...[
                             const _SectionLabel("Assigned Driver Details"),
                             const SizedBox(height: 10),
@@ -749,7 +749,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                             SizedBox(height: isMobile ? 22 : 26),
                           ],
 
-                          // -------- LIVE DRIVER GPS TRACKING (Active rides only - NOT completed) --------
+
                           if (assignedDriverId != null &&
                               assignedDriverId.toString().isNotEmpty &&
                               rawStatus != 'completed' &&
@@ -893,7 +893,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                             SizedBox(height: isMobile ? 22 : 26),
                           ],
 
-                          // -------- Reject / Assign Driver Action Buttons --------
+
                           if (rawStatus == "pending")
                             SizedBox(
                               width: double.infinity,
@@ -1030,7 +1030,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                               ),
                             )
                           else if (rawStatus == "completed" || rawStatus == "delivered") ...[
-                            // Delivery Duration Summary
+
                             Container(
                               width: double.infinity,
                               padding: const EdgeInsets.all(16),
@@ -1103,7 +1103,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                             ),
                             const SizedBox(height: 14),
 
-                            // Rate Driver Button
+
                             if (assignedDriverId != null &&
                                 assignedDriverId.toString().isNotEmpty &&
                                 docData['broker_reviewed_driver'] != true) ...[
@@ -1195,7 +1195,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
   }) {
     final bool hasDriver = assignedDriverId != null && assignedDriverId.toString().isNotEmpty;
 
-    // 1. Not assigned
+
     if (!hasDriver) {
       return Container(
         width: double.infinity,
@@ -1241,7 +1241,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       );
     }
 
-    // 2. Offer Sent
+
     if (rawStatus == 'driver_offer_sent') {
       final fareStr = driverOfferedFare != null ? "PKR $driverOfferedFare" : "Fare Pending";
       return Container(
@@ -1288,7 +1288,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       );
     }
 
-    // 3. Driver Rejected
+
     if (rawStatus == 'driver_rejected') {
       return Container(
         width: double.infinity,
@@ -1334,7 +1334,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       );
     }
 
-    // 4. Accepted by Driver
+
     if (rawStatus == 'accepted_by_driver') {
       final fareStr = driverAcceptedFare != null ? "PKR $driverAcceptedFare" : "Agreed Fare";
       return Container(
@@ -1381,7 +1381,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       );
     }
 
-    // 5. In Transit
+
     if (rawStatus == 'in_transit' || rawStatus == 'in_progress') {
       final fareStr = driverAcceptedFare != null ? "PKR $driverAcceptedFare" : "Agreed Fare";
       return Container(
@@ -1428,7 +1428,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       );
     }
 
-    // 6. Completed
+
     if (rawStatus == 'completed' || rawStatus == 'delivered') {
       final fareStr = driverAcceptedFare != null ? "PKR $driverAcceptedFare" : "Agreed Fare";
       return Container(

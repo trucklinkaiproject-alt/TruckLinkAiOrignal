@@ -14,7 +14,7 @@ class Heading extends StatelessWidget {
         fontWeight: FontWeight.bold,
 
       ),
-     
+
     );
   }
 }

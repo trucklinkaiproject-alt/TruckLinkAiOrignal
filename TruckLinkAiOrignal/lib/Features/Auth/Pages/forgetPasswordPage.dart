@@ -64,12 +64,12 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // -------- Back button --------
+
                       BackArrowButton(onTap: () => Navigator.pop(context)),
 
                       SizedBox(height: isMobile ? 26 : 34),
 
-                      // -------- Icon badge + copy (centered) --------
+
                       Center(
                         child: Column(
                           children: [
@@ -115,7 +115,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       ),
 
                       SizedBox(height: isMobile ? 30 : 38),
-                      
+
 
                       if (!_emailSent) ...[
                         const SectionLabel("Email"),

@@ -53,7 +53,7 @@ class _FindBrokerPageState extends State<FindBrokerPage> {
         final String brokerPhone = (broker['phone'] ?? 'No phone').toString();
         final String brokerId = (broker['id'] ?? broker['uid'] ?? '').toString();
 
-        // Dynamic Broker Reputation from Firestore
+
         final double? overallRating = (broker['rating'] as num?)?.toDouble() ??
             (broker['overall_rating'] as num?)?.toDouble();
         final double? completionRate = (broker['completion_rate'] as num?)?.toDouble() ??
@@ -124,7 +124,7 @@ class _FindBrokerPageState extends State<FindBrokerPage> {
                 ),
                 const SizedBox(height: 16),
 
-                // Broker Summary Card
+
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
@@ -190,7 +190,7 @@ class _FindBrokerPageState extends State<FindBrokerPage> {
 
                 const SizedBox(height: 16),
 
-                // Dynamic Broker Reputation Section
+
                 const Text(
                   "Reputation & Feedback",
                   style: TextStyle(
@@ -436,7 +436,7 @@ class _FindBrokerPageState extends State<FindBrokerPage> {
               builder: (context, state) {
                 return Column(
                   children: [
-                    // -------- Header --------
+
                     Padding(
                       padding: EdgeInsets.fromLTRB(
                         horizontalPadding,
@@ -475,7 +475,7 @@ class _FindBrokerPageState extends State<FindBrokerPage> {
                       ),
                     ),
 
-                    // -------- Search Bar --------
+
                     Padding(
                       padding: EdgeInsets.symmetric(
                         horizontal: horizontalPadding,
@@ -532,7 +532,7 @@ class _FindBrokerPageState extends State<FindBrokerPage> {
 
                     const SizedBox(height: 8),
 
-                    // -------- Broker List --------
+
                     Expanded(
                       child: _buildBrokerList(
                         context: context,
@@ -695,7 +695,7 @@ class _FindBrokerPageState extends State<FindBrokerPage> {
                     ],
                     const Spacer(),
 
-                    // Join Request Action Button
+
                     if (isConnectedToThis) ...[
                       Container(
                         padding: const EdgeInsets.symmetric(

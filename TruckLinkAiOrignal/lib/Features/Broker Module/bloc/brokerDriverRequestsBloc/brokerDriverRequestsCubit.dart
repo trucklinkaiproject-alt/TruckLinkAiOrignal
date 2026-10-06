@@ -13,7 +13,7 @@ class BrokerDriverRequestsCubit extends Cubit<BrokerDriverRequestsState> {
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _requestsSubscription;
   List<Map<String, dynamic>> _pendingRequests = [];
 
-  /// Fetches and listens to pending Driver join requests belonging strictly to the logged-in Broker.
+
   Future<void> fetchPendingRequests() async {
     try {
       if (isClosed) return;
@@ -62,7 +62,7 @@ class BrokerDriverRequestsCubit extends Cubit<BrokerDriverRequestsState> {
     }
   }
 
-  /// UI/State action to accept a pending Driver request using a Firestore transaction.
+
   Future<void> acceptRequest({
     required String requestId,
     required String driverId,
@@ -77,7 +77,7 @@ class BrokerDriverRequestsCubit extends Cubit<BrokerDriverRequestsState> {
       final String brokerId = currentUser.uid;
 
       await _firestore.runTransaction((transaction) async {
-        // 1. Verify request is still pending
+
         final requestRef = _firestore
             .collection("Broker")
             .doc(brokerId)
@@ -95,14 +95,14 @@ class BrokerDriverRequestsCubit extends Cubit<BrokerDriverRequestsState> {
           throw Exception("Join request is no longer pending.");
         }
 
-        // 2. Verify Driver exists
+
         final driverRef = _firestore.collection("Driver").doc(driverId);
         final driverSnap = await transaction.get(driverRef);
         if (!driverSnap.exists) {
           throw Exception("Driver document does not exist.");
         }
 
-        // 3. Verify Driver is not already connected to another Broker
+
         final driverData = driverSnap.data();
         final existingBrokerId =
             (driverData?['broker_id'] ?? driverData?['brokerId'])
@@ -115,14 +115,14 @@ class BrokerDriverRequestsCubit extends Cubit<BrokerDriverRequestsState> {
               "Driver is already connected to another Broker network.");
         }
 
-        // 4. Set request status to accepted
+
         transaction.update(requestRef, {
           'status': 'accepted',
           'updated_at': FieldValue.serverTimestamp(),
           'updatedAt': FieldValue.serverTimestamp(),
         });
 
-        // 5 & 6. Set Driver's broker_id to current Broker UID and update request fields
+
         transaction.update(driverRef, {
           'broker_id': brokerId,
           'brokerId': brokerId,
@@ -133,7 +133,7 @@ class BrokerDriverRequestsCubit extends Cubit<BrokerDriverRequestsState> {
           'updatedAt': FieldValue.serverTimestamp(),
         });
 
-        // 7 & 8. Add Driver to Broker's actual Driver network (using driverId to prevent duplicate records)
+
         final networkRef = _firestore
             .collection("Broker")
             .doc(brokerId)
@@ -183,7 +183,7 @@ class BrokerDriverRequestsCubit extends Cubit<BrokerDriverRequestsState> {
     }
   }
 
-  /// UI/State action to reject a pending Driver request using a Firestore transaction.
+
   Future<void> rejectRequest({
     required String requestId,
     required String driverId,
@@ -198,7 +198,7 @@ class BrokerDriverRequestsCubit extends Cubit<BrokerDriverRequestsState> {
       final String brokerId = currentUser.uid;
 
       await _firestore.runTransaction((transaction) async {
-        // 1. Verify request is pending
+
         final requestRef = _firestore
             .collection("Broker")
             .doc(brokerId)
@@ -215,14 +215,14 @@ class BrokerDriverRequestsCubit extends Cubit<BrokerDriverRequestsState> {
           throw Exception("Join request is no longer pending.");
         }
 
-        // 2. Set request status to rejected
+
         transaction.update(requestRef, {
           'status': 'rejected',
           'updated_at': FieldValue.serverTimestamp(),
           'updatedAt': FieldValue.serverTimestamp(),
         });
 
-        // 3. Update Driver document request_status to rejected (do NOT set broker_id)
+
         final driverRef = _firestore.collection("Driver").doc(driverId);
         transaction.update(driverRef, {
           'request_status': 'rejected',

@@ -6,10 +6,7 @@ import 'package:printing/printing.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
 import 'package:trucklinkai_orignal/Core/Widgets/backArrowButton.dart';
 
-/// UI-only Builty (Consignment Note) page.
-/// Swap the values in the constructor for your real order/broker/driver
-/// data whenever this gets wired up — the layout below only depends on
-/// these fields.
+
 class BuiltyPage extends StatelessWidget {
   BuiltyPage({
     super.key,
@@ -83,7 +80,7 @@ class BuiltyPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // -------- Header --------
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -107,7 +104,7 @@ class BuiltyPage extends StatelessWidget {
 
                   const SizedBox(height: 18),
 
-                  // -------- Document card --------
+
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(22),
@@ -125,7 +122,7 @@ class BuiltyPage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        // -------- Title --------
+
                         const Text(
                           "Builty / Consignment Note",
                           textAlign: TextAlign.center,
@@ -146,7 +143,7 @@ class BuiltyPage extends StatelessWidget {
 
                         const SizedBox(height: 26),
 
-                        // -------- Order ID / Date --------
+
                         _FieldRow(label: "Order ID", value: " TL - ${orderId}"),
                         const SizedBox(height: 16),
                         _FieldRow(label: "Date", value: date),
@@ -155,7 +152,7 @@ class BuiltyPage extends StatelessWidget {
                         const _Divider(),
                         const SizedBox(height: 18),
 
-                        // -------- People involved --------
+
                         _FieldRow(label: "Customer", value: userName),
                         const SizedBox(height: 16),
                         _FieldRow(label: "Broker", value: brokerName),
@@ -166,7 +163,7 @@ class BuiltyPage extends StatelessWidget {
                         const _Divider(),
                         const SizedBox(height: 18),
 
-                        // -------- Route --------
+
                         _FieldRow(label: "From", value: fromLocation),
                         const SizedBox(height: 16),
                         _FieldRow(label: "To", value: toLocation),
@@ -175,7 +172,7 @@ class BuiltyPage extends StatelessWidget {
                         const _Divider(),
                         const SizedBox(height: 18),
 
-                        // -------- Item + Price --------
+
                         _FieldRow(label: "Weight", value: weight.toString()),
                         _FieldRow(
                           label: "Quantity",
@@ -194,12 +191,12 @@ class BuiltyPage extends StatelessWidget {
                         const _Divider(),
                         const SizedBox(height: 18),
 
-                        // -------- Transport --------
+
                         _FieldRow(label: "Transport", value: transportName),
 
                         const SizedBox(height: 40),
 
-                        // -------- Signature + Stamp --------
+
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
@@ -357,9 +354,8 @@ class BuiltyPage extends StatelessWidget {
 
             child: pw.Column(
               children: [
-                // =========================================================
-                // HEADER
-                // =========================================================
+
+
                 pw.Container(
                   padding: const pw.EdgeInsets.symmetric(
                     horizontal: 24,
@@ -378,7 +374,7 @@ class BuiltyPage extends StatelessWidget {
                     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
 
                     children: [
-                      // Logo / Brand
+
                       pw.Row(
                         children: [
                           pw.Container(
@@ -424,7 +420,7 @@ class BuiltyPage extends StatelessWidget {
                         ],
                       ),
 
-                      // Document Type
+
                       pw.Column(
                         crossAxisAlignment: pw.CrossAxisAlignment.end,
 
@@ -466,9 +462,7 @@ class BuiltyPage extends StatelessWidget {
                   ),
                 ),
 
-                // =========================================================
-                // DOCUMENT INFORMATION
-                // =========================================================
+
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(20),
 
@@ -556,9 +550,7 @@ class BuiltyPage extends StatelessWidget {
 
                       pw.SizedBox(height: 20),
 
-                      // =====================================================
-                      // PEOPLE INVOLVED
-                      // =====================================================
+
                       pdfSectionTitle("PEOPLE INVOLVED"),
 
                       pw.SizedBox(height: 10),
@@ -597,9 +589,7 @@ class BuiltyPage extends StatelessWidget {
 
                       pw.SizedBox(height: 20),
 
-                      // =====================================================
-                      // ROUTE
-                      // =====================================================
+
                       pdfSectionTitle("SHIPMENT ROUTE"),
 
                       pw.SizedBox(height: 10),
@@ -713,9 +703,7 @@ class BuiltyPage extends StatelessWidget {
 
                       pw.SizedBox(height: 20),
 
-                      // =====================================================
-                      // CARGO DETAILS
-                      // =====================================================
+
                       pdfSectionTitle("CARGO DETAILS"),
 
                       pw.SizedBox(height: 10),
@@ -810,9 +798,7 @@ class BuiltyPage extends StatelessWidget {
 
                       pw.SizedBox(height: 28),
 
-                      // =====================================================
-                      // SIGNATURE SECTION
-                      // =====================================================
+
                       pw.Row(
                         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
 
@@ -882,9 +868,7 @@ class BuiltyPage extends StatelessWidget {
                   ),
                 ),
 
-                // =========================================================
-                // FOOTER
-                // =========================================================
+
                 pw.Container(
                   width: double.infinity,
                   padding: const pw.EdgeInsets.symmetric(
@@ -938,9 +922,6 @@ class BuiltyPage extends StatelessWidget {
   }
 }
 
-// =====================================================================
-// UI-only helper widgets below. No business logic lives here.
-// =====================================================================
 
 class _RoundIconButton extends StatelessWidget {
   final IconData icon;
@@ -1032,7 +1013,7 @@ class _Divider extends StatelessWidget {
   }
 }
 
-/// Simple squiggle painted to stand in for a hand-drawn signature.
+
 class _SignaturePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -1077,7 +1058,7 @@ class _SignaturePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-/// Circular "verified / stamped" badge, standing in for a company stamp.
+
 class _StampBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

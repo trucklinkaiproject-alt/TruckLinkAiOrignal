@@ -17,17 +17,15 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
   List<Map<String, dynamic>> _currentOffers = [];
   List<Map<String, dynamic>> get currentOffers => _currentOffers;
 
-  /// True while an accept/reject write is running. UI listens to this to disable
-  /// buttons and the cubit uses it to block duplicate Firestore writes.
+
   final ValueNotifier<bool> actionBusy = ValueNotifier<bool>(false);
 
-  /// Re-publishes the live offers list so list pages (Orders/Home) never get stuck
-  /// on a transient Action/Error state after an action finishes.
+
   void _restoreLoaded() {
     if (!isClosed) emit(DriverOffersLoadedState(_currentOffers));
   }
 
-  /// Returns the current active ride if driver has an accepted or in-transit ride
+
   Map<String, dynamic>? get activeRide {
     for (final offer in _currentOffers) {
       final status = (offer['status'] ?? '').toString().toLowerCase();
@@ -43,7 +41,7 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
     return null;
   }
 
-  /// Subscribes to offers sent strictly to the current Driver in real-time.
+
   void listenToOffers({required String driverId}) {
     try {
       if (isClosed) return;
@@ -77,9 +75,7 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
     }
   }
 
-  /// Driver accepts a Broker offer from the Driver Home page.
-  /// Sets offer status to 'accepted_by_driver' and updates Order status in all collections.
-  /// Returns true only when the acceptance fully succeeded.
+
   Future<bool> acceptOffer({required Map<String, dynamic> offer}) async {
     if (actionBusy.value) return false;
     actionBusy.value = true;
@@ -93,7 +89,7 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
       final String orderNo = (offer['order_no'] ?? orderId).toString();
       final String driverName = (offer['driver_name'] ?? 'Driver').toString();
 
-      // Guard: Ensure user is the assigned driver
+
       if (currentUid.isNotEmpty && driverId.isNotEmpty && currentUid != driverId) {
         emit(DriverOffersErrorState("Unauthorized: You cannot accept an offer assigned to another driver."));
         _restoreLoaded();
@@ -112,7 +108,7 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
         'updated_at': FieldValue.serverTimestamp(),
       };
 
-      // 1. Update Offer in Orders/{orderId}/DriverOffers/{offerId}
+
       try {
         await _firestore
             .collection("Orders")
@@ -122,7 +118,7 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
             .update(updateData);
       } catch (_) {}
 
-      // 2. Update Offer in Driver/{driverId}/ReceivedOffers/{offerId}
+
       await _firestore
           .collection("Driver")
           .doc(driverId)
@@ -130,13 +126,13 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
           .doc(offerId)
           .update(updateData);
 
-      // 3. Update main Orders document
+
       await _firestore
           .collection("Orders")
           .doc(orderId)
           .set(updateData, SetOptions(merge: true));
 
-      // 4. Update Order status in Broker/IncomingRequests
+
       if (brokerId.isNotEmpty) {
         await _firestore
             .collection("Broker")
@@ -145,7 +141,7 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
             .doc(orderId)
             .update(updateData);
 
-        // Notify Broker
+
         final String notifId = "driver_acc_${orderId}_$driverId";
         try {
           await NotificationService().sendNotification(
@@ -164,7 +160,7 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
         } catch (_) {}
       }
 
-      // 5. Update Order status in User/Requests
+
       if (userUid.isNotEmpty) {
         try {
           await _firestore
@@ -175,7 +171,7 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
               .update(updateData);
         } catch (_) {}
 
-        // Notify User
+
         final String notifId = "driver_acc_user_${orderId}_$driverId";
         try {
           await NotificationService().sendNotification(
@@ -212,8 +208,7 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
     }
   }
 
-  /// Driver rejects a Broker offer from the Driver Home page.
-  /// Returns true only when the rejection fully succeeded.
+
   Future<bool> rejectOffer({required Map<String, dynamic> offer}) async {
     if (actionBusy.value) return false;
     actionBusy.value = true;
@@ -252,7 +247,7 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
           .doc(offerId)
           .update(updateData);
 
-      // Also notify/update broker
+
       if (brokerId.isNotEmpty) {
         try {
           await _firestore
@@ -261,7 +256,7 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
               .collection("IncomingRequests")
               .doc(orderId)
               .update({
-            'status': 'accepted', // resets back so broker can reassign
+            'status': 'accepted',
             'assigned_driver_id': null,
             'assigned_driver_name': null,
             'assigned_driver_phone': null,
@@ -269,7 +264,7 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
           });
         } catch (_) {}
 
-        // Notify Broker of driver rejection
+
         try {
           final String notifId = "driver_rej_${orderId}_$driverId";
           final String driverName = (offer['driver_name'] ?? 'Driver').toString();
@@ -307,8 +302,7 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
     }
   }
 
-  /// Driver taps START RIDE:
-  /// Transitions order status to 'in_transit' and begins real GPS tracking.
+
   Future<void> startRide({required Map<String, dynamic> offer}) async {
     try {
       final String currentUid = _auth.currentUser?.uid ?? '';
@@ -320,7 +314,7 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
       final String orderNo = (offer['order_no'] ?? orderId).toString();
       final String driverName = (offer['driver_name'] ?? 'Driver').toString();
 
-      // Guard: Status and Driver verification
+
       if (currentUid.isNotEmpty && driverId.isNotEmpty && currentUid != driverId) {
         emit(DriverOffersErrorState("Unauthorized: Only the assigned driver can start this ride."));
         return;
@@ -332,7 +326,7 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
         'updated_at': FieldValue.serverTimestamp(),
       };
 
-      // 1. Update Driver ReceivedOffers & Driver availability
+
       await _firestore
           .collection("Driver")
           .doc(driverId)
@@ -361,13 +355,13 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
         }
       } catch (_) {}
 
-      // 2. Update main Orders
+
       await _firestore
           .collection("Orders")
           .doc(orderId)
           .set(updateData, SetOptions(merge: true));
 
-      // 3. Update Broker IncomingRequests
+
       if (brokerId.isNotEmpty) {
         await _firestore
             .collection("Broker")
@@ -376,7 +370,7 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
             .doc(orderId)
             .update(updateData);
 
-        // Notify Broker
+
         final String notifId = "ride_start_${orderId}_$driverId";
         try {
           await NotificationService().sendNotification(
@@ -395,7 +389,7 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
         } catch (_) {}
       }
 
-      // 4. Update User Requests
+
       if (userUid.isNotEmpty) {
         try {
           await _firestore
@@ -406,7 +400,7 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
               .update(updateData);
         } catch (_) {}
 
-        // Notify User
+
         final String notifId = "ride_start_user_${orderId}_$driverId";
         try {
           await NotificationService().sendNotification(
@@ -425,14 +419,13 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
         } catch (_) {}
       }
 
-      // 5. Extract pickup/drop coordinates if present
+
       final double? pickupLat = (offer['pickup_lat'] ?? offer['pickupLatitude'] ?? offer['pickupLat'] as num?)?.toDouble();
       final double? pickupLng = (offer['pickup_lng'] ?? offer['pickupLongitude'] ?? offer['pickupLng'] as num?)?.toDouble();
       final double? dropLat = (offer['drop_lat'] ?? offer['dropLatitude'] ?? offer['dropLat'] as num?)?.toDouble();
       final double? dropLng = (offer['drop_lng'] ?? offer['dropLongitude'] ?? offer['dropLng'] as num?)?.toDouble();
 
 
-      // 6. Start Real GPS Live Tracking
       await DriverLocationService().startTracking(
         orderId: orderId,
         driverId: driverId,
@@ -455,7 +448,7 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
     }
   }
 
-  /// Driver confirms cargo collected after reaching pickup
+
   Future<void> confirmCargoPickedUp({required Map<String, dynamic> offer}) async {
     try {
       final String offerId = (offer['offer_id'] ?? offer['id'] ?? '').toString();
@@ -492,7 +485,7 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
             .doc(orderId)
             .set(updateData, SetOptions(merge: true));
 
-        // Notify Broker
+
         final String notifId = "cargo_pk_${orderId}_$driverId";
         try {
           await NotificationService().sendNotification(
@@ -521,7 +514,7 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
               .set(updateData, SetOptions(merge: true));
         } catch (_) {}
 
-        // Notify User
+
         final String notifId = "cargo_pk_usr_${orderId}_$driverId";
         try {
           await NotificationService().sendNotification(
@@ -550,8 +543,7 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
     }
   }
 
-  /// Driver taps COMPLETE:
-  /// Updates status to 'completed', stops GPS tracking, updates Broker AI metrics, and notifies all parties.
+
   Future<void> completeRide({required Map<String, dynamic> offer}) async {
     try {
       final String currentUid = _auth.currentUser?.uid ?? '';
@@ -563,13 +555,13 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
       final String orderNo = (offer['order_no'] ?? orderId).toString();
       final String driverName = (offer['driver_name'] ?? 'Driver').toString();
 
-      // Guard: Only assigned driver can complete
+
       if (currentUid.isNotEmpty && driverId.isNotEmpty && currentUid != driverId) {
         emit(DriverOffersErrorState("Unauthorized: Only the assigned driver can complete this ride."));
         return;
       }
 
-      // 1. Stop active GPS tracking immediately
+
       await DriverLocationService().stopTracking();
 
       int? durationSeconds;
@@ -587,7 +579,7 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
         'updated_at': FieldValue.serverTimestamp(),
       };
 
-      // 2. Update Driver ReceivedOffers
+
       await _firestore
           .collection("Driver")
           .doc(driverId)
@@ -595,7 +587,7 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
           .doc(offerId)
           .update(updateData);
 
-      // 3. Update Driver profile trips and availability
+
       try {
         await _firestore.collection("Driver").doc(driverId).set({
           'completed_trips': FieldValue.increment(1),
@@ -621,13 +613,13 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
         }
       } catch (_) {}
 
-      // 4. Update main Orders
+
       await _firestore
           .collection("Orders")
           .doc(orderId)
           .set(updateData, SetOptions(merge: true));
 
-      // 5. Update Broker IncomingRequests & atomically calculate AI stats
+
       if (brokerId.isNotEmpty) {
         await _firestore
             .collection("Broker")
@@ -637,7 +629,6 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
             .update(updateData);
 
 
-        // Atomically update Broker completion metrics
         try {
           await _firestore.runTransaction((txn) async {
             final brokerRef = _firestore.collection('Broker').doc(brokerId);
@@ -671,7 +662,7 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
         } catch (e) {
           debugPrint("Broker stats update error: $e");
         }
-        // Notify Broker
+
         final String notifId = "comp_broker_${orderId}_$driverId";
         try {
           await NotificationService().sendNotification(
@@ -690,7 +681,7 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
         } catch (_) {}
       }
 
-      // 6. Update User Requests & notify user
+
       if (userUid.isNotEmpty) {
         try {
           await _firestore
