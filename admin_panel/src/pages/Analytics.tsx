@@ -169,21 +169,21 @@ export const Analytics: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
           <div className="flex items-center gap-2">
-            <BarChart3 className="w-6 h-6 text-sky-400" />
-            <h2 className="text-2xl font-black text-white">Logistics & Revenue Analytics</h2>
+            <BarChart3 className="w-5 h-5 text-sky-700" />
+            <h2 className="text-xl font-bold text-slate-900">Logistics & Revenue Analytics</h2>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-500 mt-1">
             Real-time telemetry, gross merchandise value (GMV), regional freight corridors, and carrier utilization.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-900 px-3.5 py-2 rounded-xl border border-slate-800">
-          <Calendar className="w-4 h-4 text-sky-400" />
+        <div className="flex items-center gap-2 text-xs text-slate-600 bg-white px-3.5 py-2 rounded-md border border-slate-200 shadow-2xs">
+          <Calendar className="w-4 h-4 text-sky-700" />
           <span>
-            Database State: <strong className="text-emerald-400">100% Live Firebase Data</strong>
+            Database State: <strong className="text-emerald-700">100% Live Firebase Data</strong>
           </span>
         </div>
       </div>
@@ -223,13 +223,13 @@ export const Analytics: React.FC = () => {
       {/* Main Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Monthly Shipments & Revenue Trend */}
-        <div className="rounded-2xl bg-slate-900/60 border border-slate-800 p-6 backdrop-blur-xl shadow-xl">
-          <div className="flex items-center justify-between mb-4">
+        <div className="rounded-lg bg-white border border-slate-200 p-6 shadow-2xs">
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
             <div>
-              <h3 className="text-base font-bold text-white">Platform Throughput & Velocity</h3>
-              <p className="text-xs text-slate-400">Shipment volume and GMV across recent months</p>
+              <h3 className="text-sm font-bold text-slate-900">Platform Throughput & Velocity</h3>
+              <p className="text-xs text-slate-500">Shipment volume and GMV across recent months</p>
             </div>
-            <span className="text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
+            <span className="text-xs font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-sm border border-emerald-200">
               Live Stream
             </span>
           </div>
@@ -237,30 +237,31 @@ export const Analytics: React.FC = () => {
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={monthlyTimelineData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                 <XAxis dataKey="month" stroke="#64748b" fontSize={12} />
                 <YAxis stroke="#64748b" fontSize={12} allowDecimals={false} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#0f172a',
-                    borderColor: '#334155',
-                    borderRadius: '0.75rem',
-                    color: '#f8fafc',
+                    backgroundColor: '#ffffff',
+                    borderColor: '#e2e8f0',
+                    borderRadius: '0.375rem',
+                    color: '#0f172a',
+                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                   }}
                 />
                 <Legend />
                 <Line
                   type="monotone"
                   dataKey="shipments"
-                  stroke="#0284c7"
-                  strokeWidth={3}
+                  stroke="#0369a1"
+                  strokeWidth={2.5}
                   name="Shipments Placed"
                 />
                 <Line
                   type="monotone"
                   dataKey="gmv"
-                  stroke="#10b981"
-                  strokeWidth={3}
+                  stroke="#059669"
+                  strokeWidth={2.5}
                   name="GMV (x1000 PKR)"
                 />
               </LineChart>
@@ -269,22 +270,22 @@ export const Analytics: React.FC = () => {
         </div>
 
         {/* Major Freight Corridors */}
-        <div className="rounded-2xl bg-slate-900/60 border border-slate-800 p-6 backdrop-blur-xl shadow-xl">
-          <div className="flex items-center justify-between mb-4">
+        <div className="rounded-lg bg-white border border-slate-200 p-6 shadow-2xs">
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
             <div>
-              <h3 className="text-base font-bold text-white">Top Freight Corridors</h3>
-              <p className="text-xs text-slate-400">Shipment volume by origin and destination</p>
+              <h3 className="text-sm font-bold text-slate-900">Top Freight Corridors</h3>
+              <p className="text-xs text-slate-500">Shipment volume by origin and destination</p>
             </div>
-            <span className="text-xs font-semibold text-sky-400 bg-sky-500/10 px-2.5 py-1 rounded-lg border border-sky-500/20">
+            <span className="text-xs font-semibold text-sky-800 bg-sky-50 px-2.5 py-1 rounded-sm border border-sky-200">
               Corridor Rank
             </span>
           </div>
 
           {topCorridors.length === 0 ? (
-            <div className="h-64 flex flex-col items-center justify-center text-slate-500 text-xs text-center">
-              <MapPin className="w-8 h-8 text-slate-700 mb-2" />
-              <p className="text-slate-400 font-medium">No freight corridors logged yet</p>
-              <p className="text-slate-600 mt-1">
+            <div className="h-64 flex flex-col items-center justify-center text-slate-400 text-xs text-center">
+              <MapPin className="w-8 h-8 text-slate-300 mb-2" />
+              <p className="text-slate-600 font-medium">No freight corridors logged yet</p>
+              <p className="text-slate-400 mt-1 max-w-xs">
                 When users post requests with pickup & drop-off locations, corridors will be calculated here.
               </p>
             </div>
@@ -292,15 +293,16 @@ export const Analytics: React.FC = () => {
             <div className="h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={topCorridors}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                   <XAxis dataKey="corridor" stroke="#64748b" fontSize={11} />
                   <YAxis stroke="#64748b" fontSize={12} allowDecimals={false} />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: '#0f172a',
-                      borderColor: '#334155',
-                      borderRadius: '0.75rem',
-                      color: '#f8fafc',
+                      backgroundColor: '#ffffff',
+                      borderColor: '#e2e8f0',
+                      borderRadius: '0.375rem',
+                      color: '#0f172a',
+                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                     }}
                     formatter={(value: any, name: string) => [
                       name === 'volume' ? `${value} loads` : formatPKR(value),
@@ -309,8 +311,8 @@ export const Analytics: React.FC = () => {
                   />
                   <Bar
                     dataKey="volume"
-                    fill="#8b5cf6"
-                    radius={[6, 6, 0, 0]}
+                    fill="#0284c7"
+                    radius={[4, 4, 0, 0]}
                     name="Loads Dispatched"
                   />
                 </BarChart>
@@ -323,44 +325,44 @@ export const Analytics: React.FC = () => {
       {/* Top Performers Row: Brokers & Drivers */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top Brokers */}
-        <div className="rounded-2xl bg-slate-900/60 border border-slate-800 p-6 backdrop-blur-xl shadow-xl">
-          <div className="flex items-center justify-between mb-4">
+        <div className="rounded-lg bg-white border border-slate-200 p-6 shadow-2xs">
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
             <div className="flex items-center gap-2">
-              <Briefcase className="w-5 h-5 text-purple-400" />
-              <h3 className="text-base font-bold text-white">Active Broker Partners</h3>
+              <Briefcase className="w-4 h-4 text-sky-700" />
+              <h3 className="text-sm font-bold text-slate-900">Active Broker Partners</h3>
             </div>
-            <span className="text-xs text-slate-400">{brokers.length} Registered Brokers</span>
+            <span className="text-xs text-slate-500">{brokers.length} Registered Brokers</span>
           </div>
 
           {topBrokers.length === 0 ? (
-            <div className="py-8 text-center text-xs text-slate-500">No brokers registered yet.</div>
+            <div className="py-8 text-center text-xs text-slate-400">No brokers registered yet.</div>
           ) : (
             <div className="space-y-2.5">
               {topBrokers.map(({ broker, count, revenue }, idx) => (
                 <div
                   key={broker.id}
-                  className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-center justify-between"
+                  className="p-3.5 rounded-md bg-slate-50 border border-slate-200/80 flex items-center justify-between hover:bg-slate-100/70 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="w-6 h-6 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-400 font-bold text-xs flex items-center justify-center font-mono">
+                    <span className="w-6 h-6 rounded-sm bg-slate-200 border border-slate-300 text-slate-700 font-bold text-xs flex items-center justify-center font-mono">
                       #{idx + 1}
                     </span>
                     <div>
-                      <p className="text-xs font-bold text-white">
+                      <p className="text-xs font-bold text-slate-900">
                         {broker.companyName || broker.name || 'Broker Partner'}
                       </p>
-                      <p className="text-[11px] text-slate-400">
+                      <p className="text-[11px] text-slate-500">
                         {broker.city || 'Pakistan'} • {broker.rating ? `${broker.rating} ★` : 'Unrated'}
                       </p>
                     </div>
                   </div>
 
                   <div className="text-right">
-                    <p className="text-xs font-bold text-emerald-400">
+                    <p className="text-xs font-bold text-emerald-700">
                       {count} {count === 1 ? 'Order' : 'Orders'}
                     </p>
                     {revenue > 0 && (
-                      <p className="text-[11px] text-slate-400 font-mono">{formatPKR(revenue)}</p>
+                      <p className="text-[11px] text-slate-500 font-mono">{formatPKR(revenue)}</p>
                     )}
                   </div>
                 </div>
@@ -370,33 +372,33 @@ export const Analytics: React.FC = () => {
         </div>
 
         {/* Top Drivers */}
-        <div className="rounded-2xl bg-slate-900/60 border border-slate-800 p-6 backdrop-blur-xl shadow-xl">
-          <div className="flex items-center justify-between mb-4">
+        <div className="rounded-lg bg-white border border-slate-200 p-6 shadow-2xs">
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
             <div className="flex items-center gap-2">
-              <Truck className="w-5 h-5 text-cyan-400" />
-              <h3 className="text-base font-bold text-white">Active Driver Fleets</h3>
+              <Truck className="w-4 h-4 text-sky-700" />
+              <h3 className="text-sm font-bold text-slate-900">Active Driver Fleets</h3>
             </div>
-            <span className="text-xs text-slate-400">{drivers.length} Registered Drivers</span>
+            <span className="text-xs text-slate-500">{drivers.length} Registered Drivers</span>
           </div>
 
           {topDrivers.length === 0 ? (
-            <div className="py-8 text-center text-xs text-slate-500">No drivers registered yet.</div>
+            <div className="py-8 text-center text-xs text-slate-400">No drivers registered yet.</div>
           ) : (
             <div className="space-y-2.5">
               {topDrivers.map(({ driver, count }, idx) => (
                 <div
                   key={driver.id}
-                  className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-center justify-between"
+                  className="p-3.5 rounded-md bg-slate-50 border border-slate-200/80 flex items-center justify-between hover:bg-slate-100/70 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="w-6 h-6 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 font-bold text-xs flex items-center justify-center font-mono">
+                    <span className="w-6 h-6 rounded-sm bg-slate-200 border border-slate-300 text-slate-700 font-bold text-xs flex items-center justify-center font-mono">
                       #{idx + 1}
                     </span>
                     <div>
-                      <p className="text-xs font-bold text-white">
+                      <p className="text-xs font-bold text-slate-900">
                         {driver.name || 'Driver Partner'}
                       </p>
-                      <p className="text-[11px] text-slate-400">
+                      <p className="text-[11px] text-slate-500">
                         {driver.vehicleNumber ? `Vehicle: ${driver.vehicleNumber}` : 'Licensed Driver'} •{' '}
                         {driver.rating ? `${driver.rating} ★` : 'Unrated'}
                       </p>
@@ -407,7 +409,7 @@ export const Analytics: React.FC = () => {
                     <Badge variant={driver.isAvailable ? 'success' : 'warning'} size="sm">
                       {driver.isAvailable ? 'Available' : 'On Trip'}
                     </Badge>
-                    <p className="text-[11px] text-slate-400 mt-1">
+                    <p className="text-[11px] text-slate-500 mt-1">
                       {count} {count === 1 ? 'Trip' : 'Trips'}
                     </p>
                   </div>

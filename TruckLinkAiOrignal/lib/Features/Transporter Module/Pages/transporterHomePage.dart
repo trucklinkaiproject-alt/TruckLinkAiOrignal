@@ -578,7 +578,7 @@ class _ActiveRideCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final String orderNo = (ride['order_no'] ?? ride['order_id'] ?? '').toString();
 
-    final String orderId = (ride['order_id'] ?? ride['orderNo'] ?? '').toString();
+    
     final String brokerName = (ride['broker_name'] ?? 'Broker').toString();
     final String brokerId = (ride['broker_id'] ?? '').toString();
     final String pickupCity = (ride['pickup_city'] ?? 'Pickup City').toString();

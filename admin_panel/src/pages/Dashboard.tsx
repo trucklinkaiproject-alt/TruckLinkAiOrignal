@@ -152,25 +152,32 @@ export const Dashboard: React.FC = () => {
     .slice(0, 6);
 
   return (
-    <div className="space-y-8">
-      {/* Welcome Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-brand-900/60 via-slate-900 to-purple-950/40 p-6 sm:p-8 border border-slate-800 shadow-2xl backdrop-blur-xl">
-        <div className="relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-300 text-xs font-semibold mb-3">
-            <span className="w-2 h-2 rounded-full bg-brand-400" />
-            Live Cloud Data Stream
+    <div className="space-y-6">
+      {/* Overview Header */}
+      <div className="bg-white rounded-lg p-6 border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-bold text-slate-900 tracking-tight">
+              Operational Overview
+            </h2>
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+              Live Telemetry
+            </span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            TruckLink AI Command Center
-          </h2>
-          <p className="mt-2 text-sm text-slate-300">
-            Real-time live telemetry, load tracking, and ecosystem oversight across Users, Brokers, and Drivers.
+          <p className="mt-1 text-xs text-slate-500">
+            Real-time platform metrics, consignment tracking, and stakeholder activity across Users, Brokers, and Drivers.
           </p>
+        </div>
+
+        <div className="text-right shrink-0">
+          <span className="text-xs text-slate-500 block">Gross Merchandise Value</span>
+          <span className="text-lg font-bold text-slate-900 font-mono">{formatPKR(totalGMV)}</span>
         </div>
       </div>
 
       {/* Primary Metrics Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatsCard
           title="Registered Users"
           value={loading ? '...' : users.length}
@@ -201,74 +208,107 @@ export const Dashboard: React.FC = () => {
         />
       </div>
 
-      {/* Analytics Charts Row */}
+      {/* Dashboard Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Real Load Activity Timeline */}
-        <div className="lg:col-span-2 rounded-2xl bg-slate-900/60 border border-slate-800 p-6 backdrop-blur-xl shadow-xl">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="text-base font-bold text-white">Logistics & Load Traffic</h3>
-              <p className="text-xs text-slate-400">Total freight volume across weekly timeline</p>
-            </div>
+        {/* Recent Activity Table (2 Cols) */}
+        <div className="lg:col-span-2 rounded-lg bg-white border border-slate-200 p-5 shadow-xs">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
-                GMV: {formatPKR(totalGMV)}
-              </span>
+              <Package className="w-4 h-4 text-sky-700" />
+              <h3 className="text-sm font-bold text-slate-900">Recent Requests & Orders</h3>
             </div>
+            <Link
+              to="/requests"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-sky-700 hover:text-sky-800"
+            >
+              View All <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
 
-          <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={trendData}>
-                <defs>
-                  <linearGradient id="loadGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#0284c7" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#0284c7" stopOpacity={0.0} />
-                  </linearGradient>
-                  <linearGradient id="compGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                <XAxis dataKey="day" stroke="#64748b" textAnchor="end" fontSize={12} />
-                <YAxis stroke="#64748b" fontSize={12} allowDecimals={false} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#0f172a',
-                    borderColor: '#334155',
-                    borderRadius: '0.75rem',
-                    color: '#f8fafc',
-                  }}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="loads"
-                  stroke="#0284c7"
-                  strokeWidth={2}
-                  fillOpacity={1}
-                  fill="url(#loadGrad)"
-                  name="Loads Placed"
-                />
-                <Area
-                  type="monotone"
-                  dataKey="completed"
-                  stroke="#10b981"
-                  strokeWidth={2}
-                  fillOpacity={1}
-                  fill="url(#compGrad)"
-                  name="Completed"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+          {recentOrders.length === 0 ? (
+            <div className="py-10 text-center text-slate-500">
+              <Package className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+              <p className="text-sm font-medium text-slate-700">No orders recorded in Firestore yet</p>
+              <p className="text-xs text-slate-400 mt-0.5">
+                New orders placed by users in the mobile app will automatically appear here.
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs text-slate-800">
+                <thead className="bg-slate-50 text-slate-600 uppercase tracking-wider border-b border-slate-200">
+                  <tr>
+                    <th className="py-2.5 px-3 font-semibold">Order No</th>
+                    <th className="py-2.5 px-3 font-semibold">User</th>
+                    <th className="py-2.5 px-3 font-semibold">Cargo</th>
+                    <th className="py-2.5 px-3 font-semibold">Broker</th>
+                    <th className="py-2.5 px-3 font-semibold">Driver</th>
+                    <th className="py-2.5 px-3 font-semibold">Fare</th>
+                    <th className="py-2.5 px-3 font-semibold">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {recentOrders.map((req) => (
+                    <tr key={req.id} className="hover:bg-slate-50/70 transition-colors">
+                      <td className="py-2.5 px-3 font-mono text-sky-700 font-semibold">
+                        #{req.numericOrderNo || req.orderNo || req.id.substring(0, 6)}
+                      </td>
+                      <td className="py-2.5 px-3 font-medium text-slate-900">
+                        {req.userName || 'Verified User'}
+                      </td>
+                      <td className="py-2.5 px-3 text-slate-600">
+                        {req.itemType || req.cargoType || 'General Freight'}
+                      </td>
+                      <td className="py-2.5 px-3">
+                        {req.brokerName ? (
+                          <span className="text-purple-700 font-medium">{req.brokerName}</span>
+                        ) : (
+                          <span className="text-slate-400 italic">Unassigned</span>
+                        )}
+                      </td>
+                      <td className="py-2.5 px-3">
+                        {req.driverName ? (
+                          <span className="text-cyan-700 font-medium">{req.driverName}</span>
+                        ) : (
+                          <span className="text-slate-400 italic">Unassigned</span>
+                        )}
+                      </td>
+                      <td className="py-2.5 px-3 font-semibold text-emerald-700">
+                        {req.finalFare
+                          ? formatPKR(req.finalFare)
+                          : req.customerFare
+                          ? formatPKR(req.customerFare)
+                          : '—'}
+                      </td>
+                      <td className="py-2.5 px-3">
+                        <Badge
+                          variant={
+                            req.status === 'delivered' || req.status === 'completed'
+                              ? 'success'
+                              : req.status === 'in_transit' || req.status === 'in-transit' || req.status === 'accepted_by_driver'
+                              ? 'info'
+                              : req.status === 'cancelled' || req.status === 'rejected'
+                              ? 'danger'
+                              : 'warning'
+                          }
+                          size="sm"
+                        >
+                          {req.status || 'pending'}
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
-        {/* Real Ecosystem Status Distribution */}
-        <div className="rounded-2xl bg-slate-900/60 border border-slate-800 p-6 backdrop-blur-xl shadow-xl flex flex-col justify-between">
+        {/* Status Distribution (1 Col) */}
+        <div className="rounded-lg bg-white border border-slate-200 p-5 shadow-xs flex flex-col justify-between">
           <div>
-            <h3 className="text-base font-bold text-white">System Distribution</h3>
-            <p className="text-xs text-slate-400">Order statuses & platform composition</p>
+            <h3 className="text-sm font-bold text-slate-900">Ecosystem Distribution</h3>
+            <p className="text-xs text-slate-500">Consignment statuses & platform composition</p>
           </div>
 
           <div className="h-56 w-full my-2">
@@ -278,9 +318,9 @@ export const Dashboard: React.FC = () => {
                   data={displayPieData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={50}
-                  outerRadius={75}
-                  paddingAngle={5}
+                  innerRadius={45}
+                  outerRadius={70}
+                  paddingAngle={4}
                   dataKey="value"
                 >
                   {displayPieData.map((entry, index) => (
@@ -289,101 +329,165 @@ export const Dashboard: React.FC = () => {
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#0f172a',
-                    borderColor: '#334155',
-                    borderRadius: '0.75rem',
-                    color: '#f8fafc',
+                    backgroundColor: '#ffffff',
+                    borderColor: '#e2e8f0',
+                    borderRadius: '0.375rem',
+                    color: '#0f172a',
+                    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
                   }}
                 />
                 <Legend
                   verticalAlign="bottom"
                   height={36}
-                  formatter={(value) => <span className="text-xs text-slate-300">{value}</span>}
+                  formatter={(value) => <span className="text-xs text-slate-600">{value}</span>}
                 />
               </PieChart>
             </ResponsiveContainer>
           </div>
 
-          <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
-            <span>Real-time aggregation</span>
-            <span className="text-emerald-400 font-semibold">100% Synced</span>
+          <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+            <span>Real-time stream</span>
+            <span className="text-emerald-700 font-semibold">100% Synced</span>
           </div>
+        </div>
+      </div>
+
+      {/* System Operations & Quick Shortcuts */}
+      <div className="rounded-lg bg-white border border-slate-200 p-5 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div className="flex-1">
+          <h3 className="text-sm font-bold text-slate-900 mb-1">Administrative Shortcuts</h3>
+          <p className="text-xs text-slate-500 mb-3">Direct dispatch & operational controls</p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <Link
+              to="/tracking"
+              className="flex items-center justify-between p-3 rounded-md bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors group"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded bg-sky-50 text-sky-700 border border-sky-100">
+                  <Truck className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-slate-900">Live Telematics Map</p>
+                  <p className="text-[11px] text-slate-500">Monitor active trucks on GPS</p>
+                </div>
+              </div>
+              <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-slate-700 transition-colors" />
+            </Link>
+
+            <Link
+              to="/requests"
+              className="flex items-center justify-between p-3 rounded-md bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors group"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded bg-purple-50 text-purple-700 border border-purple-100">
+                  <FileText className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-slate-900">Requests & Orders</p>
+                  <p className="text-[11px] text-slate-500">Complete lifecycle & assignees</p>
+                </div>
+              </div>
+              <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-slate-700 transition-colors" />
+            </Link>
+
+            <Link
+              to="/notifications"
+              className="flex items-center justify-between p-3 rounded-md bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors group"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded bg-amber-50 text-amber-700 border border-amber-100">
+                  <AlertTriangle className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-slate-900">Broadcast Alerts</p>
+                  <p className="text-[11px] text-slate-500">Send instant push announcements</p>
+                </div>
+              </div>
+              <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-slate-700 transition-colors" />
+            </Link>
+          </div>
+        </div>
+
+        <div className="p-3 rounded-md bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center gap-2 shrink-0">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          <span>All system nodes & Firestore streams operating normally.</span>
         </div>
       </div>
 
       {/* Recent Activity Table & Quick Shortcuts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Orders Overview */}
-        <div className="lg:col-span-2 rounded-2xl bg-slate-900/60 border border-slate-800 p-6 backdrop-blur-xl shadow-xl">
+        <div className="lg:col-span-2 rounded-lg bg-white border border-slate-200 p-5 shadow-xs">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Package className="w-5 h-5 text-sky-400" />
-              <h3 className="text-base font-bold text-white">Recent Requests & Orders</h3>
+              <Package className="w-4 h-4 text-sky-700" />
+              <h3 className="text-sm font-bold text-slate-900">Recent Requests & Orders</h3>
             </div>
             <Link
               to="/requests"
-              className="inline-flex items-center gap-1 text-xs font-semibold text-sky-400 hover:text-sky-300"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-sky-700 hover:text-sky-800"
             >
-              View Requests & Orders <ArrowRight className="w-3.5 h-3.5" />
+              View All <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
           {recentOrders.length === 0 ? (
-            <div className="py-10 text-center text-slate-400">
-              <Package className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-              <p className="text-sm font-medium text-slate-300">No orders recorded in Firestore yet</p>
-              <p className="text-xs text-slate-500">
+            <div className="py-10 text-center text-slate-500">
+              <Package className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+              <p className="text-sm font-medium text-slate-700">No orders recorded in Firestore yet</p>
+              <p className="text-xs text-slate-400 mt-0.5">
                 New orders placed by users in the mobile app will automatically appear here.
               </p>
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-slate-300">
-                <thead className="text-slate-500 uppercase tracking-wider border-b border-slate-800">
+              <table className="w-full text-left text-xs text-slate-800">
+                <thead className="bg-slate-50 text-slate-600 uppercase tracking-wider border-b border-slate-200">
                   <tr>
-                    <th className="py-3 px-3">Order No</th>
-                    <th className="py-3 px-3">User</th>
-                    <th className="py-3 px-3">Cargo</th>
-                    <th className="py-3 px-3">Broker</th>
-                    <th className="py-3 px-3">Driver</th>
-                    <th className="py-3 px-3">Fare</th>
-                    <th className="py-3 px-3">Status</th>
+                    <th className="py-2.5 px-3 font-semibold">Order No</th>
+                    <th className="py-2.5 px-3 font-semibold">User</th>
+                    <th className="py-2.5 px-3 font-semibold">Cargo</th>
+                    <th className="py-2.5 px-3 font-semibold">Broker</th>
+                    <th className="py-2.5 px-3 font-semibold">Driver</th>
+                    <th className="py-2.5 px-3 font-semibold">Fare</th>
+                    <th className="py-2.5 px-3 font-semibold">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60">
+                <tbody className="divide-y divide-slate-100">
                   {recentOrders.map((req) => (
-                    <tr key={req.id} className="hover:bg-slate-800/30 transition-colors">
-                      <td className="py-3 px-3 font-mono text-sky-400 font-semibold">
+                    <tr key={req.id} className="hover:bg-slate-50/70 transition-colors">
+                      <td className="py-2.5 px-3 font-mono text-sky-700 font-semibold">
                         #{req.numericOrderNo || req.orderNo || req.id.substring(0, 6)}
                       </td>
-                      <td className="py-3 px-3 font-medium text-white">
+                      <td className="py-2.5 px-3 font-medium text-slate-900">
                         {req.userName || 'Verified User'}
                       </td>
-                      <td className="py-3 px-3 text-slate-300">
+                      <td className="py-2.5 px-3 text-slate-600">
                         {req.itemType || req.cargoType || 'General Freight'}
                       </td>
-                      <td className="py-3 px-3">
+                      <td className="py-2.5 px-3">
                         {req.brokerName ? (
-                          <span className="text-purple-300 font-medium">{req.brokerName}</span>
+                          <span className="text-purple-700 font-medium">{req.brokerName}</span>
                         ) : (
-                          <span className="text-slate-500 italic">Unassigned</span>
+                          <span className="text-slate-400 italic">Unassigned</span>
                         )}
                       </td>
-                      <td className="py-3 px-3">
+                      <td className="py-2.5 px-3">
                         {req.driverName ? (
-                          <span className="text-cyan-300 font-medium">{req.driverName}</span>
+                          <span className="text-cyan-700 font-medium">{req.driverName}</span>
                         ) : (
-                          <span className="text-slate-500 italic">Unassigned</span>
+                          <span className="text-slate-400 italic">Unassigned</span>
                         )}
                       </td>
-                      <td className="py-3 px-3 font-semibold text-emerald-400">
+                      <td className="py-2.5 px-3 font-semibold text-emerald-700">
                         {req.finalFare
                           ? formatPKR(req.finalFare)
                           : req.customerFare
                           ? formatPKR(req.customerFare)
                           : '—'}
                       </td>
-                      <td className="py-3 px-3">
+                      <td className="py-2.5 px-3">
                         <Badge
                           variant={
                             req.status === 'delivered' || req.status === 'completed'
@@ -408,64 +512,64 @@ export const Dashboard: React.FC = () => {
         </div>
 
         {/* System Operations & Quick Shortcuts */}
-        <div className="rounded-2xl bg-slate-900/60 border border-slate-800 p-6 backdrop-blur-xl shadow-xl flex flex-col justify-between space-y-4">
+        <div className="rounded-lg bg-white border border-slate-200 p-5 shadow-xs flex flex-col justify-between space-y-4">
           <div>
-            <h3 className="text-base font-bold text-white mb-1">Administrative Shortcuts</h3>
-            <p className="text-xs text-slate-400 mb-4">Direct dispatch & operational controls</p>
+            <h3 className="text-sm font-bold text-slate-900 mb-1">Administrative Shortcuts</h3>
+            <p className="text-xs text-slate-500 mb-4">Direct dispatch & operational controls</p>
 
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               <Link
                 to="/tracking"
-                className="flex items-center justify-between p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700/60 transition-colors group"
+                className="flex items-center justify-between p-3 rounded-md bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors group"
               >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-sky-500/10 text-sky-400">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded bg-sky-50 text-sky-700 border border-sky-100">
                     <Truck className="w-4 h-4" />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-white">Live Telematics Map</p>
-                    <p className="text-[11px] text-slate-400">Monitor active trucks on GPS</p>
+                    <p className="text-xs font-semibold text-slate-900">Live Telematics Map</p>
+                    <p className="text-[11px] text-slate-500">Monitor active trucks on GPS</p>
                   </div>
                 </div>
-                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-white transition-colors" />
+                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-slate-700 transition-colors" />
               </Link>
 
               <Link
                 to="/requests"
-                className="flex items-center justify-between p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700/60 transition-colors group"
+                className="flex items-center justify-between p-3 rounded-md bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors group"
               >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-purple-500/10 text-purple-400">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded bg-purple-50 text-purple-700 border border-purple-100">
                     <FileText className="w-4 h-4" />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-white">Requests & Orders</p>
-                    <p className="text-[11px] text-slate-400">Complete lifecycle, fares & stakeholder assignees</p>
+                    <p className="text-xs font-semibold text-slate-900">Requests & Orders</p>
+                    <p className="text-[11px] text-slate-500">Complete lifecycle & assignees</p>
                   </div>
                 </div>
-                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-white transition-colors" />
+                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-slate-700 transition-colors" />
               </Link>
 
               <Link
                 to="/notifications"
-                className="flex items-center justify-between p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700/60 transition-colors group"
+                className="flex items-center justify-between p-3 rounded-md bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors group"
               >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded bg-amber-50 text-amber-700 border border-amber-100">
                     <AlertTriangle className="w-4 h-4" />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-white">Broadcast Alerts & FCM Push</p>
-                    <p className="text-[11px] text-slate-400">Send instant announcement to mobile apps</p>
+                    <p className="text-xs font-semibold text-slate-900">Broadcast Alerts</p>
+                    <p className="text-[11px] text-slate-500">Send instant push announcements</p>
                   </div>
                 </div>
-                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-white transition-colors" />
+                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-slate-700 transition-colors" />
               </Link>
             </div>
           </div>
 
-          <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-300 flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+          <div className="p-3 rounded-md bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>All system nodes & Firestore streams operating normally.</span>
           </div>
         </div>

@@ -301,24 +301,24 @@ export const Requests: React.FC = () => {
     }
     if (s === 'accepted_by_driver' || s === 'driver_offer_sent') {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-          <Truck className="w-3 h-3" />
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-sky-50 text-sky-800 border border-sky-200">
+          <Truck className="w-3 h-3 text-sky-700" />
           Driver Assigned
         </span>
       );
     }
     if (s === 'accepted') {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-          <CheckCircle2 className="w-3 h-3" />
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
           Broker Accepted
         </span>
       );
     }
     if (s === 'fare_offered') {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-          <DollarSign className="w-3 h-3" />
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-sky-50 text-sky-800 border border-sky-200">
+          <DollarSign className="w-3 h-3 text-sky-700" />
           Fare Offered
         </span>
       );
@@ -339,7 +339,7 @@ export const Requests: React.FC = () => {
 
     if (s.includes('reject')) {
       return (
-        <div className="flex items-center gap-1.5 text-[11px] font-medium text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-lg border border-rose-500/20">
+        <div className="flex items-center gap-1.5 text-[11px] font-medium text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
           <XCircle className="w-3 h-3" />
           <span>Declined</span>
         </div>
@@ -356,18 +356,18 @@ export const Requests: React.FC = () => {
     }
 
     return (
-      <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-300">
+      <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-700">
         <div className="flex gap-0.5">
           {[1, 2, 3, 4, 5].map((i) => (
             <span
               key={i}
-              className={`w-1.5 h-3.5 rounded-sm ${
-                i <= step ? 'bg-gradient-to-t from-sky-500 to-cyan-400' : 'bg-slate-800'
+              className={`w-1.5 h-3 rounded-2xs ${
+                i <= step ? 'bg-sky-700' : 'bg-slate-200'
               }`}
             />
           ))}
         </div>
-        <span className="text-[10px] text-slate-400 font-mono">Stage {step}/5</span>
+        <span className="text-[10px] text-slate-500 font-mono">Stage {step}/5</span>
       </div>
     );
   };
@@ -479,40 +479,30 @@ export const Requests: React.FC = () => {
   }, [activeReq, driverOffers]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Top Banner Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center font-bold text-amber-400 shadow-sm">
-              <FileText className="w-5 h-5 text-amber-400" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-2xl font-black text-white tracking-tight">Requests & Orders</h2>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  <Radio className="w-2.5 h-2.5 animate-pulse text-emerald-400" />
-                  Live Sync
-                </span>
-              </div>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Centralized Super Admin lifecycle management for all freight load postings, broker deals, driver assignments, and completed deliveries.
-              </p>
-            </div>
+          <div className="flex items-center gap-2">
+            <FileText className="w-5 h-5 text-sky-700" />
+            <h2 className="text-lg font-bold text-slate-900 tracking-tight">Requests & Orders</h2>
           </div>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Centralized administration for freight load postings, transporter bids, driver dispatches, and completed shipments.
+          </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="px-3.5 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-300 flex items-center gap-2">
-            <Layers className="w-3.5 h-3.5 text-amber-400" />
+          <div className="px-3 py-1.5 bg-white border border-slate-200 rounded-md text-xs text-slate-600 shadow-2xs flex items-center gap-2">
+            <Layers className="w-3.5 h-3.5 text-slate-500" />
             <span>
-              Total Live Records: <strong className="text-white font-mono">{requests.length}</strong>
+              Total Live Records: <strong className="text-slate-900 font-mono">{requests.length}</strong>
             </span>
           </div>
           {isAnyFilterActive && (
             <button
               onClick={handleClearFilters}
-              className="inline-flex items-center gap-1.5 px-3 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-semibold rounded-xl border border-rose-500/20 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 text-rose-700 text-xs font-semibold rounded-md border border-rose-200 shadow-2xs transition-colors"
             >
               <X className="w-3.5 h-3.5" />
               Reset Filters
@@ -522,14 +512,14 @@ export const Requests: React.FC = () => {
       </div>
 
       {/* Filter Toolbar */}
-      <div className="p-4 bg-slate-900/80 backdrop-blur-xl rounded-2xl border border-slate-800 shadow-xl space-y-3">
-        <div className="flex items-center justify-between gap-2 pb-2 border-b border-slate-800/60">
-          <div className="flex items-center gap-2 text-xs font-bold text-slate-300 uppercase tracking-wider">
-            <Filter className="w-3.5 h-3.5 text-sky-400" />
-            <span>Unified Lifecycle & Entity Filters</span>
+      <div className="p-3.5 bg-white rounded-lg border border-slate-200 shadow-2xs space-y-3">
+        <div className="flex items-center justify-between gap-2 pb-2 border-b border-slate-100">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 uppercase tracking-wider">
+            <Filter className="w-3.5 h-3.5 text-slate-500" />
+            <span>Search & Entity Filters</span>
           </div>
           <span className="text-[11px] text-slate-500">
-            Showing {sortedRequests.length} matching of {requests.length} total records
+            Showing {sortedRequests.length} matching of {requests.length} records
           </span>
         </div>
 
@@ -537,7 +527,7 @@ export const Requests: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           {/* Search Box */}
           <div className="lg:col-span-2 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
             <input
               type="text"
               value={searchTerm}
@@ -546,13 +536,13 @@ export const Requests: React.FC = () => {
                 setCurrentPage(1);
               }}
               placeholder="Search Order #, Doc ID, User, Broker, Driver..."
-              className="w-full pl-9 pr-3 py-2 bg-slate-950 border border-slate-700/60 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors"
+              className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-300 rounded-md text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-600 focus:ring-1 focus:ring-sky-600 transition-colors"
             />
           </div>
 
           {/* User Filter (Shipper) */}
           <div>
-            <label className="block text-[10px] uppercase font-semibold text-slate-400 mb-1">
+            <label className="block text-[10px] uppercase font-semibold text-slate-500 mb-0.5">
               User (Shipper)
             </label>
             <select
@@ -561,7 +551,7 @@ export const Requests: React.FC = () => {
                 setSelectedUserFilter(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full px-2.5 py-2 bg-slate-950 border border-slate-700/60 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-sky-500"
+              className="w-full px-2 py-1.5 bg-white border border-slate-300 rounded-md text-xs text-slate-900 focus:outline-none focus:border-sky-600"
             >
               <option value="all">All Users</option>
               {users.map((u) => (
@@ -574,7 +564,7 @@ export const Requests: React.FC = () => {
 
           {/* Broker Filter */}
           <div>
-            <label className="block text-[10px] uppercase font-semibold text-slate-400 mb-1">
+            <label className="block text-[10px] uppercase font-semibold text-slate-500 mb-0.5">
               Freight Broker
             </label>
             <select
@@ -583,7 +573,7 @@ export const Requests: React.FC = () => {
                 setSelectedBrokerFilter(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full px-2.5 py-2 bg-slate-950 border border-slate-700/60 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-sky-500"
+              className="w-full px-2 py-1.5 bg-white border border-slate-300 rounded-md text-xs text-slate-900 focus:outline-none focus:border-sky-600"
             >
               <option value="all">All Brokers</option>
               {brokers.map((b) => (
@@ -596,7 +586,7 @@ export const Requests: React.FC = () => {
 
           {/* Driver Filter */}
           <div>
-            <label className="block text-[10px] uppercase font-semibold text-slate-400 mb-1">
+            <label className="block text-[10px] uppercase font-semibold text-slate-500 mb-0.5">
               Assigned Driver
             </label>
             <select
@@ -605,7 +595,7 @@ export const Requests: React.FC = () => {
                 setSelectedDriverFilter(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full px-2.5 py-2 bg-slate-950 border border-slate-700/60 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-sky-500"
+              className="w-full px-2 py-1.5 bg-white border border-slate-300 rounded-md text-xs text-slate-900 focus:outline-none focus:border-sky-600"
             >
               <option value="all">All Drivers</option>
               {drivers.map((d) => (
@@ -618,7 +608,7 @@ export const Requests: React.FC = () => {
 
           {/* Status Filter */}
           <div>
-            <label className="block text-[10px] uppercase font-semibold text-slate-400 mb-1">
+            <label className="block text-[10px] uppercase font-semibold text-slate-500 mb-0.5">
               Lifecycle Status
             </label>
             <select
@@ -627,7 +617,7 @@ export const Requests: React.FC = () => {
                 setSelectedStatusFilter(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full px-2.5 py-2 bg-slate-950 border border-slate-700/60 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-sky-500"
+              className="w-full px-2 py-1.5 bg-white border border-slate-300 rounded-md text-xs text-slate-900 focus:outline-none focus:border-sky-600"
             >
               <option value="all">All Statuses</option>
               <option value="pending">Pending Broker Quote</option>
@@ -649,10 +639,10 @@ export const Requests: React.FC = () => {
             </span>
             <button
               onClick={() => setSelectedCargoFilter('all')}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors shrink-0 ${
+              className={`px-2 py-0.5 rounded text-[11px] font-medium transition-colors shrink-0 ${
                 selectedCargoFilter === 'all'
-                  ? 'bg-sky-500 text-slate-950 font-bold'
-                  : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+                  ? 'bg-slate-900 text-white font-semibold'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
               }`}
             >
               All Cargo
@@ -661,10 +651,10 @@ export const Requests: React.FC = () => {
               <button
                 key={cargo}
                 onClick={() => setSelectedCargoFilter(cargo)}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors shrink-0 ${
+                className={`px-2 py-0.5 rounded text-[11px] font-medium transition-colors shrink-0 ${
                   selectedCargoFilter.toLowerCase() === cargo.toLowerCase()
-                    ? 'bg-sky-500 text-slate-950 font-bold'
-                    : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+                    ? 'bg-slate-900 text-white font-semibold'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
                 }`}
               >
                 {cargo}
@@ -675,26 +665,26 @@ export const Requests: React.FC = () => {
       </div>
 
       {/* Main Request Data Table */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 backdrop-blur-xl shadow-xl overflow-hidden">
+      <div className="rounded-lg border border-slate-200 bg-white shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-300">
-            <thead className="bg-slate-950/70 text-[11px] uppercase tracking-wider text-slate-400 border-b border-slate-800 font-bold select-none">
+          <table className="w-full text-left text-xs text-slate-700">
+            <thead className="bg-slate-50 text-[11px] uppercase tracking-wider text-slate-600 border-b border-slate-200 font-semibold select-none">
               <tr>
                 {/* Column 1: Order No */}
                 <th
                   onClick={() => handleSort('numericOrderNo')}
-                  className="px-5 py-4 cursor-pointer hover:text-white transition-colors"
+                  className="px-4 py-3.5 cursor-pointer hover:text-slate-900 transition-colors"
                 >
                   <div className="flex items-center gap-1">
                     <span>Order No.</span>
-                    <ArrowUpDown className="w-3 h-3 text-sky-400" />
+                    <ArrowUpDown className="w-3 h-3 text-sky-700" />
                   </div>
                 </th>
 
                 {/* Column 2: User (Shipper) */}
                 <th
                   onClick={() => handleSort('userName')}
-                  className="px-5 py-4 cursor-pointer hover:text-white transition-colors"
+                  className="px-4 py-3.5 cursor-pointer hover:text-slate-900 transition-colors"
                 >
                   <div className="flex items-center gap-1">
                     <span>Shipper / User</span>
@@ -705,7 +695,7 @@ export const Requests: React.FC = () => {
                 {/* Column 3: Cargo Type */}
                 <th
                   onClick={() => handleSort('itemType')}
-                  className="px-5 py-4 cursor-pointer hover:text-white transition-colors"
+                  className="px-4 py-3.5 cursor-pointer hover:text-slate-900 transition-colors"
                 >
                   <div className="flex items-center gap-1">
                     <span>Cargo / Item</span>
@@ -716,18 +706,18 @@ export const Requests: React.FC = () => {
                 {/* Column 4: Fare / Deal */}
                 <th
                   onClick={() => handleSort('finalFare')}
-                  className="px-5 py-4 cursor-pointer hover:text-white transition-colors"
+                  className="px-4 py-3.5 cursor-pointer hover:text-slate-900 transition-colors"
                 >
                   <div className="flex items-center gap-1">
                     <span>Agreed / Deal Fare</span>
-                    <ArrowUpDown className="w-3 h-3 text-emerald-400" />
+                    <ArrowUpDown className="w-3 h-3 text-emerald-700" />
                   </div>
                 </th>
 
                 {/* Column 5: Broker */}
                 <th
                   onClick={() => handleSort('brokerName')}
-                  className="px-5 py-4 cursor-pointer hover:text-white transition-colors"
+                  className="px-4 py-3.5 cursor-pointer hover:text-slate-900 transition-colors"
                 >
                   <div className="flex items-center gap-1">
                     <span>Broker</span>
@@ -738,7 +728,7 @@ export const Requests: React.FC = () => {
                 {/* Column 6: Driver */}
                 <th
                   onClick={() => handleSort('driverName')}
-                  className="px-5 py-4 cursor-pointer hover:text-white transition-colors"
+                  className="px-4 py-3.5 cursor-pointer hover:text-slate-900 transition-colors"
                 >
                   <div className="flex items-center gap-1">
                     <span>Driver & Fleet</span>
@@ -749,7 +739,7 @@ export const Requests: React.FC = () => {
                 {/* Column 7: Status */}
                 <th
                   onClick={() => handleSort('status')}
-                  className="px-5 py-4 cursor-pointer hover:text-white transition-colors"
+                  className="px-4 py-3.5 cursor-pointer hover:text-slate-900 transition-colors"
                 >
                   <div className="flex items-center gap-1">
                     <span>Status</span>
@@ -758,20 +748,20 @@ export const Requests: React.FC = () => {
                 </th>
 
                 {/* Column 8: Lifecycle Summary */}
-                <th className="px-5 py-4">Lifecycle Step</th>
+                <th className="px-4 py-3.5">Lifecycle Step</th>
 
                 {/* Column 9: Actions */}
-                <th className="px-5 py-4 text-right">Dossier</th>
+                <th className="px-4 py-3.5 text-right">Dossier</th>
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan={9} className="px-6 py-16 text-center text-slate-400">
+                  <td colSpan={9} className="px-6 py-12 text-center text-slate-500">
                     <div className="inline-flex items-center gap-3">
-                      <div className="w-5 h-5 border-2 border-sky-400 border-t-transparent rounded-full animate-spin" />
-                      <span className="text-sm font-medium">
+                      <div className="w-4 h-4 border-2 border-sky-700 border-t-transparent rounded-full animate-spin" />
+                      <span className="text-xs font-medium">
                         Connecting to Firestore live request stream...
                       </span>
                     </div>
@@ -779,14 +769,14 @@ export const Requests: React.FC = () => {
                 </tr>
               ) : paginatedRequests.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-6 py-16 text-center text-slate-400">
-                    <Package className="w-10 h-10 text-slate-600 mx-auto mb-2" />
-                    <p className="text-base font-semibold text-slate-200">
+                  <td colSpan={9} className="px-6 py-12 text-center text-slate-500">
+                    <Package className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                    <p className="text-sm font-semibold text-slate-800">
                       {isAnyFilterActive
                         ? 'No requests match the selected filters.'
                         : 'No requests found.'}
                     </p>
-                    <p className="text-xs text-slate-500 mt-1">
+                    <p className="text-xs text-slate-500 mt-0.5">
                       {isAnyFilterActive
                         ? 'Try clearing or changing your filter criteria.'
                         : 'Real-time listener is listening for new customer load postings in Firebase.'}
@@ -794,7 +784,7 @@ export const Requests: React.FC = () => {
                     {isAnyFilterActive && (
                       <button
                         onClick={handleClearFilters}
-                        className="mt-3 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold"
+                        className="mt-3 px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-md text-xs font-semibold shadow-2xs"
                       >
                         Clear All Filters
                       </button>
@@ -813,20 +803,20 @@ export const Requests: React.FC = () => {
                   return (
                     <tr
                       key={r.id}
-                      className="hover:bg-slate-800/30 transition-colors group cursor-pointer"
+                      className="hover:bg-slate-50 transition-colors group cursor-pointer"
                       onClick={() => {
                         setSelectedReq(r);
                         setIsDetailOpen(true);
                       }}
                     >
                       {/* Column 1: Order No */}
-                      <td className="px-5 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center font-black text-sky-400 text-xs">
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-slate-800 text-[11px]">
                             #{r.orderNo || r.id.substring(0, 4)}
                           </div>
                           <div>
-                            <span className="font-mono font-bold text-white text-xs">
+                            <span className="font-mono font-bold text-slate-900 text-xs">
                               Order #{r.orderNo || r.id}
                             </span>
                             <p className="text-[10px] text-slate-500 font-mono truncate max-w-[120px]">
@@ -837,13 +827,13 @@ export const Requests: React.FC = () => {
                       </td>
 
                       {/* Column 2: User */}
-                      <td className="px-5 py-4 whitespace-nowrap">
+                      <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300">
-                            <User className="w-3.5 h-3.5" />
+                          <div className="w-6 h-6 rounded bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600">
+                            <User className="w-3 h-3" />
                           </div>
                           <div>
-                            <p className="font-semibold text-slate-100">
+                            <p className="font-semibold text-slate-900 text-xs">
                               {r.userName || 'Shipper'}
                             </p>
                             <p className="text-[10px] text-slate-500 font-mono">
@@ -855,12 +845,12 @@ export const Requests: React.FC = () => {
                       </td>
 
                       {/* Column 3: Cargo Type */}
-                      <td className="px-5 py-4 whitespace-nowrap">
+                      <td className="px-4 py-3 whitespace-nowrap">
                         <div>
-                          <span className="font-semibold text-white">
+                          <span className="font-semibold text-slate-900 text-xs">
                             {r.itemType || r.cargoType || 'General Freight'}
                           </span>
-                          <div className="flex items-center gap-1.5 text-[10px] text-slate-400 mt-0.5">
+                          <div className="flex items-center gap-1.5 text-[10px] text-slate-500 mt-0.5">
                             <span>{r.weight ? `${r.weight} kg` : 'Weight —'}</span>
                             <span>•</span>
                             <span>{r.quantity ? `Qty: ${r.quantity}` : 'Qty —'}</span>
@@ -869,29 +859,29 @@ export const Requests: React.FC = () => {
                       </td>
 
                       {/* Column 4: Fare */}
-                      <td className="px-5 py-4 whitespace-nowrap">
+                      <td className="px-4 py-3 whitespace-nowrap">
                         <div>
                           {r.fareStatus === 'finalized' && r.finalFare ? (
                             <div>
-                              <span className="font-mono font-bold text-emerald-400 text-sm">
+                              <span className="font-mono font-bold text-emerald-700 text-xs">
                                 {formatPKR(r.finalFare)}
                               </span>
-                              <span className="block text-[10px] font-semibold text-emerald-500/90 uppercase tracking-wider">
+                              <span className="block text-[10px] font-medium text-emerald-800 uppercase tracking-wider">
                                 Agreed Deal
                               </span>
                             </div>
                           ) : r.fareStatus === 'offered' && r.finalFare ? (
                             <div>
-                              <span className="font-mono font-semibold text-cyan-400 text-xs">
+                              <span className="font-mono font-semibold text-sky-800 text-xs">
                                 {formatPKR(r.finalFare)}
                               </span>
-                              <span className="block text-[10px] text-cyan-500/80">
+                              <span className="block text-[10px] text-sky-700">
                                 Offered Quote
                               </span>
                             </div>
                           ) : (
                             <div>
-                              <span className="text-slate-500 font-medium text-xs italic">
+                              <span className="text-slate-400 font-medium text-xs italic">
                                 Not finalized
                               </span>
                             </div>
@@ -900,36 +890,36 @@ export const Requests: React.FC = () => {
                       </td>
 
                       {/* Column 5: Broker */}
-                      <td className="px-5 py-4 whitespace-nowrap">
+                      <td className="px-4 py-3 whitespace-nowrap">
                         {isBrokerAssigned ? (
-                          <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-lg bg-sky-500/10 text-sky-400 flex items-center justify-center border border-sky-500/20">
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-5 h-5 rounded bg-slate-100 text-slate-600 flex items-center justify-center border border-slate-200">
                               <Briefcase className="w-3 h-3" />
                             </div>
                             <div>
-                              <p className="font-semibold text-slate-200">{r.brokerName}</p>
+                              <p className="font-semibold text-slate-900 text-xs">{r.brokerName}</p>
                               <p className="text-[10px] text-slate-500 font-mono">
                                 ID: {r.brokerId ? r.brokerId.substring(0, 8) : ''}
                               </p>
                             </div>
                           </div>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-800/80 text-slate-400 border border-slate-700/60">
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-500 border border-slate-200">
                             Not Assigned
                           </span>
                         )}
                       </td>
 
                       {/* Column 6: Driver */}
-                      <td className="px-5 py-4 whitespace-nowrap">
+                      <td className="px-4 py-3 whitespace-nowrap">
                         {isDriverAssigned ? (
-                          <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center border border-indigo-500/20">
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-5 h-5 rounded bg-slate-100 text-slate-600 flex items-center justify-center border border-slate-200">
                               <Truck className="w-3 h-3" />
                             </div>
                             <div>
-                              <p className="font-semibold text-slate-200">{r.driverName}</p>
-                              <p className="text-[10px] text-indigo-400/80 font-mono">
+                              <p className="font-semibold text-slate-900 text-xs">{r.driverName}</p>
+                              <p className="text-[10px] text-slate-500 font-mono">
                                 {r.driverVehicleNumber
                                   ? `${r.driverVehicleType || 'Truck'}: ${r.driverVehicleNumber}`
                                   : r.driverVehicleType || 'Vehicle Assigned'}
@@ -937,34 +927,34 @@ export const Requests: React.FC = () => {
                             </div>
                           </div>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-800/80 text-slate-400 border border-slate-700/60">
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-500 border border-slate-200">
                             Not Assigned
                           </span>
                         )}
                       </td>
 
                       {/* Column 7: Status */}
-                      <td className="px-5 py-4 whitespace-nowrap">
+                      <td className="px-4 py-3 whitespace-nowrap">
                         {renderStatusBadge(r.status)}
                       </td>
 
                       {/* Column 8: Lifecycle */}
-                      <td className="px-5 py-4 whitespace-nowrap">
+                      <td className="px-4 py-3 whitespace-nowrap">
                         {renderLifecyclePill(r)}
                       </td>
 
                       {/* Column 9: Inspect Button */}
-                      <td className="px-5 py-4 whitespace-nowrap text-right">
+                      <td className="px-4 py-3 whitespace-nowrap text-right">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedReq(r);
                             setIsDetailOpen(true);
                           }}
-                          className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
+                          className="p-1.5 rounded-md border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition-colors shadow-2xs"
                           title="View Request & Order Dossier"
                         >
-                          <Eye className="w-4 h-4 text-sky-400" />
+                          <Eye className="w-3.5 h-3.5 text-sky-700" />
                         </button>
                       </td>
                     </tr>
@@ -976,36 +966,36 @@ export const Requests: React.FC = () => {
         </div>
 
         {/* Pagination Footer */}
-        <div className="p-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400 bg-slate-950/40">
+        <div className="p-3.5 border-t border-slate-200 flex items-center justify-between text-xs text-slate-600 bg-slate-50">
           <div>
             Showing{' '}
-            <span className="font-semibold text-slate-200">
+            <span className="font-semibold text-slate-900">
               {sortedRequests.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}
             </span>{' '}
             to{' '}
-            <span className="font-semibold text-slate-200">
+            <span className="font-semibold text-slate-900">
               {Math.min(currentPage * itemsPerPage, sortedRequests.length)}
             </span>{' '}
-            of <span className="font-semibold text-slate-200">{sortedRequests.length}</span> entries
+            of <span className="font-semibold text-slate-900">{sortedRequests.length}</span> entries
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <button
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
               disabled={currentPage === 1 || loading}
-              className="p-1.5 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="p-1.5 rounded-md border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-2xs"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-3.5 h-3.5" />
             </button>
-            <span className="px-2 font-medium text-slate-300">
+            <span className="px-2 font-medium text-slate-700 text-xs">
               {currentPage} / {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
               disabled={currentPage === totalPages || loading}
-              className="p-1.5 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="p-1.5 rounded-md border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-2xs"
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
@@ -1024,25 +1014,25 @@ export const Requests: React.FC = () => {
         {activeReq && (() => {
           const selectedReq = activeReq;
           return (
-            <div className="space-y-6 text-xs text-slate-300">
+            <div className="space-y-5 text-xs text-slate-700">
             {/* Dossier Header Banner */}
-            <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-xl bg-slate-950/90 border border-slate-800">
+            <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-md bg-slate-50 border border-slate-200">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-sky-600 to-cyan-400 p-0.5 flex items-center justify-center font-black text-slate-950 shadow-md">
-                  <Package className="w-6 h-6 text-slate-950" />
+                <div className="w-10 h-10 rounded-md bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-slate-700 shrink-0">
+                  <Package className="w-5 h-5 text-slate-600" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono font-bold text-white text-base">
+                    <span className="font-mono font-bold text-slate-900 text-sm">
                       Order #{selectedReq.orderNo || selectedReq.id}
                     </span>
                     <span className="text-[10px] text-slate-500 font-mono">
                       (Firestore Doc ID: {selectedReq.id})
                     </span>
                   </div>
-                  <p className="text-slate-400 mt-0.5">
+                  <p className="text-slate-500 mt-0.5 text-xs">
                     Created at:{' '}
-                    <strong className="text-slate-200">
+                    <strong className="text-slate-800 font-medium">
                       {formatTimestamp(selectedReq.createdAt || selectedReq.date)}
                     </strong>
                   </p>
@@ -1057,72 +1047,72 @@ export const Requests: React.FC = () => {
             {/* ========================================================= */}
             {/* SECTION 1: REQUEST INFORMATION */}
             {/* ========================================================= */}
-            <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-3">
-              <div className="flex items-center gap-2 text-sky-400 font-bold uppercase tracking-wider text-[11px]">
-                <Package className="w-4 h-4" />
+            <div className="p-3.5 rounded-md bg-white border border-slate-200 space-y-3">
+              <div className="flex items-center gap-1.5 text-slate-900 font-bold uppercase tracking-wider text-[11px]">
+                <Package className="w-3.5 h-3.5 text-sky-700" />
                 <span>Section 1 — Request Information</span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                <div className="p-2.5 rounded-md bg-slate-50 border border-slate-200">
                   <span className="text-slate-500 font-semibold uppercase text-[10px]">
                     Order Number
                   </span>
-                  <p className="text-white font-mono font-bold text-sm mt-0.5">
+                  <p className="text-slate-900 font-mono font-bold text-xs mt-0.5">
                     #{selectedReq.orderNo || selectedReq.id}
                   </p>
                 </div>
 
-                <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
+                <div className="p-2.5 rounded-md bg-slate-50 border border-slate-200">
                   <span className="text-slate-500 font-semibold uppercase text-[10px]">
                     Cargo / Item Type
                   </span>
-                  <p className="text-white font-bold text-sm mt-0.5">
+                  <p className="text-slate-900 font-bold text-xs mt-0.5">
                     {selectedReq.itemType || selectedReq.cargoType || 'General Freight'}
                   </p>
                 </div>
 
-                <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
+                <div className="p-2.5 rounded-md bg-slate-50 border border-slate-200">
                   <span className="text-slate-500 font-semibold uppercase text-[10px]">
                     Weight & Quantity
                   </span>
-                  <p className="text-white font-bold text-sm mt-0.5">
+                  <p className="text-slate-900 font-bold text-xs mt-0.5">
                     {selectedReq.weight ? `${selectedReq.weight} kg` : 'Weight unspec'} •{' '}
                     {selectedReq.quantity ? `Qty: ${selectedReq.quantity}` : 'Qty unspec'}
                   </p>
                 </div>
 
-                <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
+                <div className="p-2.5 rounded-md bg-slate-50 border border-slate-200">
                   <span className="text-slate-500 font-semibold uppercase text-[10px]">
                     Required Vehicle
                   </span>
-                  <p className="text-white font-bold text-sm mt-0.5">
+                  <p className="text-slate-900 font-bold text-xs mt-0.5">
                     {selectedReq.vehicleType || selectedReq.vehicle_type || 'Standard Truck'}
                   </p>
                 </div>
               </div>
 
               {/* Complete Pickup & Drop Locations */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 pt-1">
                 {/* Pickup */}
-                <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1.5">
-                  <div className="flex items-center gap-1.5 text-emerald-400 font-semibold text-[11px]">
-                    <MapPin className="w-3.5 h-3.5" />
+                <div className="p-2.5 rounded-md bg-slate-50 border border-slate-200 space-y-1">
+                  <div className="flex items-center gap-1.5 text-emerald-800 font-semibold text-[11px]">
+                    <MapPin className="w-3.5 h-3.5 text-emerald-600" />
                     <span>Complete Pickup Location</span>
                   </div>
-                  <p className="text-white font-medium text-xs">
+                  <p className="text-slate-900 font-medium text-xs">
                     {selectedReq.pickupLocation || 'No pickup address recorded'}
                   </p>
                   {(selectedReq.pickupLat || selectedReq.pickupLng) ? (
-                    <div className="pt-1.5 border-t border-slate-800/60 flex items-center justify-between text-[10px]">
-                      <span className="text-slate-400 font-mono">
+                    <div className="pt-1.5 border-t border-slate-200 flex items-center justify-between text-[10px]">
+                      <span className="text-slate-500 font-mono">
                         Coordinates: {selectedReq.pickupLat?.toFixed(5)}, {selectedReq.pickupLng?.toFixed(5)}
                       </span>
                       <a
                         href={`https://www.google.com/maps?q=${selectedReq.pickupLat},${selectedReq.pickupLng}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1 text-sky-400 hover:text-sky-300 font-semibold"
+                        className="inline-flex items-center gap-1 text-sky-700 hover:text-sky-800 font-semibold"
                       >
                         <ExternalLink className="w-2.5 h-2.5" />
                         Google Maps
@@ -1132,24 +1122,24 @@ export const Requests: React.FC = () => {
                 </div>
 
                 {/* Drop */}
-                <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1.5">
-                  <div className="flex items-center gap-1.5 text-rose-400 font-semibold text-[11px]">
-                    <MapPin className="w-3.5 h-3.5" />
+                <div className="p-2.5 rounded-md bg-slate-50 border border-slate-200 space-y-1">
+                  <div className="flex items-center gap-1.5 text-rose-800 font-semibold text-[11px]">
+                    <MapPin className="w-3.5 h-3.5 text-rose-600" />
                     <span>Complete Drop-off Location</span>
                   </div>
-                  <p className="text-white font-medium text-xs">
+                  <p className="text-slate-900 font-medium text-xs">
                     {selectedReq.dropoffLocation || 'No drop-off address recorded'}
                   </p>
                   {(selectedReq.dropLat || selectedReq.dropLng) ? (
-                    <div className="pt-1.5 border-t border-slate-800/60 flex items-center justify-between text-[10px]">
-                      <span className="text-slate-400 font-mono">
+                    <div className="pt-1.5 border-t border-slate-200 flex items-center justify-between text-[10px]">
+                      <span className="text-slate-500 font-mono">
                         Coordinates: {selectedReq.dropLat?.toFixed(5)}, {selectedReq.dropLng?.toFixed(5)}
                       </span>
                       <a
                         href={`https://www.google.com/maps?q=${selectedReq.dropLat},${selectedReq.dropLng}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1 text-sky-400 hover:text-sky-300 font-semibold"
+                        className="inline-flex items-center gap-1 text-sky-700 hover:text-sky-800 font-semibold"
                       >
                         <ExternalLink className="w-2.5 h-2.5" />
                         Google Maps
@@ -1160,7 +1150,7 @@ export const Requests: React.FC = () => {
               </div>
 
               {selectedReq.additionalInfo && (
-                <div className="p-3 rounded-xl bg-slate-950/40 border border-slate-800/80 text-slate-300">
+                <div className="p-2.5 rounded-md bg-slate-50 border border-slate-200 text-slate-700">
                   <span className="text-slate-500 font-semibold uppercase text-[10px] block mb-0.5">
                     Shipper Additional Instructions:
                   </span>
@@ -1172,61 +1162,61 @@ export const Requests: React.FC = () => {
             {/* ========================================================= */}
             {/* SECTION 2: USER INFORMATION & SPECIFIC ACTION */}
             {/* ========================================================= */}
-            <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-3">
-              <div className="flex items-center gap-2 text-sky-400 font-bold uppercase tracking-wider text-[11px]">
-                <User className="w-4 h-4" />
+            <div className="p-3.5 rounded-md bg-white border border-slate-200 space-y-3">
+              <div className="flex items-center gap-1.5 text-slate-900 font-bold uppercase tracking-wider text-[11px]">
+                <User className="w-3.5 h-3.5 text-sky-700" />
                 <span>Section 2 — User Information & Shipper Action</span>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-2.5">
+                <div className="p-2.5 rounded-md bg-slate-50 border border-slate-200">
                   <span className="text-slate-500 font-semibold uppercase text-[10px]">
                     Shipper Name
                   </span>
-                  <p className="text-white font-bold text-sm mt-0.5">
+                  <p className="text-slate-900 font-bold text-xs mt-0.5">
                     {selectedReq.userName || 'Shipper'}
                   </p>
                 </div>
 
-                <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
+                <div className="p-2.5 rounded-md bg-slate-50 border border-slate-200">
                   <span className="text-slate-500 font-semibold uppercase text-[10px]">
                     User UID
                   </span>
-                  <p className="text-slate-300 font-mono text-xs mt-0.5 truncate">
+                  <p className="text-slate-600 font-mono text-xs mt-0.5 truncate">
                     {selectedReq.userUid || selectedReq.userId || 'Not recorded'}
                   </p>
                 </div>
 
-                <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
+                <div className="p-2.5 rounded-md bg-slate-50 border border-slate-200">
                   <span className="text-slate-500 font-semibold uppercase text-[10px]">
                     Contact Phone
                   </span>
-                  <p className="text-slate-300 font-mono text-xs mt-0.5">
+                  <p className="text-slate-600 font-mono text-xs mt-0.5">
                     {selectedReq.userPhone || 'Phone unrecorded'}
                   </p>
                 </div>
 
-                <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
+                <div className="p-2.5 rounded-md bg-slate-50 border border-slate-200">
                   <span className="text-slate-500 font-semibold uppercase text-[10px]">
                     Specific User Action
                   </span>
                   <div className="mt-0.5">
                     {selectedReq.fareStatus === 'finalized' || selectedReq.accepted_fare ? (
-                      <span className="text-emerald-400 font-semibold text-xs flex items-center gap-1">
+                      <span className="text-emerald-700 font-semibold text-xs flex items-center gap-1">
                         <CheckCircle2 className="w-3 h-3" />
                         Accepted Quote
                       </span>
                     ) : (selectedReq.status || '').toLowerCase().includes('reject') ? (
-                      <span className="text-rose-400 font-semibold text-xs flex items-center gap-1">
+                      <span className="text-rose-700 font-semibold text-xs flex items-center gap-1">
                         <XCircle className="w-3 h-3" />
                         Declined / Cancelled
                       </span>
                     ) : selectedReq.status === 'fare_offered' ? (
-                      <span className="text-cyan-400 font-semibold text-xs flex items-center gap-1">
+                      <span className="text-sky-800 font-semibold text-xs flex items-center gap-1">
                         <Clock className="w-3 h-3" />
                         Evaluating Quote
                       </span>
                     ) : (
-                      <span className="text-amber-400 font-semibold text-xs flex items-center gap-1">
+                      <span className="text-amber-700 font-semibold text-xs flex items-center gap-1">
                         <Clock className="w-3 h-3" />
                         Created Load Posting
                       </span>
@@ -1239,48 +1229,48 @@ export const Requests: React.FC = () => {
             {/* ========================================================= */}
             {/* SECTION 3: BROKER ACTIVITY */}
             {/* ========================================================= */}
-            <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-3">
-              <div className="flex items-center gap-2 text-sky-400 font-bold uppercase tracking-wider text-[11px]">
-                <Briefcase className="w-4 h-4" />
+            <div className="p-3.5 rounded-md bg-white border border-slate-200 space-y-3">
+              <div className="flex items-center gap-1.5 text-slate-900 font-bold uppercase tracking-wider text-[11px]">
+                <Briefcase className="w-3.5 h-3.5 text-sky-700" />
                 <span>Section 3 — Freight Broker Activity</span>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-2.5">
+                <div className="p-2.5 rounded-md bg-slate-50 border border-slate-200">
                   <span className="text-slate-500 font-semibold uppercase text-[10px]">
                     Broker Name
                   </span>
-                  <p className="text-white font-bold text-sm mt-0.5">
+                  <p className="text-slate-900 font-bold text-xs mt-0.5">
                     {selectedReq.brokerName || (
-                      <span className="text-slate-500 italic font-normal">Not Assigned</span>
+                      <span className="text-slate-400 italic font-normal">Not Assigned</span>
                     )}
                   </p>
                 </div>
 
-                <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
+                <div className="p-2.5 rounded-md bg-slate-50 border border-slate-200">
                   <span className="text-slate-500 font-semibold uppercase text-[10px]">
                     Broker UID
                   </span>
-                  <p className="text-slate-300 font-mono text-xs mt-0.5 truncate">
+                  <p className="text-slate-600 font-mono text-xs mt-0.5 truncate">
                     {selectedReq.brokerId && selectedReq.brokerId !== 'notAssigned'
                       ? selectedReq.brokerId
                       : 'Not Assigned'}
                   </p>
                 </div>
 
-                <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
+                <div className="p-2.5 rounded-md bg-slate-50 border border-slate-200">
                   <span className="text-slate-500 font-semibold uppercase text-[10px]">
                     Broker Quoted Fare
                   </span>
-                  <p className="text-cyan-400 font-bold text-sm mt-0.5">
+                  <p className="text-sky-800 font-bold text-xs mt-0.5">
                     {formatPKR(selectedReq.customer_fare || selectedReq.brokerOffer || selectedReq.quoteAmount)}
                   </p>
                 </div>
 
-                <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
+                <div className="p-2.5 rounded-md bg-slate-50 border border-slate-200">
                   <span className="text-slate-500 font-semibold uppercase text-[10px]">
                     Broker Contact Phone
                   </span>
-                  <p className="text-slate-300 font-mono text-xs mt-0.5">
+                  <p className="text-slate-600 font-mono text-xs mt-0.5">
                     {selectedReq.brokerPhone || 'Phone unrecorded'}
                   </p>
                 </div>
@@ -1290,35 +1280,35 @@ export const Requests: React.FC = () => {
             {/* ========================================================= */}
             {/* SECTION 4: FINAL BROKER DEAL */}
             {/* ========================================================= */}
-            <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-3">
-              <div className="flex items-center gap-2 text-emerald-400 font-bold uppercase tracking-wider text-[11px]">
-                <FileCheck className="w-4 h-4" />
+            <div className="p-3.5 rounded-md bg-white border border-slate-200 space-y-3">
+              <div className="flex items-center gap-1.5 text-slate-900 font-bold uppercase tracking-wider text-[11px]">
+                <FileCheck className="w-3.5 h-3.5 text-emerald-700" />
                 <span>Section 4 — Final Broker Deal</span>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <div className="p-2.5 rounded-md bg-slate-50 border border-slate-200">
                   <span className="text-slate-500 font-semibold uppercase text-[10px]">
                     Final Agreed Fare (`accepted_fare`)
                   </span>
-                  <p className="text-emerald-400 font-black text-base mt-0.5">
+                  <p className="text-emerald-700 font-bold text-sm mt-0.5">
                     {formatPKR(selectedReq.accepted_fare || selectedReq.finalFare)}
                   </p>
                 </div>
 
-                <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
+                <div className="p-2.5 rounded-md bg-slate-50 border border-slate-200">
                   <span className="text-slate-500 font-semibold uppercase text-[10px]">
                     Agreed Broker
                   </span>
-                  <p className="text-white font-bold text-sm mt-0.5">
+                  <p className="text-slate-900 font-bold text-xs mt-0.5">
                     {selectedReq.brokerName || 'No broker agreement'}
                   </p>
                 </div>
 
-                <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
+                <div className="p-2.5 rounded-md bg-slate-50 border border-slate-200">
                   <span className="text-slate-500 font-semibold uppercase text-[10px]">
                     Agreement Timestamp
                   </span>
-                  <p className="text-slate-300 font-mono text-xs mt-0.5">
+                  <p className="text-slate-600 font-mono text-xs mt-0.5">
                     {selectedReq.deal_accepted_at || selectedReq.accepted_at
                       ? formatTimestamp(selectedReq.deal_accepted_at || selectedReq.accepted_at)
                       : selectedReq.fareStatus === 'finalized'
@@ -1332,61 +1322,61 @@ export const Requests: React.FC = () => {
             {/* ========================================================= */}
             {/* SECTION 5: DRIVER INFORMATION */}
             {/* ========================================================= */}
-            <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-3">
-              <div className="flex items-center gap-2 text-indigo-400 font-bold uppercase tracking-wider text-[11px]">
-                <Truck className="w-4 h-4" />
+            <div className="p-3.5 rounded-md bg-white border border-slate-200 space-y-3">
+              <div className="flex items-center gap-1.5 text-slate-900 font-bold uppercase tracking-wider text-[11px]">
+                <Truck className="w-3.5 h-3.5 text-sky-700" />
                 <span>Section 5 — Driver Information</span>
               </div>
 
               {selectedReq.assigned_driver_id &&
               selectedReq.assigned_driver_id !== 'notAssigned' &&
               selectedReq.assigned_driver_id !== 'N/A' ? (
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                  <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-2.5">
+                  <div className="p-2.5 rounded-md bg-slate-50 border border-slate-200">
                     <span className="text-slate-500 font-semibold uppercase text-[10px]">
                       Driver Name
                     </span>
-                    <p className="text-white font-bold text-sm mt-0.5">
+                    <p className="text-slate-900 font-bold text-xs mt-0.5">
                       {selectedReq.driverName || 'Driver Assigned'}
                     </p>
                   </div>
 
-                  <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
+                  <div className="p-2.5 rounded-md bg-slate-50 border border-slate-200">
                     <span className="text-slate-500 font-semibold uppercase text-[10px]">
                       Driver UID
                     </span>
-                    <p className="text-slate-300 font-mono text-xs mt-0.5 truncate">
+                    <p className="text-slate-600 font-mono text-xs mt-0.5 truncate">
                       {selectedReq.assigned_driver_id || selectedReq.driverId}
                     </p>
                   </div>
 
-                  <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
+                  <div className="p-2.5 rounded-md bg-slate-50 border border-slate-200">
                     <span className="text-slate-500 font-semibold uppercase text-[10px]">
                       Assigned Vehicle
                     </span>
-                    <p className="text-white font-mono font-bold text-xs mt-0.5">
+                    <p className="text-slate-900 font-mono font-bold text-xs mt-0.5">
                       {selectedReq.driverVehicleNumber
                         ? `${selectedReq.driverVehicleType || 'Truck'}: ${selectedReq.driverVehicleNumber}`
                         : selectedReq.driverVehicleType || 'Vehicle Assigned'}
                     </p>
                   </div>
 
-                  <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
+                  <div className="p-2.5 rounded-md bg-slate-50 border border-slate-200">
                     <span className="text-slate-500 font-semibold uppercase text-[10px]">
                       Agreed Driver Fare
                     </span>
-                    <p className="text-indigo-400 font-bold text-sm mt-0.5">
+                    <p className="text-sky-800 font-bold text-xs mt-0.5">
                       {formatPKR(selectedReq.assigned_fare || selectedReq.driver_fare)}
                     </p>
                   </div>
                 </div>
               ) : (
-                <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 text-center py-5">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                    <AlertTriangle className="w-3.5 h-3.5" />
+                <div className="p-3.5 rounded-md bg-slate-50 border border-slate-200 text-center py-4">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                    <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
                     Driver: Not assigned
                   </span>
-                  <p className="text-xs text-slate-500 mt-2">
+                  <p className="text-xs text-slate-500 mt-1">
                     No transporter or driver has been assigned to this order yet.
                   </p>
                 </div>
@@ -1396,10 +1386,10 @@ export const Requests: React.FC = () => {
             {/* ========================================================= */}
             {/* SECTION 6: DRIVER RESPONSE & REASSIGNMENT HISTORY */}
             {/* ========================================================= */}
-            <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-3">
+            <div className="p-3.5 rounded-md bg-white border border-slate-200 space-y-3">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-indigo-400 font-bold uppercase tracking-wider text-[11px]">
-                  <History className="w-4 h-4" />
+                <div className="flex items-center gap-1.5 text-slate-900 font-bold uppercase tracking-wider text-[11px]">
+                  <History className="w-3.5 h-3.5 text-sky-700" />
                   <span>Section 6 — Driver Response & Reassignment History</span>
                 </div>
                 <span className="text-[10px] text-slate-500 font-mono">
@@ -1408,40 +1398,40 @@ export const Requests: React.FC = () => {
               </div>
 
               {loadingOffers ? (
-                <div className="p-6 text-center text-slate-400 bg-slate-950/40 rounded-xl">
-                  <div className="w-4 h-4 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                <div className="p-4 text-center text-slate-500 bg-slate-50 rounded-md">
+                  <div className="w-4 h-4 border-2 border-sky-700 border-t-transparent rounded-full animate-spin mx-auto mb-1.5" />
                   <span>Streaming driver offers...</span>
                 </div>
               ) : driverOffers.length === 0 ? (
-                <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 text-center py-5">
-                  <p className="text-slate-400 font-medium">No driver offers dispatched yet.</p>
-                  <p className="text-[11px] text-slate-500 mt-1">
+                <div className="p-3.5 rounded-md bg-slate-50 border border-slate-200 text-center py-4">
+                  <p className="text-slate-700 font-medium">No driver offers dispatched yet.</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
                     When the freight broker dispatches offers to drivers via TruckLink AI, all offer attempts, responses, and reassignments will stream here in real time.
                   </p>
                 </div>
               ) : (
-                <div className="rounded-xl border border-slate-800/80 overflow-hidden bg-slate-950/60">
-                  <table className="w-full text-left text-xs text-slate-300">
-                    <thead className="bg-slate-900/80 text-[10px] uppercase font-bold text-slate-400 border-b border-slate-800">
+                <div className="rounded-md border border-slate-200 overflow-hidden bg-white">
+                  <table className="w-full text-left text-xs text-slate-700">
+                    <thead className="bg-slate-50 text-[10px] uppercase font-bold text-slate-600 border-b border-slate-200">
                       <tr>
-                        <th className="px-3.5 py-2.5">Driver Name & UID</th>
-                        <th className="px-3.5 py-2.5">Offered Fare</th>
-                        <th className="px-3.5 py-2.5">Vehicle</th>
-                        <th className="px-3.5 py-2.5">Dispatched At</th>
-                        <th className="px-3.5 py-2.5">Driver Status</th>
-                        <th className="px-3.5 py-2.5">Response Notes</th>
+                        <th className="px-3 py-2">Driver Name & UID</th>
+                        <th className="px-3 py-2">Offered Fare</th>
+                        <th className="px-3 py-2">Vehicle</th>
+                        <th className="px-3 py-2">Dispatched At</th>
+                        <th className="px-3 py-2">Driver Status</th>
+                        <th className="px-3 py-2">Response Notes</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-800/50 text-[11px]">
+                    <tbody className="divide-y divide-slate-100 text-[11px]">
                       {driverOffers.map((offer) => {
                         const offerStatus = (offer.status || 'pending').toLowerCase();
                         const isAccepted = offerStatus === 'accepted_by_driver';
                         const isRejected = offerStatus.includes('reject');
 
                         return (
-                          <tr key={offer.id} className="hover:bg-slate-800/30 transition-colors">
-                            <td className="px-3.5 py-2.5 whitespace-nowrap">
-                              <p className="font-semibold text-white">
+                          <tr key={offer.id} className="hover:bg-slate-50 transition-colors">
+                            <td className="px-3 py-2 whitespace-nowrap">
+                              <p className="font-semibold text-slate-900">
                                 {offer.driver_name || 'Driver'}
                               </p>
                               <p className="text-[10px] text-slate-500 font-mono">
@@ -1449,50 +1439,50 @@ export const Requests: React.FC = () => {
                               </p>
                             </td>
 
-                            <td className="px-3.5 py-2.5 whitespace-nowrap font-mono font-semibold text-emerald-400">
+                            <td className="px-3 py-2 whitespace-nowrap font-mono font-semibold text-emerald-700">
                               {formatPKR(offer.fare)}
                             </td>
 
-                            <td className="px-3.5 py-2.5 whitespace-nowrap text-slate-300">
+                            <td className="px-3 py-2 whitespace-nowrap text-slate-700">
                               {offer.vehicle_number
                                 ? `${offer.vehicle_type || 'Truck'}: ${offer.vehicle_number}`
                                 : offer.vehicle_type || 'Truck'}
                             </td>
 
-                            <td className="px-3.5 py-2.5 whitespace-nowrap text-slate-400 font-mono text-[10px]">
+                            <td className="px-3 py-2 whitespace-nowrap text-slate-500 font-mono text-[10px]">
                               {formatTimestamp(offer.created_at)}
                             </td>
 
-                            <td className="px-3.5 py-2.5 whitespace-nowrap">
+                            <td className="px-3 py-2 whitespace-nowrap">
                               {isAccepted ? (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                                  <CheckCircle2 className="w-2.5 h-2.5" />
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                  <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
                                   Accepted by Driver
                                 </span>
                               ) : isRejected ? (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">
-                                  <XCircle className="w-2.5 h-2.5" />
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-800 border border-rose-200">
+                                  <XCircle className="w-2.5 h-2.5 text-rose-600" />
                                   Rejected by Driver
                                 </span>
                               ) : (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                                  <Clock className="w-2.5 h-2.5" />
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                                  <Clock className="w-2.5 h-2.5 text-amber-600" />
                                   Awaiting Response
                                 </span>
                               )}
                             </td>
 
-                            <td className="px-3.5 py-2.5 text-slate-400 max-w-[180px] truncate">
+                            <td className="px-3 py-2 text-slate-600 max-w-[180px] truncate">
                               {offer.rejection_reason ? (
-                                <span className="text-rose-300">
+                                <span className="text-rose-700">
                                   Reason: {offer.rejection_reason}
                                 </span>
                               ) : offer.accepted_at ? (
-                                <span className="text-emerald-400/80 font-mono text-[10px]">
+                                <span className="text-emerald-700 font-mono text-[10px]">
                                   Accepted: {formatTimestamp(offer.accepted_at)}
                                 </span>
                               ) : (
-                                <span className="text-slate-500 italic">—</span>
+                                <span className="text-slate-400 italic">—</span>
                               )}
                             </td>
                           </tr>
@@ -1507,37 +1497,37 @@ export const Requests: React.FC = () => {
             {/* ========================================================= */}
             {/* SECTION 7: REJECTION / CANCELLATION ACTOR ANALYSIS */}
             {/* ========================================================= */}
-            <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-3">
-              <div className="flex items-center gap-2 text-rose-400 font-bold uppercase tracking-wider text-[11px]">
-                <ShieldAlert className="w-4 h-4" />
+            <div className="p-3.5 rounded-md bg-white border border-slate-200 space-y-3">
+              <div className="flex items-center gap-1.5 text-slate-900 font-bold uppercase tracking-wider text-[11px]">
+                <ShieldAlert className="w-3.5 h-3.5 text-rose-700" />
                 <span>Section 7 — Rejection / Cancellation Actor Analysis</span>
               </div>
 
               {rejectionAnalysis?.isRejected ? (
-                <div className="p-4 rounded-xl bg-rose-950/20 border border-rose-800/40 space-y-2">
+                <div className="p-3.5 rounded-md bg-rose-50 border border-rose-200 space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="px-2.5 py-0.5 rounded-md text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300">
                         Actor: {rejectionAnalysis.actor}
                       </span>
                       {rejectionAnalysis.actorDetail && (
-                        <span className="text-xs text-slate-300 font-medium">
+                        <span className="text-xs text-rose-900 font-medium">
                           ({rejectionAnalysis.actorDetail})
                         </span>
                       )}
                     </div>
-                    <span className="text-[10px] font-mono text-rose-400/70">
+                    <span className="text-[10px] font-mono text-rose-700">
                       Status: {selectedReq.status}
                     </span>
                   </div>
 
-                  <p className="text-slate-200 text-xs leading-relaxed">
+                  <p className="text-rose-900 text-xs leading-relaxed">
                     {rejectionAnalysis.description}
                   </p>
 
                   {rejectionAnalysis.reason && (
-                    <div className="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800 text-slate-300 text-xs">
-                      <strong className="text-rose-400 uppercase text-[10px] block">
+                    <div className="p-2 rounded-md bg-white border border-rose-200 text-slate-800 text-xs">
+                      <strong className="text-rose-700 uppercase text-[10px] block">
                         Reason Provided:
                       </strong>
                       <p className="mt-0.5">{rejectionAnalysis.reason}</p>
@@ -1545,13 +1535,13 @@ export const Requests: React.FC = () => {
                   )}
                 </div>
               ) : (
-                <div className="p-3.5 rounded-xl bg-emerald-950/20 border border-emerald-800/40 flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                <div className="p-3 rounded-md bg-emerald-50 border border-emerald-200 flex items-center gap-2.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                   <div>
-                    <h5 className="font-semibold text-emerald-300 text-xs">
+                    <h5 className="font-semibold text-emerald-900 text-xs">
                       Active Order — No Rejection or Cancellation
                     </h5>
-                    <p className="text-[11px] text-slate-400 mt-0.5">
+                    <p className="text-[11px] text-emerald-700 mt-0.5">
                       This freight request has progressed normally without cancellations by the User, Broker, or Driver.
                     </p>
                   </div>
@@ -1562,31 +1552,31 @@ export const Requests: React.FC = () => {
             {/* ========================================================= */}
             {/* SECTION 8: CHRONOLOGICAL LIFECYCLE TIMELINE */}
             {/* ========================================================= */}
-            <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-4">
+            <div className="p-3.5 rounded-md bg-white border border-slate-200 space-y-3">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sky-400 font-bold uppercase tracking-wider text-[11px]">
-                  <Clock className="w-4 h-4" />
-                  <span>Section 8 — Chronological Real Firestore Lifecycle Timeline</span>
+                <div className="flex items-center gap-1.5 text-slate-900 font-bold uppercase tracking-wider text-[11px]">
+                  <Clock className="w-3.5 h-3.5 text-sky-700" />
+                  <span>Section 8 — Chronological Firestore Lifecycle Timeline</span>
                 </div>
-                <span className="text-[10px] text-slate-500">Real Timestamps Only</span>
+                <span className="text-[10px] text-slate-500">Real Timestamps</span>
               </div>
 
-              <div className="relative pl-6 space-y-4 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-800">
+              <div className="relative pl-5 space-y-3.5 before:absolute before:left-1.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
                 {/* 1. Request Created */}
                 <div className="relative">
-                  <div className="absolute -left-6 top-0.5 w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center text-slate-950 font-black text-[9px]">
+                  <div className="absolute -left-5 top-0.5 w-3.5 h-3.5 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold text-[8px]">
                     ✓
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h5 className="text-white font-bold">1. Freight Request Created</h5>
-                      <span className="text-emerald-400 text-[10px] font-mono">
+                      <h5 className="text-slate-900 font-bold text-xs">1. Freight Request Created</h5>
+                      <span className="text-emerald-700 text-[10px] font-mono">
                         {formatTimestamp(selectedReq.createdAt || selectedReq.date)}
                       </span>
                     </div>
-                    <p className="text-slate-400 text-[11px] mt-0.5">
+                    <p className="text-slate-600 text-[11px] mt-0.5">
                       Customer {selectedReq.userName || 'User'} created load posting for{' '}
-                      <strong className="text-slate-200">
+                      <strong className="text-slate-900 font-medium">
                         {selectedReq.itemType || selectedReq.cargoType || 'General Freight'}
                       </strong>
                     </p>
@@ -1596,24 +1586,24 @@ export const Requests: React.FC = () => {
                 {/* 2. Broker Assignment & Quotation */}
                 <div className="relative">
                   <div
-                    className={`absolute -left-6 top-0.5 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black ${
+                    className={`absolute -left-5 top-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-bold ${
                       selectedReq.brokerId && selectedReq.brokerId !== 'notAssigned'
-                        ? 'bg-sky-500 text-slate-950'
-                        : 'bg-slate-800 text-slate-500'
+                        ? 'bg-sky-700 text-white'
+                        : 'bg-slate-200 text-slate-500'
                     }`}
                   >
                     {selectedReq.brokerId && selectedReq.brokerId !== 'notAssigned' ? '✓' : '2'}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h5 className="text-white font-bold">2. Broker Assignment & Quotation</h5>
+                      <h5 className="text-slate-900 font-bold text-xs">2. Broker Assignment & Quotation</h5>
                       {selectedReq.quote_submitted_at && (
-                        <span className="text-sky-400 text-[10px] font-mono">
+                        <span className="text-sky-700 text-[10px] font-mono">
                           {formatTimestamp(selectedReq.quote_submitted_at)}
                         </span>
                       )}
                     </div>
-                    <p className="text-slate-400 text-[11px] mt-0.5">
+                    <p className="text-slate-600 text-[11px] mt-0.5">
                       {selectedReq.brokerName && selectedReq.brokerName !== 'Not Assigned'
                         ? `Freight Broker ${selectedReq.brokerName} quoted ${formatPKR(
                             selectedReq.customer_fare || selectedReq.brokerOffer || selectedReq.quoteAmount
@@ -1626,12 +1616,12 @@ export const Requests: React.FC = () => {
                 {/* 3. Deal Acceptance */}
                 <div className="relative">
                   <div
-                    className={`absolute -left-6 top-0.5 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black ${
+                    className={`absolute -left-5 top-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-bold ${
                       selectedReq.fareStatus === 'finalized' || selectedReq.accepted_fare
-                        ? 'bg-emerald-500 text-slate-950'
+                        ? 'bg-emerald-600 text-white'
                         : (selectedReq.status || '').toLowerCase().includes('reject')
-                        ? 'bg-rose-500 text-white'
-                        : 'bg-slate-800 text-slate-500'
+                        ? 'bg-rose-600 text-white'
+                        : 'bg-slate-200 text-slate-500'
                     }`}
                   >
                     {selectedReq.fareStatus === 'finalized' || selectedReq.accepted_fare
@@ -1642,14 +1632,14 @@ export const Requests: React.FC = () => {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h5 className="text-white font-bold">3. Deal Acceptance & Agreed Fare</h5>
+                      <h5 className="text-slate-900 font-bold text-xs">3. Deal Acceptance & Agreed Fare</h5>
                       {(selectedReq.deal_accepted_at || selectedReq.accepted_at) && (
-                        <span className="text-emerald-400 text-[10px] font-mono">
+                        <span className="text-emerald-700 text-[10px] font-mono">
                           {formatTimestamp(selectedReq.deal_accepted_at || selectedReq.accepted_at)}
                         </span>
                       )}
                     </div>
-                    <p className="text-slate-400 text-[11px] mt-0.5">
+                    <p className="text-slate-600 text-[11px] mt-0.5">
                       {selectedReq.fareStatus === 'finalized' || selectedReq.accepted_fare
                         ? `Deal agreed between User and Broker for ${formatPKR(
                             selectedReq.accepted_fare || selectedReq.finalFare
@@ -1664,12 +1654,12 @@ export const Requests: React.FC = () => {
                 {/* 4. Driver Dispatch & Assignment */}
                 <div className="relative">
                   <div
-                    className={`absolute -left-6 top-0.5 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black ${
+                    className={`absolute -left-5 top-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-bold ${
                       selectedReq.assigned_driver_id && selectedReq.assigned_driver_id !== 'notAssigned'
-                        ? 'bg-indigo-500 text-white'
+                        ? 'bg-sky-700 text-white'
                         : driverOffers.length > 0
-                        ? 'bg-amber-500 text-slate-950'
-                        : 'bg-slate-800 text-slate-500'
+                        ? 'bg-amber-600 text-white'
+                        : 'bg-slate-200 text-slate-500'
                     }`}
                   >
                     {selectedReq.assigned_driver_id && selectedReq.assigned_driver_id !== 'notAssigned'
@@ -1678,14 +1668,14 @@ export const Requests: React.FC = () => {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h5 className="text-white font-bold">4. Driver Assignment & Offers</h5>
+                      <h5 className="text-slate-900 font-bold text-xs">4. Driver Assignment & Offers</h5>
                       {driverOffers.length > 0 && (
-                        <span className="text-indigo-400 text-[10px] font-mono">
+                        <span className="text-sky-700 text-[10px] font-mono">
                           {formatTimestamp(driverOffers[0].created_at)}
                         </span>
                       )}
                     </div>
-                    <p className="text-slate-400 text-[11px] mt-0.5">
+                    <p className="text-slate-600 text-[11px] mt-0.5">
                       {selectedReq.driverName && selectedReq.driverName !== 'Not Assigned'
                         ? `Driver ${selectedReq.driverName} assigned (${
                             selectedReq.driverVehicleType || 'Truck'
@@ -1700,12 +1690,12 @@ export const Requests: React.FC = () => {
                 {/* 5. In Transit */}
                 <div className="relative">
                   <div
-                    className={`absolute -left-6 top-0.5 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black ${
+                    className={`absolute -left-5 top-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-bold ${
                       ['in_transit', 'heading_to_drop', 'completed', 'delivered'].includes(
                         (selectedReq.status || '').toLowerCase()
                       )
-                        ? 'bg-cyan-500 text-slate-950'
-                        : 'bg-slate-800 text-slate-500'
+                        ? 'bg-sky-700 text-white'
+                        : 'bg-slate-200 text-slate-500'
                     }`}
                   >
                     {['in_transit', 'heading_to_drop', 'completed', 'delivered'].includes(
@@ -1716,9 +1706,9 @@ export const Requests: React.FC = () => {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h5 className="text-white font-bold">5. In Transit (Active GPS Telemetry)</h5>
+                      <h5 className="text-slate-900 font-bold text-xs">5. In Transit (Active GPS Telemetry)</h5>
                     </div>
-                    <p className="text-slate-400 text-[11px] mt-0.5">
+                    <p className="text-slate-600 text-[11px] mt-0.5">
                       {['in_transit', 'heading_to_drop', 'completed', 'delivered'].includes(
                         (selectedReq.status || '').toLowerCase()
                       )
@@ -1731,10 +1721,10 @@ export const Requests: React.FC = () => {
                 {/* 6. Completed Delivery */}
                 <div className="relative">
                   <div
-                    className={`absolute -left-6 top-0.5 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black ${
+                    className={`absolute -left-5 top-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-bold ${
                       ['completed', 'delivered'].includes((selectedReq.status || '').toLowerCase())
-                        ? 'bg-emerald-500 text-slate-950'
-                        : 'bg-slate-800 text-slate-500'
+                        ? 'bg-emerald-600 text-white'
+                        : 'bg-slate-200 text-slate-500'
                     }`}
                   >
                     {['completed', 'delivered'].includes((selectedReq.status || '').toLowerCase())
@@ -1743,14 +1733,14 @@ export const Requests: React.FC = () => {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h5 className="text-white font-bold">6. Consignment Delivery Completed</h5>
+                      <h5 className="text-slate-900 font-bold text-xs">6. Consignment Delivery Completed</h5>
                       {(selectedReq.completed_at || selectedReq.delivered_at) && (
-                        <span className="text-emerald-400 text-[10px] font-mono">
+                        <span className="text-emerald-700 text-[10px] font-mono">
                           {formatTimestamp(selectedReq.completed_at || selectedReq.delivered_at)}
                         </span>
                       )}
                     </div>
-                    <p className="text-slate-400 text-[11px] mt-0.5">
+                    <p className="text-slate-600 text-[11px] mt-0.5">
                       {['completed', 'delivered'].includes((selectedReq.status || '').toLowerCase())
                         ? 'Load successfully delivered to destination'
                         : 'Pending final drop-off and recipient confirmation'}
@@ -1761,10 +1751,10 @@ export const Requests: React.FC = () => {
             </div>
 
             {/* Modal Footer */}
-            <div className="pt-4 border-t border-slate-800 flex justify-end gap-3">
+            <div className="pt-3 border-t border-slate-200 flex justify-end gap-2">
               <button
                 onClick={() => setIsDetailOpen(false)}
-                className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold transition-colors"
+                className="px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-md text-xs font-semibold shadow-2xs transition-colors"
               >
                 Close Dossier
               </button>

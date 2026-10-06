@@ -56,11 +56,11 @@ export const Tracking: React.FC = () => {
     // Custom truck icon
     const truckIcon = L.divIcon({
       className: 'custom-truck-icon',
-      html: `<div style="background-color: #0284c7; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 4px 12px rgba(2,132,199,0.5);">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+      html: `<div style="background-color: #0369a1; width: 30px; height: 30px; border-radius: 4px; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
       </div>`,
-      iconSize: [34, 34],
-      iconAnchor: [17, 17],
+      iconSize: [30, 30],
+      iconAnchor: [15, 15],
     });
 
     // Clear old markers
@@ -107,40 +107,40 @@ export const Tracking: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <MapPin className="w-6 h-6 text-sky-400" />
-            <h2 className="text-2xl font-black text-white">Live Fleet Telematics & GPS</h2>
+            <MapPin className="w-5 h-5 text-sky-700" />
+            <h2 className="text-lg font-bold text-slate-900">Live Fleet Telematics & GPS</h2>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
-            Real-time geospatial tracking of active freight carriers and consignment routes.
+          <p className="text-xs text-slate-500 mt-0.5">
+            Geospatial tracking of active freight carriers and consignment routes.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <Badge variant="info">
-            <span className="w-2 h-2 rounded-full bg-sky-400 animate-ping mr-1.5" />
+            <span className="w-1.5 h-1.5 rounded-full bg-sky-600 mr-1.5" />
             {drivers.length} Drivers Active on Map
           </Badge>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[700px]">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 h-[650px]">
         {/* Left Sidebar: Fleet List */}
-        <div className="rounded-2xl bg-slate-900/60 border border-slate-800 p-4 backdrop-blur-xl flex flex-col h-full overflow-hidden">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+        <div className="rounded-lg bg-white border border-slate-200 p-3.5 shadow-2xs flex flex-col h-full overflow-hidden">
+          <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
               Fleet Units ({drivers.length})
             </h3>
-            <span className="text-[10px] text-sky-400 font-semibold">Live GPS</span>
+            <span className="text-[10px] text-sky-700 font-semibold">Live GPS</span>
           </div>
 
-          <div className="flex-1 overflow-y-auto space-y-2 py-3">
+          <div className="flex-1 overflow-y-auto space-y-2 py-2.5">
             {drivers.length === 0 ? (
               <div className="py-12 text-center text-xs text-slate-500">
-                <Truck className="w-8 h-8 mx-auto mb-2 text-slate-700" />
+                <Truck className="w-6 h-6 mx-auto mb-2 text-slate-400" />
                 No active drivers registered in Firestore
               </div>
             ) : (
@@ -148,18 +148,18 @@ export const Tracking: React.FC = () => {
                 <div
                   key={d.id}
                   onClick={() => handleSelectDriver(d, idx)}
-                  className={`p-3 rounded-xl border transition-all cursor-pointer ${
+                  className={`p-2.5 rounded-md border transition-all cursor-pointer ${
                     selectedDriver?.id === d.id
-                      ? 'bg-sky-500/15 border-sky-500/40 shadow-lg'
-                      : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'
+                      ? 'bg-sky-50 border-sky-300 shadow-xs'
+                      : 'bg-slate-50 border-slate-200 hover:bg-slate-100'
                   }`}
                 >
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="font-semibold text-white text-xs">
+                      <p className="font-semibold text-slate-900 text-xs">
                         {d.name || d.fullName || 'Fleet Driver'}
                       </p>
-                      <p className="text-[11px] text-slate-400 font-mono mt-0.5">
+                      <p className="text-[11px] text-slate-500 font-mono mt-0.5">
                         {d.vehicleType || 'Truck'} • {d.vehicleNumber || 'Reg Pending'}
                       </p>
                     </div>
@@ -168,12 +168,12 @@ export const Tracking: React.FC = () => {
                     </Badge>
                   </div>
 
-                  <div className="mt-2 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-slate-400">
+                  <div className="mt-2 pt-1.5 border-t border-slate-200 flex items-center justify-between text-[10px] text-slate-500">
                     <span className="flex items-center gap-1">
-                      <Phone className="w-3 h-3 text-slate-500" />
+                      <Phone className="w-3 h-3 text-slate-400" />
                       {d.phone || '—'}
                     </span>
-                    <span className="font-mono text-sky-400">Click to Locate</span>
+                    <span className="font-medium text-sky-700">Locate</span>
                   </div>
                 </div>
               ))
@@ -182,8 +182,8 @@ export const Tracking: React.FC = () => {
         </div>
 
         {/* Right Area: Interactive Map */}
-        <div className="lg:col-span-3 rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden relative shadow-2xl">
-          <div ref={mapContainerRef} className="w-full h-full min-h-[500px]" />
+        <div className="lg:col-span-3 rounded-lg bg-white border border-slate-200 overflow-hidden relative shadow-2xs">
+          <div ref={mapContainerRef} className="w-full h-full min-h-[480px]" />
         </div>
       </div>
     </div>

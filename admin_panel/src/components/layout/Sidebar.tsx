@@ -70,42 +70,37 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       {isOpen && (
         <div
           onClick={onClose}
-          className="fixed inset-0 z-40 bg-slate-950/80 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-xs lg:hidden"
         />
       )}
 
       <aside
-        className={`fixed top-0 left-0 bottom-0 z-50 w-72 bg-slate-900/95 border-r border-slate-800 backdrop-blur-xl flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed top-0 left-0 bottom-0 z-50 w-64 bg-slate-900 border-r border-slate-800 flex flex-col transition-transform duration-200 ease-in-out lg:translate-x-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         {/* Brand Header */}
-        <div className="h-16 px-6 border-b border-slate-800 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-sky-400 p-0.5 flex items-center justify-center shadow-lg shadow-sky-500/20">
-              <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
-                <Truck className="w-5 h-5 text-sky-400" />
-              </div>
+        <div className="h-16 px-5 border-b border-slate-800 flex items-center justify-between bg-slate-950">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-md bg-sky-700 flex items-center justify-center text-white">
+              <Truck className="w-4 h-4" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-white text-base tracking-tight">TruckLink</span>
-                <span className="px-1.5 py-0.2 bg-gradient-to-r from-brand-500 to-cyan-400 text-slate-950 font-black text-[10px] rounded uppercase tracking-wider">
-                  AI
-                </span>
+                <span className="font-bold text-white text-sm tracking-tight">TruckLink AI</span>
               </div>
               <span className="text-[10px] text-slate-400 font-medium tracking-wide uppercase">
-                Admin Control Center
+                Admin Console
               </span>
             </div>
           </div>
         </div>
 
         {/* Navigation List */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
+        <div className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
           {navItems.map((group) => (
             <div key={group.category} className="space-y-1">
-              <p className="px-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+              <p className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                 {group.category}
               </p>
               <div className="mt-1 space-y-0.5">
@@ -117,18 +112,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                       to={link.path}
                       onClick={() => onClose && onClose()}
                       className={({ isActive }) =>
-                        `flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition-all group ${
+                        `flex items-center justify-between px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors ${
                           isActive
-                            ? 'bg-gradient-to-r from-brand-500/20 to-sky-500/10 text-sky-300 border border-sky-500/30 shadow-sm'
+                            ? 'bg-slate-800 text-white font-semibold'
                             : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
                         }`
                       }
                     >
-                      <div className="flex items-center gap-3">
-                        <Icon className="w-4 h-4 text-slate-400 group-hover:text-sky-400 transition-colors" />
+                      <div className="flex items-center gap-2.5">
+                        <Icon className="w-4 h-4 text-slate-400" />
                         <span>{link.name}</span>
                       </div>
-                      <ChevronRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity text-slate-400" />
                     </NavLink>
                   );
                 })}
@@ -138,11 +132,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* User Info / Logout Footer */}
-        <div className="p-4 border-t border-slate-800 bg-slate-950/40">
-          <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-800/50 border border-slate-700/50 mb-2">
-            <div className="flex items-center gap-2.5 overflow-hidden">
-              <div className="w-8 h-8 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-xs border border-sky-500/30 shrink-0">
-                <Shield className="w-4 h-4" />
+        <div className="p-3 border-t border-slate-800 bg-slate-950">
+          <div className="flex items-center justify-between p-2 rounded-md bg-slate-900 border border-slate-800 mb-2">
+            <div className="flex items-center gap-2 overflow-hidden">
+              <div className="w-7 h-7 rounded bg-slate-800 text-slate-300 flex items-center justify-center font-bold text-xs shrink-0">
+                <Shield className="w-3.5 h-3.5 text-sky-400" />
               </div>
               <div className="overflow-hidden text-left">
                 <p className="text-xs font-semibold text-white truncate">
@@ -153,16 +147,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 </p>
               </div>
             </div>
-            <span className="text-[10px] font-semibold bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/30">
+            <span className="text-[10px] font-medium bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded border border-slate-700">
               {adminProfile?.role || 'Admin'}
             </span>
           </div>
 
           <button
             onClick={() => logout()}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-xl border border-rose-500/20 transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-rose-400 hover:bg-slate-800/80 rounded-md border border-slate-800 transition-colors"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-3.5 h-3.5" />
             Sign Out
           </button>
         </div>

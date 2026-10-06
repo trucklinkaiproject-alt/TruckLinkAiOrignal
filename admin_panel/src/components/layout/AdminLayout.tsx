@@ -42,12 +42,12 @@ export const AdminLayout: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-slate-100 text-slate-900 flex flex-col lg:flex-row">
       {/* Navigation Sidebar */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 lg:pl-72">
+      <div className="flex-1 flex flex-col min-w-0 lg:pl-64">
         <Header
           onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
           title={getPageTitle(location.pathname)}

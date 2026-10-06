@@ -256,112 +256,120 @@ export const Messages: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <MessageSquare className="w-6 h-6 text-sky-400" />
-            <h2 className="text-2xl font-black text-white">Live Communications Oversight</h2>
+            <MessageSquare className="w-5 h-5 text-sky-700" />
+            <h2 className="text-lg font-bold text-slate-900">Communications Oversight</h2>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
-            Real-time audit of messaging threads between Users, Brokers, and Drivers categorized by stakeholder interaction.
+          <p className="text-xs text-slate-500 mt-0.5">
+            Audit of messaging threads between Users, Brokers, and Drivers categorized by operational interaction.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-900 px-3.5 py-2 rounded-xl border border-slate-800">
-          <ShieldCheck className="w-4 h-4 text-emerald-400" />
+        <div className="flex items-center gap-2 text-xs text-slate-600 bg-white px-3.5 py-1.5 rounded-md border border-slate-200 shadow-2xs">
+          <ShieldCheck className="w-4 h-4 text-emerald-600" />
           <span>
-            Compliance Monitoring: <strong className="text-emerald-400">Live & Active</strong>
+            Compliance Monitoring: <strong className="text-emerald-700">Active</strong>
           </span>
         </div>
       </div>
 
       {/* 3 Interaction Categories Bar */}
-      <div className="flex flex-wrap items-center gap-2 p-1.5 bg-slate-900/80 border border-slate-800 rounded-2xl">
+      <div className="flex flex-wrap items-center gap-1.5 p-1 bg-white border border-slate-200 rounded-md shadow-2xs">
         <button
           onClick={() => setActiveCategory('all')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-colors ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold transition-colors ${
             activeCategory === 'all'
-              ? 'bg-brand-600 text-white shadow-md'
-              : 'text-slate-400 hover:text-white'
+              ? 'bg-slate-900 text-white shadow-2xs'
+              : 'text-slate-600 hover:text-slate-900'
           }`}
         >
           <span>All Channels</span>
-          <span className="px-1.5 py-0.5 rounded-full bg-slate-950/60 text-[10px]">
+          <span className={`px-1.5 py-0.2 rounded text-[10px] ${
+            activeCategory === 'all' ? 'bg-slate-800 text-slate-200' : 'bg-slate-100 text-slate-600'
+          }`}>
             {enrichedThreads.length}
           </span>
         </button>
 
         <button
           onClick={() => setActiveCategory('user-broker')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-colors ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold transition-colors ${
             activeCategory === 'user-broker'
-              ? 'bg-purple-600 text-white shadow-md'
-              : 'text-slate-400 hover:text-white'
+              ? 'bg-slate-900 text-white shadow-2xs'
+              : 'text-slate-600 hover:text-slate-900'
           }`}
         >
           <User className="w-3.5 h-3.5" />
           <span>User ↔ Broker</span>
-          <span className="px-1.5 py-0.5 rounded-full bg-slate-950/60 text-[10px]">
+          <span className={`px-1.5 py-0.2 rounded text-[10px] ${
+            activeCategory === 'user-broker' ? 'bg-slate-800 text-slate-200' : 'bg-slate-100 text-slate-600'
+          }`}>
             {countUserBroker}
           </span>
         </button>
 
         <button
           onClick={() => setActiveCategory('broker-driver')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-colors ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold transition-colors ${
             activeCategory === 'broker-driver'
-              ? 'bg-cyan-600 text-white shadow-md'
-              : 'text-slate-400 hover:text-white'
+              ? 'bg-slate-900 text-white shadow-2xs'
+              : 'text-slate-600 hover:text-slate-900'
           }`}
         >
           <Briefcase className="w-3.5 h-3.5" />
           <span>Broker ↔ Driver</span>
-          <span className="px-1.5 py-0.5 rounded-full bg-slate-950/60 text-[10px]">
+          <span className={`px-1.5 py-0.2 rounded text-[10px] ${
+            activeCategory === 'broker-driver' ? 'bg-slate-800 text-slate-200' : 'bg-slate-100 text-slate-600'
+          }`}>
             {countBrokerDriver}
           </span>
         </button>
 
         <button
           onClick={() => setActiveCategory('user-driver')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-colors ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold transition-colors ${
             activeCategory === 'user-driver'
-              ? 'bg-emerald-600 text-white shadow-md'
-              : 'text-slate-400 hover:text-white'
+              ? 'bg-slate-900 text-white shadow-2xs'
+              : 'text-slate-600 hover:text-slate-900'
           }`}
         >
           <Truck className="w-3.5 h-3.5" />
           <span>User ↔ Driver</span>
-          <span className="px-1.5 py-0.5 rounded-full bg-slate-950/60 text-[10px]">
+          <span className={`px-1.5 py-0.2 rounded text-[10px] ${
+            activeCategory === 'user-driver' ? 'bg-slate-800 text-slate-200' : 'bg-slate-100 text-slate-600'
+          }`}>
             {countUserDriver}
           </span>
         </button>
       </div>
 
       {/* Main Chat Layout: 2 Columns */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[680px]">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-[650px]">
         {/* Left Column: Unique Conversation Tiles */}
-        <div className="rounded-2xl bg-slate-900/60 border border-slate-800 p-4 backdrop-blur-xl flex flex-col h-full overflow-hidden shadow-xl">
-          <div className="relative mb-3">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+        <div className="rounded-lg bg-white border border-slate-200 p-3.5 shadow-2xs flex flex-col h-full overflow-hidden">
+          <div className="relative mb-2.5">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search conversations, names or text..."
-              className="w-full pl-9 pr-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500"
+              className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-300 rounded-md text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-600"
             />
           </div>
 
           <div className="flex-1 overflow-y-auto space-y-2 pr-1">
             {loadingThreads ? (
-              <div className="py-16 text-center text-xs text-slate-400">Loading chat threads...</div>
+              <div className="py-16 text-center text-xs text-slate-500">Loading chat threads...</div>
             ) : filteredThreads.length === 0 ? (
-              <div className="py-16 text-center text-xs text-slate-500 space-y-2">
-                <MessageSquare className="w-8 h-8 mx-auto text-slate-700" />
-                <p className="font-semibold text-slate-400">No conversations in this category</p>
-                <p className="text-[11px] text-slate-600">
+              <div className="py-16 text-center text-xs text-slate-500 space-y-1.5">
+                <MessageSquare className="w-6 h-6 mx-auto text-slate-400" />
+                <p className="font-semibold text-slate-700">No conversations in this category</p>
+                <p className="text-[11px] text-slate-500">
                   New messages sent between users, brokers, or drivers will automatically appear here.
                 </p>
               </div>
@@ -372,24 +380,24 @@ export const Messages: React.FC = () => {
                   <div
                     key={thread.id}
                     onClick={() => setSelectedThread(thread)}
-                    className={`p-3 rounded-xl border transition-all cursor-pointer ${
+                    className={`p-2.5 rounded-md border transition-all cursor-pointer ${
                       isSelected
-                        ? 'bg-sky-500/15 border-sky-500/40 shadow-sm'
-                        : 'bg-slate-950/50 border-slate-800/80 hover:border-slate-700'
+                        ? 'bg-sky-50 border-sky-300 shadow-2xs'
+                        : 'bg-slate-50 border-slate-200 hover:bg-slate-100'
                     }`}
                   >
                     {/* Participant Names & Roles */}
                     <div className="flex items-start justify-between gap-2">
-                      <div className="space-y-1 min-w-0">
+                      <div className="space-y-0.5 min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="font-bold text-white text-xs truncate max-w-[130px]">
+                          <span className="font-bold text-slate-900 text-xs truncate max-w-[120px]">
                             {thread.participantA?.name || 'Participant 1'}
                           </span>
                           <Badge variant={getRoleBadgeVariant(thread.participantA?.role)} size="sm">
                             {thread.participantA?.role || 'User'}
                           </Badge>
-                          <span className="text-slate-600 text-[10px]">↔</span>
-                          <span className="font-bold text-white text-xs truncate max-w-[130px]">
+                          <span className="text-slate-400 text-[10px]">↔</span>
+                          <span className="font-bold text-slate-900 text-xs truncate max-w-[120px]">
                             {thread.participantB?.name || 'Participant 2'}
                           </span>
                           <Badge variant={getRoleBadgeVariant(thread.participantB?.role)} size="sm">
@@ -400,14 +408,14 @@ export const Messages: React.FC = () => {
                     </div>
 
                     {/* Last message preview */}
-                    <p className="text-xs text-slate-400 truncate mt-2">
+                    <p className="text-xs text-slate-600 truncate mt-1.5">
                       {thread.lastMessage || 'Conversation active'}
                     </p>
 
-                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-800/60 text-[10px] text-slate-500">
+                    <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-slate-200 text-[10px] text-slate-500">
                       <span className="font-mono">#{thread.id.substring(0, 8)}</span>
                       {thread.orderId && (
-                        <span className="text-slate-400">Order #{thread.orderId}</span>
+                        <span className="text-slate-600 font-medium">Order #{thread.orderId}</span>
                       )}
                     </div>
                   </div>
@@ -418,48 +426,48 @@ export const Messages: React.FC = () => {
         </div>
 
         {/* Right Column: Real-Time Message Stream Viewer */}
-        <div className="lg:col-span-2 rounded-2xl bg-slate-900/60 border border-slate-800 backdrop-blur-xl flex flex-col h-full overflow-hidden shadow-xl">
+        <div className="lg:col-span-2 rounded-lg bg-white border border-slate-200 shadow-2xs flex flex-col h-full overflow-hidden">
           {selectedThread ? (
             <>
               {/* Active Conversation Header */}
-              <div className="p-4 border-b border-slate-800 bg-slate-950/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="p-3.5 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h4 className="font-black text-white text-sm">
+                    <h4 className="font-bold text-slate-900 text-xs">
                       {selectedThread.participantA?.name || 'Participant A'}
                     </h4>
                     <Badge variant={getRoleBadgeVariant(selectedThread.participantA?.role)} size="sm">
                       {selectedThread.participantA?.role || 'User'}
                     </Badge>
-                    <span className="text-slate-500">↔</span>
-                    <h4 className="font-black text-white text-sm">
+                    <span className="text-slate-400">↔</span>
+                    <h4 className="font-bold text-slate-900 text-xs">
                       {selectedThread.participantB?.name || 'Participant B'}
                     </h4>
                     <Badge variant={getRoleBadgeVariant(selectedThread.participantB?.role)} size="sm">
                       {selectedThread.participantB?.role || 'Broker'}
                     </Badge>
                   </div>
-                  <p className="text-[11px] font-mono text-slate-500 mt-1">
+                  <p className="text-[10px] font-mono text-slate-500 mt-0.5">
                     Channel ID: {selectedThread.id}
                   </p>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Badge variant="info" size="sm">
+                  <Badge variant="neutral" size="sm">
                     Audited Stream
                   </Badge>
                 </div>
               </div>
 
               {/* Message Feed */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/40">
                 {loadingMessages ? (
-                  <div className="py-20 text-center text-xs text-slate-400">
+                  <div className="py-20 text-center text-xs text-slate-500">
                     Loading messages from Firestore stream...
                   </div>
                 ) : messages.length === 0 ? (
                   <div className="py-20 text-center text-xs text-slate-500">
-                    <MessageSquare className="w-8 h-8 mx-auto mb-2 text-slate-700" />
+                    <MessageSquare className="w-6 h-6 mx-auto mb-1.5 text-slate-400" />
                     No individual messages recorded in this conversation yet.
                   </div>
                 ) : (
@@ -488,19 +496,19 @@ export const Messages: React.FC = () => {
                           isSenderA ? 'items-start' : 'items-end'
                         }`}
                       >
-                        <div className="flex items-center gap-2 mb-1 px-1 text-[11px] text-slate-400">
-                          <span className="font-semibold text-slate-300">{senderName}</span>
-                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">
+                        <div className="flex items-center gap-1.5 mb-1 px-1 text-[11px] text-slate-500">
+                          <span className="font-semibold text-slate-800 text-xs">{senderName}</span>
+                          <span className="text-[10px] px-1 py-0.2 rounded bg-slate-200 text-slate-700">
                             {senderRole}
                           </span>
-                          <span className="text-slate-500">{formatMsgTime(msg.timestamp)}</span>
+                          <span className="text-slate-400 text-[10px]">{formatMsgTime(msg.timestamp)}</span>
                         </div>
 
                         <div
-                          className={`max-w-[75%] p-3.5 rounded-2xl text-xs leading-relaxed ${
+                          className={`max-w-[75%] p-3 rounded-lg text-xs leading-relaxed ${
                             isSenderA
-                              ? 'bg-slate-800/80 text-white rounded-tl-none border border-slate-700/60'
-                              : 'bg-brand-600/90 text-white rounded-tr-none border border-brand-500/50 shadow-md'
+                              ? 'bg-white text-slate-900 border border-slate-200 shadow-2xs'
+                              : 'bg-sky-700 text-white shadow-2xs'
                           }`}
                         >
                           <p>{msg.text || (msg as any).message || ''}</p>
@@ -513,21 +521,21 @@ export const Messages: React.FC = () => {
               </div>
 
               {/* Bottom Notice: Admin Audit only */}
-              <div className="p-3 bg-slate-950/80 border-t border-slate-800 flex items-center justify-between text-xs text-slate-500">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  <span>Read-only compliance audit mode active.</span>
+              <div className="p-2.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+                <div className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <span className="text-[11px]">Read-only compliance audit mode active.</span>
                 </div>
-                <span className="font-mono text-[11px] text-slate-600">
+                <span className="font-mono text-[10px] text-slate-500">
                   {messages.length} Messages Logged
                 </span>
               </div>
             </>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center text-slate-500 p-8 text-center">
-              <MessageSquare className="w-12 h-12 mb-3 text-slate-700" />
-              <p className="text-sm font-semibold text-slate-300">Select a Conversation</p>
-              <p className="text-xs text-slate-500 mt-1 max-w-sm">
+              <MessageSquare className="w-10 h-10 mb-2 text-slate-400" />
+              <p className="text-xs font-semibold text-slate-800">Select a Conversation</p>
+              <p className="text-[11px] text-slate-500 mt-0.5 max-w-sm">
                 Choose any conversation from the participant list on the left to inspect the real-time audited dialogue.
               </p>
             </div>

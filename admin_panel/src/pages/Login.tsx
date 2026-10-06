@@ -54,76 +54,65 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center p-4 relative overflow-hidden">
-      {/* Background glowing effects */}
-      <div className="absolute -top-40 -left-40 w-96 h-96 bg-brand-600/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-purple-600/15 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="max-w-md w-full relative z-10">
+    <div className="min-h-screen bg-slate-100 flex flex-col justify-center items-center p-4">
+      <div className="max-w-md w-full">
         {/* Header Branding */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-brand-600 to-sky-400 p-0.5 shadow-2xl shadow-sky-500/20 mb-4">
-            <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center">
-              <Truck className="w-8 h-8 text-sky-400" />
-            </div>
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-sky-700 text-white mb-3 shadow-xs">
+            <Truck className="w-6 h-6" />
           </div>
-          <div className="flex items-center justify-center gap-2 mb-1">
-            <h1 className="text-2xl font-black tracking-tight text-white">TruckLink</h1>
-            <span className="px-2 py-0.5 bg-gradient-to-r from-brand-500 to-cyan-400 text-slate-950 font-black text-xs rounded uppercase tracking-wider">
-              AI
-            </span>
-          </div>
-          <p className="text-sm text-slate-400">Super Admin Command Center</p>
+          <h1 className="text-xl font-bold tracking-tight text-slate-900">TruckLink AI</h1>
+          <p className="text-xs text-slate-500 mt-0.5">Administration & Operations Portal</p>
         </div>
 
         {/* Login Card */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-7 sm:p-8 backdrop-blur-2xl shadow-2xl">
-          <div className="flex items-center gap-2 mb-6 text-xs font-bold text-sky-400 uppercase tracking-wider">
-            <ShieldCheck className="w-4 h-4" />
-            <span>Authorized Administrator Authentication</span>
+        <div className="bg-white border border-slate-200 rounded-lg p-6 sm:p-8 shadow-xs">
+          <div className="flex items-center gap-1.5 mb-5 pb-3 border-b border-slate-100 text-xs font-semibold text-slate-700 uppercase tracking-wider">
+            <ShieldCheck className="w-4 h-4 text-sky-700" />
+            <span>Administrator Sign In</span>
           </div>
 
           {error && (
-            <div className="mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-start gap-2.5 text-rose-300 text-xs">
-              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+            <div className="mb-4 p-3 rounded-md bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-rose-700 text-xs">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold text-rose-200">Access Denied</p>
-                <p className="text-rose-300/90 mt-0.5">{error}</p>
+                <p className="font-semibold text-rose-800">Authentication Failed</p>
+                <p className="text-rose-700 mt-0.5">{error}</p>
               </div>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                Admin Email Address
+              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                Admin Email
               </label>
               <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="admin@trucklink.ai"
                   required
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-950/90 border border-slate-700/70 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-colors"
+                  className="w-full pl-9 pr-3.5 py-2 bg-white border border-slate-300 rounded-md text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-600 focus:ring-1 focus:ring-sky-600 transition-colors"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                Security Password
+              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
                   required
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-950/90 border border-slate-700/70 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-colors"
+                  className="w-full pl-9 pr-3.5 py-2 bg-white border border-slate-300 rounded-md text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-600 focus:ring-1 focus:ring-sky-600 transition-colors"
                 />
               </div>
             </div>
@@ -131,7 +120,7 @@ export const Login: React.FC = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full mt-2 py-3 px-4 text-white font-bold text-sm rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50 bg-gradient-to-r from-brand-600 to-sky-500 hover:from-brand-500 hover:to-sky-400 shadow-sky-600/25"
+              className="w-full mt-2 py-2.5 px-4 text-white font-semibold text-sm rounded-md shadow-xs flex items-center justify-center gap-2 transition-colors disabled:opacity-50 bg-sky-700 hover:bg-sky-800"
             >
               {isSubmitting ? (
                 <>
@@ -140,7 +129,7 @@ export const Login: React.FC = () => {
                 </>
               ) : (
                 <>
-                  <span>Authenticate & Enter</span>
+                  <span>Sign In</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -148,12 +137,12 @@ export const Login: React.FC = () => {
           </form>
 
           {/* Security Notice */}
-          <div className="mt-6 pt-4 border-t border-slate-800 text-center space-y-1">
-            <p className="text-xs text-slate-400">
-              Access is strictly restricted to authorized Super Administrators.
+          <div className="mt-6 pt-4 border-t border-slate-100 text-center space-y-1">
+            <p className="text-xs text-slate-500">
+              Access is restricted to authorized personnel only.
             </p>
-            <p className="text-[11px] font-mono text-slate-500">
-              Public registration is disabled. Managed via Firebase Admin SDK.
+            <p className="text-[11px] font-mono text-slate-400">
+              System access is monitored and logged.
             </p>
           </div>
         </div>
