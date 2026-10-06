@@ -163,6 +163,109 @@ class _DriverTruckDetailsPageState extends State<DriverTruckDetailsPage> {
     }
   }
 
+  InputDecoration _fieldDecoration({required String hint, required IconData icon}) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+      prefixIcon: Icon(icon, color: Colors.grey[500], size: 20),
+      filled: true,
+      fillColor: const Color(0xFFF5F6FA),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Appcolors.tertiaryGreen, width: 1.6),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Colors.redAccent, width: 1.2),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Colors.redAccent, width: 1.6),
+      ),
+    );
+  }
+
+  Widget _buildVehicleTypeField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Vehicle Type",
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.black87),
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          value: _selectedVehicleType,
+          validator: (val) {
+            if (val == null || val.trim().isEmpty) {
+              return "Please select your vehicle type";
+            }
+            return null;
+          },
+          decoration: _fieldDecoration(
+            hint: "Select Vehicle Type",
+            icon: Icons.fire_truck_outlined,
+          ),
+          icon: const Icon(Icons.keyboard_arrow_down_rounded),
+          borderRadius: BorderRadius.circular(16),
+          dropdownColor: Colors.white,
+          isExpanded: true,
+          items: kVehicleTypes.map((type) {
+            return DropdownMenuItem<String>(
+              value: type,
+              child: Text(
+                type,
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+              ),
+            );
+          }).toList(),
+          onChanged: (val) {
+            setState(() {
+              _selectedVehicleType = val;
+            });
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildVehicleNumberField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Vehicle / Truck Number",
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.black87),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: _vehicleNumberController,
+          textCapitalization: TextCapitalization.characters,
+          style: const TextStyle(fontSize: 15),
+          validator: (val) {
+            if (val == null || val.trim().isEmpty) {
+              return "Please enter your vehicle / truck registration number";
+            }
+            return null;
+          },
+          decoration: _fieldDecoration(
+            hint: "e.g. KHI-7890 or LEA-1234",
+            icon: Icons.pin_outlined,
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<DriverCubit, DriverState>(
@@ -229,7 +332,7 @@ class _DriverTruckDetailsPageState extends State<DriverTruckDetailsPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  widget.isFirstLogin ? "Vehicle Setup" : "Truck / Vehicle Details",
+                                  widget.isFirstLogin ? "Set Up Your Vehicle" : "Truck / Vehicle Details",
                                   style: const TextStyle(
                                     fontSize: 19,
                                     fontWeight: FontWeight.w800,
@@ -239,7 +342,7 @@ class _DriverTruckDetailsPageState extends State<DriverTruckDetailsPage> {
                                 const SizedBox(height: 2),
                                 Text(
                                   widget.isFirstLogin
-                                      ? "Set up your vehicle details to start accepting jobs"
+                                      ? "Add your vehicle details to start receiving transport requests."
                                       : "Complete vehicle info to join Broker network",
                                   style: const TextStyle(
                                     fontSize: 12.5,
@@ -410,132 +513,79 @@ class _DriverTruckDetailsPageState extends State<DriverTruckDetailsPage> {
 
                       const SizedBox(height: 20),
 
-                      // -------- Vehicle Type Field --------
-                      const Text(
-                        "Vehicle Type",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black87,
+                      // -------- Vehicle Information Card --------
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(isMobile ? 16 : 22),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.04),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      DropdownButtonFormField<String>(
-                        value: _selectedVehicleType,
-                        validator: (val) {
-                          if (val == null || val.trim().isEmpty) {
-                            return "Please select your vehicle type";
-                          }
-                          return null;
-                        },
-                        decoration: InputDecoration(
-                          hintText: "Select Vehicle Type",
-                          hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-                          prefixIcon: Icon(
-                            Icons.fire_truck_outlined,
-                            color: Colors.grey[500],
-                            size: 20,
-                          ),
-                          filled: true,
-                          fillColor: Colors.white,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 16,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide.none,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide(
-                              color: Colors.grey.withOpacity(0.2),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  width: 38,
+                                  height: 38,
+                                  decoration: BoxDecoration(
+                                    color: Appcolors.tertiaryGreen.withOpacity(0.12),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Icon(
+                                    Icons.local_shipping_rounded,
+                                    color: Appcolors.tertiaryGreen,
+                                    size: 20,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                const Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Vehicle Information",
+                                        style: TextStyle(
+                                          fontSize: 15.5,
+                                          fontWeight: FontWeight.w800,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                      SizedBox(height: 2),
+                                      Text(
+                                        "Brokers use this to match you with the right shipments.",
+                                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: const BorderSide(
-                              color: Appcolors.tertiaryGreen,
-                              width: 1.6,
-                            ),
-                          ),
-                        ),
-                        icon: const Icon(Icons.keyboard_arrow_down_rounded),
-                        borderRadius: BorderRadius.circular(16),
-                        dropdownColor: Colors.white,
-                        isExpanded: true,
-                        items: kVehicleTypes.map((type) {
-                          return DropdownMenuItem<String>(
-                            value: type,
-                            child: Text(
-                              type,
-                              style: const TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (val) {
-                          setState(() {
-                            _selectedVehicleType = val;
-                          });
-                        },
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // -------- Vehicle Number Field --------
-                      const Text(
-                        "Vehicle / Truck Number",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        controller: _vehicleNumberController,
-                        textCapitalization: TextCapitalization.characters,
-                        style: const TextStyle(fontSize: 15),
-                        validator: (val) {
-                          if (val == null || val.trim().isEmpty) {
-                            return "Please enter your vehicle / truck registration number";
-                          }
-                          return null;
-                        },
-                        decoration: InputDecoration(
-                          hintText: "e.g. KHI-7890 or LEA-1234",
-                          hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-                          prefixIcon: Icon(
-                            Icons.pin_outlined,
-                            color: Colors.grey[500],
-                            size: 20,
-                          ),
-                          filled: true,
-                          fillColor: Colors.white,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 16,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide.none,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide(
-                              color: Colors.grey.withOpacity(0.2),
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: const BorderSide(
-                              color: Appcolors.tertiaryGreen,
-                              width: 1.6,
-                            ),
-                          ),
+                            const SizedBox(height: 20),
+                            // Side by side on tablet/desktop, stacked on mobile
+                            if (width >= 700)
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(child: _buildVehicleTypeField()),
+                                  const SizedBox(width: 20),
+                                  Expanded(child: _buildVehicleNumberField()),
+                                ],
+                              )
+                            else ...[
+                              _buildVehicleTypeField(),
+                              const SizedBox(height: 18),
+                              _buildVehicleNumberField(),
+                            ],
+                          ],
                         ),
                       ),
 

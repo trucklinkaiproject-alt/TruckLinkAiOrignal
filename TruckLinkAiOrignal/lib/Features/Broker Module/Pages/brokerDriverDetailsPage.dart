@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
 import 'package:trucklinkai_orignal/Core/Widgets/backArrowButton.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/Pages/brokerchatpage.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerDriverNetworkBloc/brokerDriverNetworkCubit.dart';
 
 class BrokerDriverDetailsPage extends StatelessWidget {
   final Map<String, dynamic> driverData;
@@ -65,6 +67,76 @@ class BrokerDriverDetailsPage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// Confirms, then removes the driver from THIS broker's network only (driver account stays intact).
+  Future<void> _confirmRemoveFromNetwork(
+    BuildContext context,
+    String driverId,
+    String driverName,
+  ) async {
+    final cubit = context.read<BrokerDriverNetworkCubit>();
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+
+    bool loading = false;
+    final bool? removed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          title: const Text("Remove from My Network?", style: TextStyle(fontWeight: FontWeight.w800)),
+          content: Text(
+            "$driverName will be removed from your driver network and will no longer be available "
+            "for your assignments. Their TruckLink AI account is not deleted and they can still log in.",
+          ),
+          actions: [
+            TextButton(
+              onPressed: loading ? null : () => Navigator.pop(ctx, false),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red[700],
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: loading
+                  ? null
+                  : () async {
+                      setDialogState(() => loading = true);
+                      final error = await cubit.removeDriverFromNetwork(driverId);
+                      if (error == null) {
+                        if (ctx.mounted) Navigator.pop(ctx, true);
+                      } else {
+                        if (ctx.mounted) Navigator.pop(ctx, false);
+                        messenger.showSnackBar(
+                          SnackBar(content: Text(error), backgroundColor: Colors.red[700]),
+                        );
+                      }
+                    },
+              child: loading
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    )
+                  : const Text("Remove", style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (removed == true) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text("$driverName removed from your network."),
+          backgroundColor: Appcolors.tertiaryGreen,
+        ),
+      );
+      if (navigator.canPop()) navigator.pop();
+    }
   }
 
   @override
@@ -400,6 +472,26 @@ class BrokerDriverDetailsPage extends StatelessWidget {
                             const Divider(height: 22, thickness: 0.8),
                             _vehicleInfoRow(Icons.badge_outlined, "Driver ID", driverId.isNotEmpty ? driverId : "N/A"),
                           ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.red[700],
+                            side: BorderSide(color: Colors.red.withOpacity(0.4), width: 1.5),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                          ),
+                          onPressed: driverId.isEmpty
+                              ? null
+                              : () => _confirmRemoveFromNetwork(context, driverId, name),
+                          icon: const Icon(Icons.person_remove_alt_1_rounded, size: 20),
+                          label: const Text(
+                            "Remove from My Network",
+                            style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 24),

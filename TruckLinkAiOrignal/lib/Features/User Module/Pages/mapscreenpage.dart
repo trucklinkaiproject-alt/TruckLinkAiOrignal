@@ -65,6 +65,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
     _debounceTimer?.cancel();
     _cameraIdleTimer?.cancel();
     searchController.dispose();
+    mapController.dispose();
     super.dispose();
   }
 
@@ -471,7 +472,14 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                 initialZoom: 15.0,
                 minZoom: kMinSafeZoom,
                 maxZoom: kMaxSafeZoom,
-                cameraConstraint: const CameraConstraint.unconstrained(),
+                // Keep the camera inside the world so panning/zooming can't drift into
+                // invalid (beyond-Mercator) areas that generate invalid tile requests.
+                cameraConstraint: CameraConstraint.contain(
+                  bounds: LatLngBounds(
+                    const LatLng(-85.0, -180.0),
+                    const LatLng(85.0, 180.0),
+                  ),
+                ),
                 interactionOptions: const InteractionOptions(
                   flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
                 ),

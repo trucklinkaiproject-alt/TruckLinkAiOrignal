@@ -3,10 +3,41 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:trucklinkai_orignal/Core/Services/notificationService.dart';
 import 'package:trucklinkai_orignal/Features/Broker Module/bloc/brokerAssignDriverBloc/brokerAssignDriverState.dart';
 
+/// Canonical comparison key for vehicle types (case/space/punctuation-insensitive),
+/// so "Pickup Truck" and "PickUp Truck" compare equal while "Truck" != "PickUp Truck".
+String normalizeVehicleType(String? value) =>
+    (value ?? '').toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+
+/// Offer statuses (Driver/{id}/ReceivedOffers) that mean the driver is on an active trip.
+const List<String> kActiveDriverTripStatuses = [
+  'accepted_by_driver',
+  'accepted',
+  'in_progress',
+  'in_transit',
+  'arrived_at_pickup',
+  'heading_to_drop',
+];
+
 class BrokerAssignDriverCubit extends Cubit<BrokerAssignDriverState> {
   BrokerAssignDriverCubit() : super(BrokerAssignDriverInitialState());
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  /// True if the driver currently has an accepted/in-transit trip.
+  Future<bool> _hasActiveTrip(String driverId) async {
+    try {
+      final snap = await _firestore
+          .collection("Driver")
+          .doc(driverId)
+          .collection("ReceivedOffers")
+          .where('status', whereIn: kActiveDriverTripStatuses)
+          .limit(1)
+          .get();
+      return snap.docs.isNotEmpty;
+    } catch (_) {
+      return false;
+    }
+  }
 
   /// Fetches drivers from the current Broker's Driver Network whose vehicle_type
   /// matches the User Order's required vehicle type and who are currently online and available.
@@ -24,42 +55,53 @@ class BrokerAssignDriverCubit extends Cubit<BrokerAssignDriverState> {
           .collection("DriverNetwork")
           .get();
 
-      final targetVehicleType = requiredVehicleType.trim().toLowerCase();
+      final targetVehicleType = normalizeVehicleType(requiredVehicleType);
 
       final List<Map<String, dynamic>> eligible = [];
       for (var doc in snapshot.docs) {
         final data = doc.data();
         final driverId = doc.id;
-        final driverVehicleType =
-            (data['vehicle_type'] ?? '').toString().trim().toLowerCase();
+        final driverVehicleType = normalizeVehicleType(
+          (data['vehicle_type'] ?? data['vehicleType'] ?? '').toString(),
+        );
 
         // Check availability status
         final rawAvailability = (data['availability_status'] ?? data['status'] ?? 'offline').toString().toLowerCase();
 
-        // Match Driver.vehicle_type == Order.required_vehicle_type
-        final bool vehicleMatches = targetVehicleType.isEmpty ||
-            driverVehicleType == targetVehicleType ||
-            driverVehicleType.contains(targetVehicleType) ||
-            targetVehicleType.contains(driverVehicleType);
+        // Exact (normalized) match: Driver.vehicle_type == Order.vehicle_type.
+        // No substring matching, so "Truck" never matches "PickUp Truck".
+        final bool vehicleMatches =
+            targetVehicleType.isEmpty || driverVehicleType == targetVehicleType;
 
-        if (vehicleMatches) {
-          // Verify with live Driver document in case background availability changed
-          String liveStatus = rawAvailability;
-          try {
-            final driverDoc = await _firestore.collection("Driver").doc(driverId).get();
-            if (driverDoc.exists) {
-              final dData = driverDoc.data() ?? {};
-              liveStatus = (dData['availability_status'] ?? dData['status'] ?? rawAvailability).toString().toLowerCase();
-            }
-          } catch (_) {}
+        if (!vehicleMatches) continue;
 
-          eligible.add({
-            'id': driverId,
-            ...data,
-            'is_online': liveStatus == 'online' || liveStatus == 'active',
-            'availability_status': liveStatus,
-          });
-        }
+        // Verify with the live Driver document (account must exist) and live availability.
+        String liveStatus = rawAvailability;
+        try {
+          final driverDoc = await _firestore.collection("Driver").doc(driverId).get();
+          if (!driverDoc.exists) continue; // account no longer valid
+          final dData = driverDoc.data() ?? {};
+          liveStatus = (dData['availability_status'] ?? dData['status'] ?? rawAvailability).toString().toLowerCase();
+
+          // Live vehicle type is the source of truth if it differs from the network copy.
+          final liveType = normalizeVehicleType(
+            (dData['vehicle_type'] ?? dData['vehicleType'] ?? '').toString(),
+          );
+          if (liveType.isNotEmpty && targetVehicleType.isNotEmpty && liveType != targetVehicleType) {
+            continue;
+          }
+        } catch (_) {}
+
+        // Skip drivers already occupied by an active trip/order.
+        if (liveStatus == 'on_ride') continue;
+        if (await _hasActiveTrip(driverId)) continue;
+
+        eligible.add({
+          'id': driverId,
+          ...data,
+          'is_online': liveStatus == 'online' || liveStatus == 'active',
+          'availability_status': liveStatus,
+        });
       }
 
       if (!isClosed) {

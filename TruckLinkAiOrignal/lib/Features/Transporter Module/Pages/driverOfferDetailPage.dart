@@ -19,6 +19,8 @@ class DriverOfferDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final String orderNo = (offer['order_no'] ?? offer['orderNo'] ?? offer['order_id'] ?? '').toString();
     final String orderId = (offer['order_id'] ?? offer['orderId'] ?? orderNo).toString();
+    // ReceivedOffers documents are keyed by offer id (not order id)
+    final String offerDocId = (offer['offer_id'] ?? offer['id'] ?? orderId).toString();
     final String currentDriverUid = FirebaseAuth.instance.currentUser?.uid ?? '';
 
     return Scaffold(
@@ -30,7 +32,7 @@ class DriverOfferDetailPage extends StatelessWidget {
                   .collection("Driver")
                   .doc(currentDriverUid)
                   .collection("ReceivedOffers")
-                  .doc(orderId)
+                  .doc(offerDocId)
                   .snapshots()
               : const Stream.empty(),
           builder: (context, snapshot) {
@@ -435,72 +437,84 @@ class DriverOfferDetailPage extends StatelessWidget {
                           // STATE-SPECIFIC ACTIONS
                           // =======================================================
                           if (isPending) ...[
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: SizedBox(
-                                    height: 50,
-                                    child: OutlinedButton(
-                                      style: OutlinedButton.styleFrom(
-                                        foregroundColor: Colors.red[700],
-                                        side: BorderSide(color: Colors.red.withOpacity(0.4), width: 1.5),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(25),
-                                        ),
-                                      ),
-                                      onPressed: state is DriverOffersLoadingState
-                                          ? null
-                                          : () async {
-                                              await context.read<DriverOffersCubit>().rejectOffer(offer: liveOffer);
-                                              if (context.mounted && Navigator.canPop(context)) {
-                                                Navigator.pop(context);
-                                              }
-                                            },
-                                      child: const Text(
-                                        "REJECT",
-                                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 14),
-                                Expanded(
-                                  child: SizedBox(
-                                    height: 50,
-                                    child: ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Appcolors.tertiaryGreen,
-                                        elevation: 0,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(25),
-                                        ),
-                                      ),
-                                      onPressed: state is DriverOffersLoadingState
-                                          ? null
-                                          : () {
-                                              context.read<DriverOffersCubit>().acceptOffer(offer: liveOffer);
-                                            },
-                                      child: state is DriverOffersLoadingState
-                                          ? const SizedBox(
-                                              width: 22,
-                                              height: 22,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2.2,
-                                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                              ),
-                                            )
-                                          : const Text(
-                                              "ACCEPT",
-                                              style: TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.w800,
-                                                color: Colors.white,
-                                              ),
+                            ValueListenableBuilder<bool>(
+                              valueListenable: context.read<DriverOffersCubit>().actionBusy,
+                              builder: (context, busy, _) {
+                                return Row(
+                                  children: [
+                                    Expanded(
+                                      child: SizedBox(
+                                        height: 50,
+                                        child: OutlinedButton(
+                                          style: OutlinedButton.styleFrom(
+                                            foregroundColor: Colors.red[700],
+                                            side: BorderSide(color: Colors.red.withOpacity(0.4), width: 1.5),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(25),
                                             ),
+                                          ),
+                                          onPressed: busy
+                                              ? null
+                                              : () async {
+                                                  final nav = Navigator.of(context);
+                                                  final ok = await context.read<DriverOffersCubit>().rejectOffer(offer: liveOffer);
+                                                  // Only leave the page after the write succeeded
+                                                  if (ok && context.mounted && nav.canPop()) {
+                                                    nav.pop();
+                                                  }
+                                                },
+                                          child: const Text(
+                                            "REJECT",
+                                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                                          ),
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ),
-                              ],
+                                    const SizedBox(width: 14),
+                                    Expanded(
+                                      child: SizedBox(
+                                        height: 50,
+                                        child: ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Appcolors.tertiaryGreen,
+                                            elevation: 0,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(25),
+                                            ),
+                                          ),
+                                          onPressed: busy
+                                              ? null
+                                              : () async {
+                                                  final nav = Navigator.of(context);
+                                                  final ok = await context.read<DriverOffersCubit>().acceptOffer(offer: liveOffer);
+                                                  // Only leave the page after the write succeeded
+                                                  if (ok && context.mounted && nav.canPop()) {
+                                                    nav.pop();
+                                                  }
+                                                },
+                                          child: busy
+                                              ? const SizedBox(
+                                                  width: 22,
+                                                  height: 22,
+                                                  child: CircularProgressIndicator(
+                                                    strokeWidth: 2.2,
+                                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                                  ),
+                                                )
+                                              : const Text(
+                                                  "ACCEPT",
+                                                  style: TextStyle(
+                                                    fontSize: 15,
+                                                    fontWeight: FontWeight.w800,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
                             ),
                           ]
                           else if (isAccepted) ...[

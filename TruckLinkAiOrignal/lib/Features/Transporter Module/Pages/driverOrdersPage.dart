@@ -219,8 +219,14 @@ class _DriverOrdersPageState extends State<DriverOrdersPage>
               return _buildErrorState(state.errorMessage);
             }
 
-            if (state is DriverOffersLoadedState) {
-              final filtered = _filterOffers(state.offers, category);
+            // Action-success states are transient; the live list is always available on the cubit.
+            if (state is DriverOffersLoadedState ||
+                state is DriverOffersActionSuccessState) {
+              final List<Map<String, dynamic>> offers =
+                  state is DriverOffersLoadedState
+                      ? state.offers
+                      : context.read<DriverOffersCubit>().currentOffers;
+              final filtered = _filterOffers(offers, category);
 
               if (filtered.isEmpty) {
                 return _buildEmptyState(category);
@@ -249,7 +255,13 @@ class _DriverOrdersPageState extends State<DriverOrdersPage>
               );
             }
 
-            return const SizedBox.shrink();
+            // Initial/unknown state: show a spinner instead of a blank screen
+            return const Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                color: Appcolors.tertiaryGreen,
+              ),
+            );
           },
         );
       },
@@ -363,9 +375,9 @@ class _DriverOrdersPageState extends State<DriverOrdersPage>
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Text(
-                    "No $category orders",
-                    style: const TextStyle(
+                  const Text(
+                    "No Request Yet",
+                    style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 15,
                       color: Colors.black87,
@@ -373,7 +385,7 @@ class _DriverOrdersPageState extends State<DriverOrdersPage>
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    "Your $category orders will appear here",
+                    "Your $category requests will appear here",
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
                   ),
                 ],

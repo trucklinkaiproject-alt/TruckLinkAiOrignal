@@ -18,6 +18,12 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
   bool _showMap = true;
 
   @override
+  void dispose() {
+    _mapController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final initialData = widget.orderStatusDetail;
     final String orderId = (initialData["orderId"] ?? initialData["id"] ?? initialData["orderNo"] ?? "").toString();
@@ -165,7 +171,12 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
                                 initialZoom: 13.0,
                                 minZoom: 4.5,
                                 maxZoom: 18.5,
-                                cameraConstraint: const CameraConstraint.unconstrained(),
+                                cameraConstraint: CameraConstraint.contain(
+                                  bounds: LatLngBounds(
+                                    const LatLng(-85.0, -180.0),
+                                    const LatLng(85.0, 180.0),
+                                  ),
+                                ),
                                 interactionOptions: const InteractionOptions(
                                   flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
                                 ),

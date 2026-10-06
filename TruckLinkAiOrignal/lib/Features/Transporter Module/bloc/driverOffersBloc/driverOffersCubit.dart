@@ -17,6 +17,16 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
   List<Map<String, dynamic>> _currentOffers = [];
   List<Map<String, dynamic>> get currentOffers => _currentOffers;
 
+  /// True while an accept/reject write is running. UI listens to this to disable
+  /// buttons and the cubit uses it to block duplicate Firestore writes.
+  final ValueNotifier<bool> actionBusy = ValueNotifier<bool>(false);
+
+  /// Re-publishes the live offers list so list pages (Orders/Home) never get stuck
+  /// on a transient Action/Error state after an action finishes.
+  void _restoreLoaded() {
+    if (!isClosed) emit(DriverOffersLoadedState(_currentOffers));
+  }
+
   /// Returns the current active ride if driver has an accepted or in-transit ride
   Map<String, dynamic>? get activeRide {
     for (final offer in _currentOffers) {
@@ -69,7 +79,10 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
 
   /// Driver accepts a Broker offer from the Driver Home page.
   /// Sets offer status to 'accepted_by_driver' and updates Order status in all collections.
-  Future<void> acceptOffer({required Map<String, dynamic> offer}) async {
+  /// Returns true only when the acceptance fully succeeded.
+  Future<bool> acceptOffer({required Map<String, dynamic> offer}) async {
+    if (actionBusy.value) return false;
+    actionBusy.value = true;
     try {
       final String currentUid = _auth.currentUser?.uid ?? '';
       final String offerId = (offer['offer_id'] ?? offer['id'] ?? '').toString();
@@ -83,12 +96,14 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
       // Guard: Ensure user is the assigned driver
       if (currentUid.isNotEmpty && driverId.isNotEmpty && currentUid != driverId) {
         emit(DriverOffersErrorState("Unauthorized: You cannot accept an offer assigned to another driver."));
-        return;
+        _restoreLoaded();
+        return false;
       }
 
       if (offerId.isEmpty || orderId.isEmpty) {
         emit(DriverOffersErrorState("Invalid offer or order reference."));
-        return;
+        _restoreLoaded();
+        return false;
       }
 
       final updateData = {
@@ -183,16 +198,25 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
         emit(DriverOffersActionSuccessState(
           "Accepted assignment for Order #$orderNo! Active ride started.",
         ));
+        _restoreLoaded();
       }
+      return true;
     } catch (e) {
       if (!isClosed) {
         emit(DriverOffersErrorState("Failed to accept offer: ${e.toString()}"));
+        _restoreLoaded();
       }
+      return false;
+    } finally {
+      actionBusy.value = false;
     }
   }
 
   /// Driver rejects a Broker offer from the Driver Home page.
-  Future<void> rejectOffer({required Map<String, dynamic> offer}) async {
+  /// Returns true only when the rejection fully succeeded.
+  Future<bool> rejectOffer({required Map<String, dynamic> offer}) async {
+    if (actionBusy.value) return false;
+    actionBusy.value = true;
     try {
       final String currentUid = _auth.currentUser?.uid ?? '';
       final String offerId = (offer['offer_id'] ?? offer['id'] ?? '').toString();
@@ -203,7 +227,8 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
 
       if (offerId.isEmpty || orderId.isEmpty) {
         emit(DriverOffersErrorState("Invalid offer or order reference."));
-        return;
+        _restoreLoaded();
+        return false;
       }
 
       final updateData = {
@@ -268,11 +293,17 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
         emit(DriverOffersActionSuccessState(
           "Rejected offer for Order #$orderNo.",
         ));
+        _restoreLoaded();
       }
+      return true;
     } catch (e) {
       if (!isClosed) {
         emit(DriverOffersErrorState("Failed to reject offer: ${e.toString()}"));
+        _restoreLoaded();
       }
+      return false;
+    } finally {
+      actionBusy.value = false;
     }
   }
 
@@ -706,6 +737,7 @@ class DriverOffersCubit extends Cubit<DriverOffersState> {
   @override
   Future<void> close() {
     _offersSubscription?.cancel();
+    actionBusy.dispose();
     return super.close();
   }
 }

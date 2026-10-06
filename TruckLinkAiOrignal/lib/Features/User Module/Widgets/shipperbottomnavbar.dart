@@ -48,7 +48,7 @@ class _ShipperBottomNavBarState extends State<ShipperBottomNavBar> {
             highlightColor: Colors.transparent,
           ),
           child: SizedBox(
-            height: 65,
+            height: 67,
             child: BottomNavigationBar(
               currentIndex: _currentIndex,
               onTap: (index) {
