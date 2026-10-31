@@ -6,10 +6,8 @@ import 'package:printing/printing.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
 import 'package:trucklinkai_orignal/Core/Widgets/backArrowButton.dart';
 
-/// UI-only Builty (Consignment Note) page.
-/// Swap the values in the constructor for your real order/broker/driver
-/// data whenever this gets wired up — the layout below only depends on
-/// these fields.
+/// Builty (Consignment Note) page.
+/// Fully wired to live Order, Shipper, Broker, and Driver records (Phase 2.15).
 class BuiltyPage extends StatelessWidget {
   BuiltyPage({
     super.key,
@@ -96,8 +94,6 @@ class BuiltyPage extends StatelessWidget {
                       _RoundIconButton(
                         icon: Icons.file_download_outlined,
                         onTap: () async {
-                          print("PDF DOWNLOAD BUTTON PRESSED");
-
                           await downloadBuiltyPdf();
                         },
                         filled: true,
@@ -116,7 +112,7 @@ class BuiltyPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(22),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 16,
                           offset: const Offset(0, 6),
                         ),
@@ -147,7 +143,7 @@ class BuiltyPage extends StatelessWidget {
                         const SizedBox(height: 26),
 
                         // -------- Order ID / Date --------
-                        _FieldRow(label: "Order ID", value: " TL - ${orderId}"),
+                        _FieldRow(label: "Order ID", value: " TL - $orderId"),
                         const SizedBox(height: 16),
                         _FieldRow(label: "Date", value: date),
 
@@ -215,7 +211,7 @@ class BuiltyPage extends StatelessWidget {
                                   Container(
                                     width: 130,
                                     height: 1,
-                                    color: Colors.grey.withOpacity(0.3),
+                                    color: Colors.grey.withValues(alpha: 0.3),
                                   ),
                                   const SizedBox(height: 6),
                                   Text(
@@ -966,7 +962,7 @@ class _RoundIconButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withValues(alpha: 0.06),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -1028,7 +1024,7 @@ class _Divider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(height: 1, color: Colors.grey.withOpacity(0.15));
+    return Container(height: 1, color: Colors.grey.withValues(alpha: 0.15));
   }
 }
 
@@ -1089,7 +1085,7 @@ class _StampBadge extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
-            color: Appcolors.primaryBlue.withOpacity(0.6),
+            color: Appcolors.primaryBlue.withValues(alpha: 0.6),
             width: 1.6,
           ),
         ),
@@ -1100,7 +1096,7 @@ class _StampBadge extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: Appcolors.primaryBlue.withOpacity(0.5),
+                color: Appcolors.primaryBlue.withValues(alpha: 0.5),
                 width: 1,
               ),
             ),
@@ -1111,14 +1107,14 @@ class _StampBadge extends StatelessWidget {
                   Icon(
                     Icons.local_shipping_outlined,
                     size: 16,
-                    color: Appcolors.primaryBlue.withOpacity(0.7),
+                    color: Appcolors.primaryBlue.withValues(alpha: 0.7),
                   ),
                   Text(
                     "TRUCKLINK AI",
                     style: TextStyle(
                       fontSize: 6.5,
                       fontWeight: FontWeight.w800,
-                      color: Appcolors.primaryBlue.withOpacity(0.7),
+                      color: Appcolors.primaryBlue.withValues(alpha: 0.7),
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -1127,7 +1123,7 @@ class _StampBadge extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 6.5,
                       fontWeight: FontWeight.w800,
-                      color: Appcolors.primaryBlue.withOpacity(0.7),
+                      color: Appcolors.primaryBlue.withValues(alpha: 0.7),
                       letterSpacing: 0.5,
                     ),
                   ),

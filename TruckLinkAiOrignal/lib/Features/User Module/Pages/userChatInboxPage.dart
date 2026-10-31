@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
+import 'package:trucklinkai_orignal/Core/Services/appLogger.dart';
 import 'package:trucklinkai_orignal/Core/Widgets/backArrowButton.dart';
 import 'package:trucklinkai_orignal/Features/User Module/Pages/brokerchatpage.dart';
 
@@ -112,7 +114,9 @@ class _UserChatInboxPageState extends State<UserChatInboxPage> {
         _participantCache[participantId] = result;
         return result;
       }
-    } catch (_) {}
+    } catch (e, stack) {
+      AppLogger.error("Failed to load participant profile for $participantId", e, stack, "UserChatInboxPage");
+    }
 
     _participantCache[participantId] = result;
     return result;
@@ -250,7 +254,7 @@ class _UserChatInboxPageState extends State<UserChatInboxPage> {
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.03),
+                          color: Colors.black.withValues(alpha: 0.03),
                           blurRadius: 10,
                           offset: const Offset(0, 3),
                         ),
@@ -396,6 +400,11 @@ class _UserChatInboxPageState extends State<UserChatInboxPage> {
                           docDt = lastMessageTime;
                         }
 
+                        final Map<String, dynamic>? pNames = data['participantNames'] as Map<String, dynamic>?;
+                        final String denormName = (pNames?[otherUserId] ?? data['name_$otherUserId'] ?? '').toString();
+                        final Map<String, dynamic>? pRoles = data['participantRoles'] as Map<String, dynamic>?;
+                        final String denormRole = (pRoles?[otherUserId] ?? data['role_$otherUserId'] ?? explicitRole).toString();
+
                         if (!conversationMap.containsKey(otherUserId)) {
                           conversationMap[otherUserId] = _UserConversationItem(
                             canonicalChatId: canonicalChatId,
@@ -407,6 +416,8 @@ class _UserChatInboxPageState extends State<UserChatInboxPage> {
                             orderId: orderId,
                             explicitRole: explicitRole,
                             rawChatId: rawChatId,
+                            denormalizedName: denormName,
+                            denormalizedRole: denormRole,
                           );
                         } else {
                           final existing = conversationMap[otherUserId]!;
@@ -423,6 +434,8 @@ class _UserChatInboxPageState extends State<UserChatInboxPage> {
                               orderId: orderId.isNotEmpty ? orderId : existing.orderId,
                               explicitRole: explicitRole.isNotEmpty ? explicitRole : existing.explicitRole,
                               rawChatId: rawChatId,
+                              denormalizedName: denormName.isNotEmpty ? denormName : existing.denormalizedName,
+                              denormalizedRole: denormRole.isNotEmpty ? denormRole : existing.denormalizedRole,
                             );
                           } else {
                             existing.unreadCount = combinedUnread;
@@ -454,10 +467,55 @@ class _UserChatInboxPageState extends State<UserChatInboxPage> {
                           24,
                         ),
                         itemCount: sortedConversations.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 10),
+                        separatorBuilder: (_, _) => const SizedBox(height: 10),
                         itemBuilder: (context, index) {
                           final conv = sortedConversations[index];
 
+                          // FAST PATH (Phase 2.14): Use denormalized participant data if available, eliminating N+1 queries
+                          if (conv.denormalizedName != null && conv.denormalizedName!.isNotEmpty) {
+                            final String displayName = conv.denormalizedName!;
+                            final String role = conv.denormalizedRole.isNotEmpty ? conv.denormalizedRole : (conv.explicitRole.isNotEmpty ? conv.explicitRole : 'Broker');
+
+                            // Apply Search Query Filter
+                            if (_searchQuery.isNotEmpty) {
+                              final matchesName = displayName.toLowerCase().contains(_searchQuery);
+                              final matchesMessage = conv.lastMessage.toLowerCase().contains(_searchQuery);
+                              final matchesOrder = conv.orderId.toLowerCase().contains(_searchQuery);
+                              if (!matchesName && !matchesMessage && !matchesOrder) {
+                                return const SizedBox.shrink();
+                              }
+                            }
+
+                            // Apply Category Filter
+                            if (_selectedFilter == "Brokers" && role.toLowerCase() != "broker") {
+                              return const SizedBox.shrink();
+                            }
+                            if (_selectedFilter == "Drivers" && role.toLowerCase() != "driver") {
+                              return const SizedBox.shrink();
+                            }
+                            if (_selectedFilter == "Shippers" &&
+                                role.toLowerCase() != "customer" &&
+                                role.toLowerCase() != "user" &&
+                                role.toLowerCase() != "shipper") {
+                              return const SizedBox.shrink();
+                            }
+
+                            return _buildConversationTile(
+                              context: context,
+                              chatId: conv.canonicalChatId,
+                              currentUserId: currentUserId,
+                              otherUserId: conv.otherUserId,
+                              name: displayName,
+                              role: role,
+                              avatarUrl: null,
+                              lastMessage: conv.lastMessage,
+                              timestamp: conv.lastMessageTime,
+                              unreadCount: conv.unreadCount,
+                              orderId: conv.orderId,
+                            );
+                          }
+
+                          // FALLBACK: Query profile if chat document is from legacy data
                           return FutureBuilder<Map<String, dynamic>>(
                             future: _getParticipantProfile(conv.otherUserId, conv.explicitRole.isNotEmpty ? conv.explicitRole : null),
                             builder: (context, profileSnap) {
@@ -541,7 +599,7 @@ class _UserChatInboxPageState extends State<UserChatInboxPage> {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: Appcolors.primaryBlue.withOpacity(0.25),
+                    color: Appcolors.primaryBlue.withValues(alpha: 0.25),
                     blurRadius: 6,
                     offset: const Offset(0, 2),
                   )
@@ -585,7 +643,9 @@ class _UserChatInboxPageState extends State<UserChatInboxPage> {
           await _firestore.collection('chats').doc(chatId).set({
             'unreadCount_$currentUserId': 0,
           }, SetOptions(merge: true));
-        } catch (_) {}
+        } catch (e, stack) {
+          AppLogger.error("Failed to reset unread count", e, stack, "UserChatInboxPage");
+        }
 
         if (!context.mounted) return;
 
@@ -608,19 +668,19 @@ class _UserChatInboxPageState extends State<UserChatInboxPage> {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: hasUnread ? Colors.white : Colors.white.withOpacity(0.95),
+          color: hasUnread ? Colors.white : Colors.white.withValues(alpha: 0.95),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: hasUnread
-                ? Appcolors.primaryBlue.withOpacity(0.35)
-                : Colors.grey.withOpacity(0.12),
+                ? Appcolors.primaryBlue.withValues(alpha: 0.35)
+                : Colors.grey.withValues(alpha: 0.12),
             width: hasUnread ? 1.4 : 1.0,
           ),
           boxShadow: [
             BoxShadow(
               color: hasUnread
-                  ? Appcolors.primaryBlue.withOpacity(0.06)
-                  : Colors.black.withOpacity(0.03),
+                  ? Appcolors.primaryBlue.withValues(alpha: 0.06)
+                  : Colors.black.withValues(alpha: 0.03),
               blurRadius: 10,
               offset: const Offset(0, 3),
             ),
@@ -633,9 +693,9 @@ class _UserChatInboxPageState extends State<UserChatInboxPage> {
               children: [
                 CircleAvatar(
                   radius: 26,
-                  backgroundColor: roleColor.withOpacity(0.12),
+                  backgroundColor: roleColor.withValues(alpha: 0.12),
                   backgroundImage: (avatarUrl != null && avatarUrl.isNotEmpty)
-                      ? NetworkImage(avatarUrl)
+                      ? CachedNetworkImageProvider(avatarUrl)
                       : null,
                   child: (avatarUrl == null || avatarUrl.isEmpty)
                       ? Text(
@@ -692,7 +752,7 @@ class _UserChatInboxPageState extends State<UserChatInboxPage> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: roleColor.withOpacity(0.1),
+                          color: roleColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
@@ -790,7 +850,7 @@ class _UserChatInboxPageState extends State<UserChatInboxPage> {
               width: 72,
               height: 72,
               decoration: BoxDecoration(
-                color: Appcolors.primaryBlue.withOpacity(0.08),
+                color: Appcolors.primaryBlue.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: Appcolors.primaryBlue, size: 34),
@@ -832,6 +892,8 @@ class _UserConversationItem {
   String orderId;
   String explicitRole;
   String rawChatId;
+  String? denormalizedName;
+  String denormalizedRole;
 
   _UserConversationItem({
     required this.canonicalChatId,
@@ -843,5 +905,7 @@ class _UserConversationItem {
     required this.orderId,
     required this.explicitRole,
     required this.rawChatId,
+    this.denormalizedName,
+    this.denormalizedRole = '',
   });
 }

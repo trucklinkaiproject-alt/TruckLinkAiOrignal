@@ -14,6 +14,7 @@ import {
   orderBy,
   limit,
   serverTimestamp,
+  getCountFromServer,
   QueryConstraint
 } from 'firebase/firestore';
 import { db } from './firebase';
@@ -42,6 +43,21 @@ export const formatPKR = (val: number | string | undefined | null): string => {
   return `PKR ${num.toLocaleString('en-PK')}`;
 };
 
+/**
+ * Fast server-side document count query using getCountFromServer.
+ * Avoids downloading full documents or payload bytes.
+ */
+export const getCollectionCount = async (collectionName: string): Promise<number> => {
+  try {
+    const coll = collection(db, collectionName);
+    const snapshot = await getCountFromServer(coll);
+    return snapshot.data().count;
+  } catch (err) {
+    console.warn(`[getCollectionCount] Failed to count ${collectionName}:`, err);
+    return 0;
+  }
+};
+
 // Generic audit logger
 export const logAdminAction = async (
   adminId: string,
@@ -67,66 +83,146 @@ export const logAdminAction = async (
   }
 };
 
-// ================= USER OPERATIONS =================
+// ================= SHARED USER SUBSCRIPTION =================
+let userSubscribers: ((users: UserProfile[]) => void)[] = [];
+let userSnapshotUnsub: (() => void) | null = null;
+let lastUsersCache: UserProfile[] | null = null;
+
 export const subscribeUsers = (callback: (users: UserProfile[]) => void) => {
-  const usersRef = collection(db, 'User');
-  return onSnapshot(usersRef, (snapshot) => {
-    const list: UserProfile[] = [];
-    snapshot.forEach((docSnap) => {
-      list.push({ id: docSnap.id, ...docSnap.data() } as UserProfile);
-    });
-    callback(list);
-  });
+  userSubscribers.push(callback);
+  if (lastUsersCache) {
+    callback(lastUsersCache);
+  }
+  if (!userSnapshotUnsub) {
+    const usersRef = collection(db, 'User');
+    userSnapshotUnsub = onSnapshot(
+      usersRef,
+      (snapshot) => {
+        const list: UserProfile[] = [];
+        cachedUsers = {};
+        snapshot.forEach((docSnap) => {
+          const item = { id: docSnap.id, ...docSnap.data() } as UserProfile;
+          list.push(item);
+          cachedUsers[docSnap.id] = item;
+        });
+        lastUsersCache = list;
+        userSubscribers.forEach((cb) => cb(list));
+        if (allRequestsSubscribers.length > 0) emitAllRequests();
+      },
+      (err) => {
+        console.warn('[subscribeUsers] Snapshot error:', err);
+      }
+    );
+  }
+  return () => {
+    userSubscribers = userSubscribers.filter((cb) => cb !== callback);
+    if (userSubscribers.length === 0 && allRequestsSubscribers.length === 0 && userSnapshotUnsub) {
+      userSnapshotUnsub();
+      userSnapshotUnsub = null;
+    }
+  };
 };
 
 export const updateUserStatus = async (
   userId: string,
   status: 'active' | 'blocked',
+  adminId: string,
   adminEmail: string
 ) => {
   const userRef = doc(db, 'User', userId);
   await updateDoc(userRef, { status, updatedAt: serverTimestamp() });
-  await logAdminAction('admin', adminEmail, `USER_STATUS_${status.toUpperCase()}`, 'User', userId);
+  await logAdminAction(adminId, adminEmail, `USER_STATUS_${status.toUpperCase()}`, 'User', userId);
 };
 
-export const deleteUserDoc = async (userId: string, adminEmail: string) => {
-  const userRef = doc(db, 'User', userId);
-  await deleteDoc(userRef);
-  await logAdminAction('admin', adminEmail, 'USER_DELETED', 'User', userId);
+const callDeleteUserProfile = async (uid: string, role: 'User' | 'Broker' | 'Driver'): Promise<boolean> => {
+  try {
+    const { getFunctions, httpsCallable } = await import('firebase/functions');
+    const functions = getFunctions();
+    const deleteFn = httpsCallable<{ uid: string; role: string }, { success: boolean }>(
+      functions,
+      'deleteUserProfile'
+    );
+    await deleteFn({ uid, role });
+    return true;
+  } catch (err) {
+    console.warn(`[deleteUserProfile] Cloud Function call failed, falling back to direct delete:`, err);
+    return false;
+  }
 };
 
-// ================= BROKER OPERATIONS =================
+export const deleteUserDoc = async (userId: string, adminId: string, adminEmail: string) => {
+  const success = await callDeleteUserProfile(userId, 'User');
+  if (!success) {
+    const userRef = doc(db, 'User', userId);
+    await deleteDoc(userRef);
+    await logAdminAction(adminId, adminEmail, 'USER_DELETED', 'User', userId);
+  }
+};
+
+// ================= SHARED BROKER SUBSCRIPTION =================
+let brokerSubscribers: ((brokers: BrokerProfile[]) => void)[] = [];
+let brokerSnapshotUnsub: (() => void) | null = null;
+let lastBrokersCache: BrokerProfile[] | null = null;
+
 export const subscribeBrokers = (callback: (brokers: BrokerProfile[]) => void) => {
-  const brokersRef = collection(db, 'Broker');
-  return onSnapshot(brokersRef, (snapshot) => {
-    const list: BrokerProfile[] = [];
-    snapshot.forEach((docSnap) => {
-      list.push({ id: docSnap.id, ...docSnap.data() } as BrokerProfile);
-    });
-    callback(list);
-  });
+  brokerSubscribers.push(callback);
+  if (lastBrokersCache) {
+    callback(lastBrokersCache);
+  }
+  if (!brokerSnapshotUnsub) {
+    const brokersRef = collection(db, 'Broker');
+    brokerSnapshotUnsub = onSnapshot(
+      brokersRef,
+      (snapshot) => {
+        const list: BrokerProfile[] = [];
+        cachedBrokers = {};
+        snapshot.forEach((docSnap) => {
+          const item = { id: docSnap.id, ...docSnap.data() } as BrokerProfile;
+          list.push(item);
+          cachedBrokers[docSnap.id] = item;
+        });
+        lastBrokersCache = list;
+        brokerSubscribers.forEach((cb) => cb(list));
+        if (allRequestsSubscribers.length > 0) emitAllRequests();
+      },
+      (err) => {
+        console.warn('[subscribeBrokers] Snapshot error:', err);
+      }
+    );
+  }
+  return () => {
+    brokerSubscribers = brokerSubscribers.filter((cb) => cb !== callback);
+    if (brokerSubscribers.length === 0 && allRequestsSubscribers.length === 0 && brokerSnapshotUnsub) {
+      brokerSnapshotUnsub();
+      brokerSnapshotUnsub = null;
+    }
+  };
 };
 
 export const updateBrokerStatus = async (
   brokerId: string,
   status: 'active' | 'blocked',
+  adminId: string,
   adminEmail: string
 ) => {
   const brokerRef = doc(db, 'Broker', brokerId);
   await updateDoc(brokerRef, { status, updatedAt: serverTimestamp() });
-  await logAdminAction('admin', adminEmail, `BROKER_STATUS_${status.toUpperCase()}`, 'Broker', brokerId);
+  await logAdminAction(adminId, adminEmail, `BROKER_STATUS_${status.toUpperCase()}`, 'Broker', brokerId);
 };
 
-export const verifyBroker = async (brokerId: string, isVerified: boolean, adminEmail: string) => {
+export const verifyBroker = async (brokerId: string, isVerified: boolean, adminId: string, adminEmail: string) => {
   const brokerRef = doc(db, 'Broker', brokerId);
   await updateDoc(brokerRef, { isVerified, updatedAt: serverTimestamp() });
-  await logAdminAction('admin', adminEmail, isVerified ? 'BROKER_VERIFIED' : 'BROKER_UNVERIFIED', 'Broker', brokerId);
+  await logAdminAction(adminId, adminEmail, isVerified ? 'BROKER_VERIFIED' : 'BROKER_UNVERIFIED', 'Broker', brokerId);
 };
 
-export const deleteBrokerDoc = async (brokerId: string, adminEmail: string) => {
-  const brokerRef = doc(db, 'Broker', brokerId);
-  await deleteDoc(brokerRef);
-  await logAdminAction('admin', adminEmail, 'BROKER_DELETED', 'Broker', brokerId);
+export const deleteBrokerDoc = async (brokerId: string, adminId: string, adminEmail: string) => {
+  const success = await callDeleteUserProfile(brokerId, 'Broker');
+  if (!success) {
+    const brokerRef = doc(db, 'Broker', brokerId);
+    await deleteDoc(brokerRef);
+    await logAdminAction(adminId, adminEmail, 'BROKER_DELETED', 'Broker', brokerId);
+  }
 };
 
 // ================= DRIVER OPERATIONS =================
@@ -197,31 +293,64 @@ export const normalizeDriver = (docId: string, data: Record<string, any>): Drive
   };
 };
 
+// ================= SHARED DRIVER SUBSCRIPTION =================
+let driverSubscribers: ((drivers: DriverProfile[]) => void)[] = [];
+let driverSnapshotUnsub: (() => void) | null = null;
+let lastDriversCache: DriverProfile[] | null = null;
+
 export const subscribeDrivers = (callback: (drivers: DriverProfile[]) => void) => {
-  const driversRef = collection(db, 'Driver');
-  return onSnapshot(driversRef, (snapshot) => {
-    const list: DriverProfile[] = [];
-    snapshot.forEach((docSnap) => {
-      list.push(normalizeDriver(docSnap.id, docSnap.data()));
-    });
-    callback(list);
-  });
+  driverSubscribers.push(callback);
+  if (lastDriversCache) {
+    callback(lastDriversCache);
+  }
+  if (!driverSnapshotUnsub) {
+    const driversRef = collection(db, 'Driver');
+    driverSnapshotUnsub = onSnapshot(
+      driversRef,
+      (snapshot) => {
+        const list: DriverProfile[] = [];
+        cachedDrivers = {};
+        snapshot.forEach((docSnap) => {
+          const item = normalizeDriver(docSnap.id, docSnap.data());
+          list.push(item);
+          cachedDrivers[docSnap.id] = item;
+        });
+        lastDriversCache = list;
+        driverSubscribers.forEach((cb) => cb(list));
+        if (allRequestsSubscribers.length > 0) emitAllRequests();
+      },
+      (err) => {
+        console.warn('[subscribeDrivers] Snapshot error:', err);
+      }
+    );
+  }
+  return () => {
+    driverSubscribers = driverSubscribers.filter((cb) => cb !== callback);
+    if (driverSubscribers.length === 0 && allRequestsSubscribers.length === 0 && driverSnapshotUnsub) {
+      driverSnapshotUnsub();
+      driverSnapshotUnsub = null;
+    }
+  };
 };
 
 export const updateDriverStatus = async (
   driverId: string,
   status: 'active' | 'blocked' | 'on-trip',
+  adminId: string,
   adminEmail: string
 ) => {
   const driverRef = doc(db, 'Driver', driverId);
   await updateDoc(driverRef, { status, updatedAt: serverTimestamp() });
-  await logAdminAction('admin', adminEmail, `DRIVER_STATUS_${status.toUpperCase()}`, 'Driver', driverId);
+  await logAdminAction(adminId, adminEmail, `DRIVER_STATUS_${status.toUpperCase()}`, 'Driver', driverId);
 };
 
-export const deleteDriverDoc = async (driverId: string, adminEmail: string) => {
-  const driverRef = doc(db, 'Driver', driverId);
-  await deleteDoc(driverRef);
-  await logAdminAction('admin', adminEmail, 'DRIVER_DELETED', 'Driver', driverId);
+export const deleteDriverDoc = async (driverId: string, adminId: string, adminEmail: string) => {
+  const success = await callDeleteUserProfile(driverId, 'Driver');
+  if (!success) {
+    const driverRef = doc(db, 'Driver', driverId);
+    await deleteDoc(driverRef);
+    await logAdminAction(adminId, adminEmail, 'DRIVER_DELETED', 'Driver', driverId);
+  }
 };
 
 // ================= ORDERS OPERATIONS =================
@@ -239,11 +368,12 @@ export const subscribeOrders = (callback: (orders: OrderItem[]) => void) => {
 export const updateOrderStatus = async (
   orderId: string,
   status: string,
+  adminId: string,
   adminEmail: string
 ) => {
   const orderRef = doc(db, 'Orders', orderId);
   await updateDoc(orderRef, { status, updatedAt: serverTimestamp() });
-  await logAdminAction('admin', adminEmail, `ORDER_STATUS_${status.toUpperCase()}`, 'Orders', orderId);
+  await logAdminAction(adminId, adminEmail, `ORDER_STATUS_${status.toUpperCase()}`, 'Orders', orderId);
 };
 
 // ================= REQUESTS & LIFECYCLE (Real-time Collection Group & Cache) =================
@@ -450,92 +580,107 @@ export const normalizeRequest = (
   };
 };
 
+// ================= SHARED ALL REQUESTS SUBSCRIPTION =================
+let allRequestsSubscribers: ((requests: UserRequest[]) => void)[] = [];
+let reqGroupUnsub: (() => void) | null = null;
+let ordersUnsub: (() => void) | null = null;
+let rawRequestsMap: Map<string, { id: string; data: Record<string, any> }> = new Map();
+let lastRequestsCache: UserRequest[] | null = null;
+let activeUsersUnsubHook: (() => void) | null = null;
+let activeBrokersUnsubHook: (() => void) | null = null;
+let activeDriversUnsubHook: (() => void) | null = null;
+
+const emitAllRequests = () => {
+  const list: UserRequest[] = [];
+  rawRequestsMap.forEach((entry) => {
+    list.push(normalizeRequest(entry.id, entry.data, cachedUsers, cachedBrokers, cachedDrivers));
+  });
+
+  // Default sorting: Order No sequence ascending (1, 2, 3... 10)
+  list.sort((a, b) => {
+    if (a.numericOrderNo !== b.numericOrderNo) {
+      return (a.numericOrderNo || 0) - (b.numericOrderNo || 0);
+    }
+    return (a.orderNo || '').localeCompare(b.orderNo || '');
+  });
+
+  lastRequestsCache = list;
+  allRequestsSubscribers.forEach((cb) => cb(list));
+};
+
 export const subscribeAllRequests = (callback: (requests: UserRequest[]) => void) => {
-  let rawRequestsMap: Map<string, { id: string; data: Record<string, any> }> = new Map();
+  allRequestsSubscribers.push(callback);
+  if (lastRequestsCache) {
+    callback(lastRequestsCache);
+  }
 
-  const emitNormalized = () => {
-    const list: UserRequest[] = [];
-    rawRequestsMap.forEach((entry) => {
-      list.push(normalizeRequest(entry.id, entry.data, cachedUsers, cachedBrokers, cachedDrivers));
-    });
+  // Ensure shared stakeholder listeners are active
+  if (!activeUsersUnsubHook) activeUsersUnsubHook = subscribeUsers(() => {});
+  if (!activeBrokersUnsubHook) activeBrokersUnsubHook = subscribeBrokers(() => {});
+  if (!activeDriversUnsubHook) activeDriversUnsubHook = subscribeDrivers(() => {});
 
-    // Default sorting: Order No sequence ascending (1, 2, 3... 10)
-    list.sort((a, b) => {
-      if (a.numericOrderNo !== b.numericOrderNo) {
-        return (a.numericOrderNo || 0) - (b.numericOrderNo || 0);
+  if (!reqGroupUnsub) {
+    const reqGroupRef = collectionGroup(db, 'Requests');
+    reqGroupUnsub = onSnapshot(
+      reqGroupRef,
+      (snapshot) => {
+        snapshot.forEach((docSnap) => {
+          const existing = rawRequestsMap.get(docSnap.id);
+          rawRequestsMap.set(docSnap.id, {
+            id: docSnap.id,
+            data: existing ? { ...existing.data, ...docSnap.data() } : docSnap.data(),
+          });
+        });
+        emitAllRequests();
+      },
+      (err) => {
+        console.warn('CollectionGroup listener error, falling back to manual load:', err);
       }
-      return (a.orderNo || '').localeCompare(b.orderNo || '');
-    });
+    );
+  }
 
-    callback(list);
-  };
-
-  // 1. Subscribe to User profiles
-  const unsubUsers = onSnapshot(collection(db, 'User'), (snap) => {
-    cachedUsers = {};
-    snap.forEach((d) => {
-      cachedUsers[d.id] = { id: d.id, ...d.data() } as UserProfile;
-    });
-    emitNormalized();
-  });
-
-  // 2. Subscribe to Broker profiles
-  const unsubBrokers = onSnapshot(collection(db, 'Broker'), (snap) => {
-    cachedBrokers = {};
-    snap.forEach((d) => {
-      cachedBrokers[d.id] = { id: d.id, ...d.data() } as BrokerProfile;
-    });
-    emitNormalized();
-  });
-
-  // 3. Subscribe to Driver profiles
-  const unsubDrivers = onSnapshot(collection(db, 'Driver'), (snap) => {
-    cachedDrivers = {};
-    snap.forEach((d) => {
-      cachedDrivers[d.id] = normalizeDriver(d.id, d.data());
-    });
-    emitNormalized();
-  });
-
-  // 4. Subscribe to all requests using collectionGroup('Requests')
-  const reqGroupRef = collectionGroup(db, 'Requests');
-  const unsubRequests = onSnapshot(
-    reqGroupRef,
-    (snapshot) => {
+  if (!ordersUnsub) {
+    ordersUnsub = onSnapshot(collection(db, 'Orders'), (snapshot) => {
       snapshot.forEach((docSnap) => {
         const existing = rawRequestsMap.get(docSnap.id);
-        rawRequestsMap.set(docSnap.id, {
-          id: docSnap.id,
-          data: existing ? { ...existing.data, ...docSnap.data() } : docSnap.data(),
-        });
+        if (existing) {
+          rawRequestsMap.set(docSnap.id, {
+            id: docSnap.id,
+            data: { ...existing.data, ...docSnap.data() },
+          });
+        }
       });
-      emitNormalized();
-    },
-    (err) => {
-      console.warn('CollectionGroup listener error, falling back to manual load:', err);
-    }
-  );
-
-  // 5. Also listen to Orders collection to capture tracking & driver updates
-  const unsubOrders = onSnapshot(collection(db, 'Orders'), (snapshot) => {
-    snapshot.forEach((docSnap) => {
-      const existing = rawRequestsMap.get(docSnap.id);
-      if (existing) {
-        rawRequestsMap.set(docSnap.id, {
-          id: docSnap.id,
-          data: { ...existing.data, ...docSnap.data() },
-        });
-      }
+      emitAllRequests();
     });
-    emitNormalized();
-  });
+  }
 
   return () => {
-    unsubUsers();
-    unsubBrokers();
-    unsubDrivers();
-    unsubRequests();
-    unsubOrders();
+    allRequestsSubscribers = allRequestsSubscribers.filter((cb) => cb !== callback);
+
+    if (allRequestsSubscribers.length === 0) {
+      if (reqGroupUnsub) {
+        reqGroupUnsub();
+        reqGroupUnsub = null;
+      }
+      if (ordersUnsub) {
+        ordersUnsub();
+        ordersUnsub = null;
+      }
+      if (activeUsersUnsubHook) {
+        activeUsersUnsubHook();
+        activeUsersUnsubHook = null;
+      }
+      if (activeBrokersUnsubHook) {
+        activeBrokersUnsubHook();
+        activeBrokersUnsubHook = null;
+      }
+      if (activeDriversUnsubHook) {
+        activeDriversUnsubHook();
+        activeDriversUnsubHook = null;
+      }
+      rawRequestsMap.clear();
+      lastRequestsCache = null;
+    }
   };
 };
 
@@ -848,71 +993,29 @@ export const updateReviewDoc = async (
 };
 
 // ================= SYSTEM NOTIFICATIONS & FCM PUSH =================
+/**
+ * sendBroadcastNotification
+ * Delegates to the server-side Cloud Function to avoid broad client write rights.
+ * The Cloud Function handles batched writes and audit logging.
+ */
 export const sendBroadcastNotification = async (
   title: string,
   message: string,
   targetAudience: 'all' | 'users' | 'brokers' | 'drivers',
-  adminEmail: string
-) => {
-  // 1. Record broadcast in SystemNotifications collection
-  const notificationsRef = collection(db, 'SystemNotifications');
-  const docRef = await addDoc(notificationsRef, {
-    title,
-    message,
-    targetAudience,
-    sentBy: adminEmail,
-    sentAt: serverTimestamp(),
-    status: 'sent'
-  });
+  _adminId: string,
+  _adminEmail: string
+): Promise<string> => {
+  // Delegate entirely to the server-side Cloud Function.
+  // The function handles batched Firestore writes, FCM fan-out, and audit logging.
+  const { getFunctions, httpsCallable } = await import('firebase/functions');
+  const functions = getFunctions();
+  const broadcastFn = httpsCallable<
+    { title: string; message: string; targetAudience: string },
+    { success: boolean; notificationId: string; totalSent: number }
+  >(functions, 'sendBroadcastNotification');
 
-  // 2. Push Fan-Out to active mobile devices via Cloud Function trigger
-  // Writing to {role}/{uid}/Notifications/{notifId} triggers functions/index.js -> sendPushNotificationOnFirestoreCreate
-  try {
-    const rolesToTarget: ('User' | 'Broker' | 'Driver')[] = [];
-    if (targetAudience === 'all') {
-      rolesToTarget.push('User', 'Broker', 'Driver');
-    } else if (targetAudience === 'users') {
-      rolesToTarget.push('User');
-    } else if (targetAudience === 'brokers') {
-      rolesToTarget.push('Broker');
-    } else if (targetAudience === 'drivers') {
-      rolesToTarget.push('Driver');
-    }
-
-    for (const role of rolesToTarget) {
-      const snap = await getDocs(collection(db, role));
-      for (const recDoc of snap.docs) {
-        const notifId = `broadcast_${docRef.id}_${recDoc.id}`;
-        const notifDocRef = doc(db, role, recDoc.id, 'Notifications', notifId);
-        await setDoc(notifDocRef, {
-          id: notifId,
-          title,
-          body: message,
-          subtitle: message,
-          type: 'admin_broadcast',
-          order_id: '',
-          order_no: '',
-          chat_id: '',
-          sender_id: 'superadmin',
-          sender_name: 'TruckLink AI Admin',
-          recipient_id: recDoc.id,
-          recipient_role: role,
-          is_read: false,
-          timestamp: serverTimestamp(),
-          created_at: serverTimestamp(),
-        }, { merge: true });
-      }
-    }
-  } catch (pushErr) {
-    console.warn('Push fan-out error (notifications record saved):', pushErr);
-  }
-
-  await logAdminAction('admin', adminEmail, 'BROADCAST_NOTIFICATION_SENT', 'SystemNotifications', docRef.id, {
-    title,
-    targetAudience
-  });
-
-  return docRef.id;
+  const result = await broadcastFn({ title, message, targetAudience });
+  return result.data.notificationId;
 };
 
 export const subscribeNotifications = (callback: (notifs: SystemNotification[]) => void) => {

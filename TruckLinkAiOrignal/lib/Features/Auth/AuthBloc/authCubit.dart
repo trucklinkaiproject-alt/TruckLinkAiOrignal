@@ -4,9 +4,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:trucklinkai_orignal/Core/Services/appLogger.dart';
 import 'package:trucklinkai_orignal/Core/Services/fcmTokenService.dart';
+import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerBloc/brokerCubit.dart';
+import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerDriverNetworkBloc/brokerDriverNetworkCubit.dart';
+import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerDriverRequestsBloc/brokerDriverRequestsCubit.dart';
+import 'package:trucklinkai_orignal/Features/Driver%20Module/Services/driverLocationService.dart';
+import 'package:trucklinkai_orignal/Features/Driver%20Module/bloc/driverBloc/driverCubit.dart';
+import 'package:trucklinkai_orignal/Features/Driver%20Module/bloc/driverOffersBloc/driverOffersCubit.dart';
+import 'package:trucklinkai_orignal/Features/User%20Module/bloc/getBrokerBloc/getBrokerCubit.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/bloc/userBloc/usercubit.dart';
-import 'package:trucklinkai_orignal/Features/Transporter%20Module/bloc/driverBloc/driverCubit.dart';
 import 'authState.dart';
 
 class AuthCubit extends Cubit<AuthState> {
@@ -42,8 +49,34 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       emit(AuthLoading());
 
+      // 1.12: Validate role is one of User, Broker, Driver
+      if (!['User', 'Broker', 'Driver'].contains(selectedRole)) {
+        emit(AuthFailure("Invalid role selected. Must be User, Broker, or Driver."));
+        return;
+      }
+
+      // 1.8: Password policy - minimum 8 characters
+      if (password.length < 8) {
+        emit(AuthFailure("Password must be at least 8 characters long."));
+        return;
+      }
+
+      // 1.8: Email format validation
+      final emailRegex = RegExp(r'^[\w\.-]+@[\w\.-]+\.\w{2,}$');
+      if (!emailRegex.hasMatch(email.trim())) {
+        emit(AuthFailure("Please enter a valid email address."));
+        return;
+      }
+
+      // 1.8: Phone validation (at least 10 digits)
+      final phoneDigits = phone.replaceAll(RegExp(r'\D'), '');
+      if (phoneDigits.length < 10) {
+        emit(AuthFailure("Please enter a valid phone number (at least 10 digits)."));
+        return;
+      }
+
       UserCredential userCredential = await _auth
-          .createUserWithEmailAndPassword(email: email, password: password);
+          .createUserWithEmailAndPassword(email: email.trim(), password: password);
 
       await userCredential.user?.sendEmailVerification();
 
@@ -115,63 +148,77 @@ class AuthCubit extends Cubit<AuthState> {
         return;
       }
 
-      final snapshot = await firebaseFirestore
-          .collection(role)
-          .where('email', isEqualTo: email)
-          .get();
-
-      if (snapshot.docs.isEmpty) {
-        emit(AuthFailure("No user found with this role"));
-        return;
-      }
-
+      // 1.7: Sign in FIRST, then verify role — never query Firestore before auth.
       final userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      // Refresh currentUser state to verify email verification status
       final user = userCredential.user;
-      if (user != null) {
-        await user.reload();
-        final refreshedUser = _auth.currentUser;
-        if (refreshedUser != null && !refreshedUser.emailVerified) {
-          await _auth.signOut();
-          emit(AuthEmailNotVerified(email));
-          return;
-        }
+      if (user == null) {
+        emit(AuthFailure("Authentication failed. Please try again."));
+        return;
       }
 
-      // Register device FCM token upon successful login
-      if (user != null) {
-        try {
-          await FcmTokenService().registerToken(uid: user.uid, role: role);
-        } catch (_) {}
+      // Refresh to get current emailVerified status
+      await user.reload();
+      final refreshedUser = _auth.currentUser;
+      if (refreshedUser != null && !refreshedUser.emailVerified) {
+        await _auth.signOut();
+        emit(AuthEmailNotVerified(email));
+        return;
       }
+
+      // Verify role doc exists for this UID
+      final roleDoc = await firebaseFirestore
+          .collection(role)
+          .doc(user.uid)
+          .get();
+
+      if (!roleDoc.exists) {
+        await _auth.signOut();
+        emit(AuthFailure("No account found for this role. Please check your selection."));
+        return;
+      }
+
+      // 1.6: Check blocked status
+      final roleData = roleDoc.data() ?? {};
+      final status = (roleData['status'] ?? '').toString().toLowerCase();
+      if (status == 'blocked') {
+        await _auth.signOut();
+        emit(AuthFailure("Your account has been suspended. Please contact support."));
+        return;
+      }
+
+      selectedRole = role;
+
+      // Register device FCM token upon successful login
+      try {
+        await FcmTokenService().registerToken(uid: user.uid, role: role);
+      } catch (_) {}
 
       emit(AuthSuccess(role: role));
     } on FirebaseAuthException catch (e) {
-      emit(AuthFailure(e.message ?? "An unknown error occurred"));
+      // Use a generic message to avoid leaking whether the email exists
+      emit(AuthFailure(e.code == 'user-not-found' || e.code == 'wrong-password'
+          ? "Invalid email or password."
+          : (e.message ?? "An unknown error occurred")));
     } catch (e) {
       emit(AuthFailure("An unknown error occurred"));
     }
   }
 
-  Future<void> resendVerificationEmail({
-    required String email,
-    required String password,
-  }) async {
+  /// Resends the email verification link using the already signed-in user.
+  /// No password needed — the user was just signed up and is still authenticated.
+  Future<void> resendVerificationEmail() async {
     try {
       emit(AuthLoading());
-
-      final userCredential = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      await userCredential.user?.sendEmailVerification();
-      await _auth.signOut();
-
+      final user = _auth.currentUser;
+      if (user == null) {
+        emit(AuthFailure("Session expired. Please sign up again."));
+        return;
+      }
+      await user.sendEmailVerification();
       emit(AuthVerificationEmailSent());
     } on FirebaseAuthException catch (e) {
       emit(AuthFailure(e.message ?? "Failed to resend verification email"));
@@ -180,28 +227,26 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-
+  /// Checks email verification status using the already signed-in user.
+  /// No password needed — the user is still authenticated from signUp.
   Future<void> checkEmailVerified({
-    required String email,
-    required String password,
     required String role,
   }) async {
     try {
       emit(AuthLoading());
-
-      final userCredential = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      await userCredential.user?.reload();
+      final user = _auth.currentUser;
+      if (user == null) {
+        emit(AuthFailure("Session expired. Please sign up again."));
+        return;
+      }
+      await user.reload();
       final refreshedUser = _auth.currentUser;
 
       if (refreshedUser != null && refreshedUser.emailVerified) {
-        emit(AuthEmailVerified(email));
+        await _auth.signOut(); // sign out — user must log in properly
+        emit(AuthEmailVerified(refreshedUser.email ?? ''));
       } else {
-        await _auth.signOut();
-        emit(AuthEmailNotVerified(email));
+        emit(AuthEmailNotVerified(user.email ?? ''));
       }
     } on FirebaseAuthException catch (e) {
       emit(AuthFailure(e.message ?? "An unknown error occurred"));
@@ -237,35 +282,90 @@ Future<void> cancelSignUp({
 }
   Future<void> logOut(BuildContext context) async {
     try {
+      emit(AuthLoading());
+
+      // 1. Capture cubit references synchronously before any async gap
       final userCubit = context.read<UserCubit>();
       final driverCubit = context.read<DriverCubit>();
-      emit(AuthLoading());
+      final brokerCubit = context.read<BrokerCubit>();
+      final driverOffersCubit = context.read<DriverOffersCubit>();
+      final getBrokerCubit = context.read<GetBrokerCubit>();
+      final brokerDriverRequestsCubit = context.read<BrokerDriverRequestsCubit>();
+      final brokerDriverNetworkCubit = context.read<BrokerDriverNetworkCubit>();
+
+      // Cancel subscriptions and reset state across eager cubits (Phase 3.3)
       try {
         await userCubit.stopListening();
-      } catch (_) {}
+      } catch (e) {
+        AppLogger.warn("Failed to stop UserCubit: $e", "AuthCubit");
+      }
+
       try {
         driverCubit.stopListening();
-      } catch (_) {}
+      } catch (e) {
+        AppLogger.warn("Failed to stop DriverCubit: $e", "AuthCubit");
+      }
 
-      // Clean up current device FCM token
+      try {
+        await brokerCubit.stopListening();
+      } catch (e) {
+        AppLogger.warn("Failed to stop BrokerCubit: $e", "AuthCubit");
+      }
+
+      try {
+        driverOffersCubit.stopListening();
+      } catch (e) {
+        AppLogger.warn("Failed to stop DriverOffersCubit: $e", "AuthCubit");
+      }
+
+      try {
+        getBrokerCubit.stopListening();
+      } catch (e) {
+        AppLogger.warn("Failed to stop GetBrokerCubit: $e", "AuthCubit");
+      }
+
+      try {
+        brokerDriverRequestsCubit.stopListening();
+      } catch (e) {
+        AppLogger.warn("Failed to stop BrokerDriverRequestsCubit: $e", "AuthCubit");
+      }
+
+      try {
+        brokerDriverNetworkCubit.stopListening();
+      } catch (e) {
+        AppLogger.warn("Failed to stop BrokerDriverNetworkCubit: $e", "AuthCubit");
+      }
+
+      try {
+        DriverLocationService().stopTracking();
+      } catch (e) {
+        AppLogger.warn("Failed to stop DriverLocationService tracking: $e", "AuthCubit");
+      }
+
+      // 2. Clean up current device FCM token
       final currentUid = _auth.currentUser?.uid;
       final roleToClean = selectedRole;
       if (currentUid != null && currentUid.isNotEmpty && roleToClean.isNotEmpty) {
         try {
           await FcmTokenService().removeCurrentDeviceToken(uid: currentUid, role: roleToClean);
-        } catch (_) {}
+        } catch (e) {
+          AppLogger.warn("Failed to remove FCM token: $e", "AuthCubit");
+        }
       } else if (currentUid != null && currentUid.isNotEmpty) {
         for (final r in ['User', 'Broker', 'Driver']) {
           try {
             await FcmTokenService().removeCurrentDeviceToken(uid: currentUid, role: r);
-          } catch (_) {}
+          } catch (e) {
+            AppLogger.warn("Failed to remove FCM token for $r: $e", "AuthCubit");
+          }
         }
       }
 
       selectedRole = '';
       await _auth.signOut();
       emit(AuthInitial());
-    } catch (e) {
+    } catch (e, stack) {
+      AppLogger.error("Logout failed", e, stack, "AuthCubit");
       emit(AuthFailure("An unknown error occurred"));
     }
   }

@@ -15,7 +15,7 @@
 //       decoration: BoxDecoration(
 //         boxShadow: [
 //           BoxShadow(
-//             color: Colors.grey.withOpacity(0.3),
+//             color: Colors.grey.withValues(alpha: 0.3),
 //             spreadRadius: 0.7,
 //             blurRadius: 1,
 //             offset: Offset(0, 1), // changes position of shadow
@@ -75,7 +75,7 @@ class HomeQuickContainer extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.25),
+            color: Colors.grey.withValues(alpha: 0.25),
             spreadRadius: 1,
             blurRadius: 4,
             offset: const Offset(0, 2),

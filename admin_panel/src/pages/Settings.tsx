@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Settings as SettingsIcon, Shield, Key, UserPlus, Server, CheckCircle2, Lock, Mail, User } from 'lucide-react';
+import { Settings as SettingsIcon, Shield, Key, UserPlus, Server, CheckCircle2, AlertCircle, Lock, Mail, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { collection, getDocs, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db } from '../services/firebase';
 import { AdminUser } from '../types/models';
 import { Badge } from '../components/common/Badge';
@@ -18,6 +19,7 @@ export const Settings: React.FC = () => {
   const [newRole, setNewRole] = useState<'admin' | 'moderator'>('admin');
   const [addingAdmin, setAddingAdmin] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const fetchAdmins = async () => {
     setLoadingAdmins(true);
@@ -39,30 +41,47 @@ export const Settings: React.FC = () => {
     fetchAdmins();
   }, []);
 
+  /**
+   * Calls the server-side `setAdminClaim` Cloud Function.
+   * No direct Firestore writes are performed from the browser for admin creation.
+   */
   const handleCreateAdmin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newEmail || !newUid) return;
+    if (adminProfile?.role !== 'superadmin') {
+      setErrorMsg('Only a superadmin can grant admin privileges.');
+      return;
+    }
 
     setAddingAdmin(true);
     setSuccessMsg(null);
+    setErrorMsg(null);
+
     try {
-      const adminDocRef = doc(db, 'Admins', newUid.trim());
-      await setDoc(adminDocRef, {
+      const functions = getFunctions();
+      const setAdminClaim = httpsCallable<{ targetUid: string; role: string; email: string; displayName: string }, { success: boolean; message: string }>(
+        functions,
+        'setAdminClaim'
+      );
+
+      const result = await setAdminClaim({
+        targetUid: newUid.trim(),
+        role: newRole,
         email: newEmail.trim(),
         displayName: newName.trim() || 'Admin User',
-        role: newRole,
-        status: 'active',
-        createdAt: serverTimestamp(),
-        lastLoginAt: serverTimestamp(),
       });
 
-      setNewEmail('');
-      setNewName('');
-      setNewUid('');
-      setSuccessMsg('New Admin profile authorized and registered in Admins collection.');
-      fetchAdmins();
-    } catch (err) {
-      console.error('Failed to add admin:', err);
+      if (result.data.success) {
+        setNewEmail('');
+        setNewName('');
+        setNewUid('');
+        setSuccessMsg(result.data.message || 'Admin privileges granted successfully.');
+        fetchAdmins();
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to grant admin privileges.';
+      console.error('handleCreateAdmin error:', err);
+      setErrorMsg(message);
     } finally {
       setAddingAdmin(false);
     }
@@ -136,20 +155,39 @@ export const Settings: React.FC = () => {
               <span className="text-slate-400">Account Status:</span>
               <Badge variant="success" size="sm">Active</Badge>
             </div>
+
+            <div className="flex items-center gap-1.5 text-emerald-400 text-[10px] pt-1 border-t border-slate-800">
+              <Key className="w-3 h-3" />
+              <span>Admin claim verified via Firebase Auth token</span>
+            </div>
           </div>
         </div>
 
-        {/* Authorize New Admin */}
+        {/* Authorize New Admin – superadmin only */}
         <div className="rounded-2xl bg-slate-900/60 border border-slate-800 p-6 backdrop-blur-xl shadow-xl">
           <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm mb-4">
             <UserPlus className="w-5 h-5" />
             <h3>Grant Admin Privileges</h3>
           </div>
 
+          {adminProfile?.role !== 'superadmin' && (
+            <div className="mb-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2">
+              <Lock className="w-4 h-4 shrink-0" />
+              <span>Only a <strong>superadmin</strong> can grant admin privileges.</span>
+            </div>
+          )}
+
           {successMsg && (
             <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 shrink-0" />
               <span>{successMsg}</span>
+            </div>
+          )}
+
+          {errorMsg && (
+            <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-xs flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{errorMsg}</span>
             </div>
           )}
 
@@ -159,12 +197,14 @@ export const Settings: React.FC = () => {
                 Admin UID (Firebase Auth UID)
               </label>
               <input
+                id="settings-admin-uid"
                 type="text"
                 value={newUid}
                 onChange={(e) => setNewUid(e.target.value)}
                 placeholder="User UID from Firebase Auth"
                 required
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-700/80 rounded-xl text-white focus:outline-none focus:border-brand-500"
+                disabled={adminProfile?.role !== 'superadmin'}
+                className="w-full px-3 py-2 bg-slate-950 border border-slate-700/80 rounded-xl text-white focus:outline-none focus:border-brand-500 disabled:opacity-50"
               />
             </div>
 
@@ -173,12 +213,14 @@ export const Settings: React.FC = () => {
                 Admin Email
               </label>
               <input
+                id="settings-admin-email"
                 type="email"
                 value={newEmail}
                 onChange={(e) => setNewEmail(e.target.value)}
                 placeholder="newadmin@trucklink.ai"
                 required
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-700/80 rounded-xl text-white focus:outline-none focus:border-brand-500"
+                disabled={adminProfile?.role !== 'superadmin'}
+                className="w-full px-3 py-2 bg-slate-950 border border-slate-700/80 rounded-xl text-white focus:outline-none focus:border-brand-500 disabled:opacity-50"
               />
             </div>
 
@@ -187,11 +229,13 @@ export const Settings: React.FC = () => {
                 Display Name
               </label>
               <input
+                id="settings-admin-name"
                 type="text"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 placeholder="Full Name"
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-700/80 rounded-xl text-white focus:outline-none focus:border-brand-500"
+                disabled={adminProfile?.role !== 'superadmin'}
+                className="w-full px-3 py-2 bg-slate-950 border border-slate-700/80 rounded-xl text-white focus:outline-none focus:border-brand-500 disabled:opacity-50"
               />
             </div>
 
@@ -200,9 +244,11 @@ export const Settings: React.FC = () => {
                 Role Permission
               </label>
               <select
+                id="settings-admin-role"
                 value={newRole}
-                onChange={(e) => setNewRole(e.target.value as any)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-700/80 rounded-xl text-white focus:outline-none focus:border-brand-500"
+                onChange={(e) => setNewRole(e.target.value as 'admin' | 'moderator')}
+                disabled={adminProfile?.role !== 'superadmin'}
+                className="w-full px-3 py-2 bg-slate-950 border border-slate-700/80 rounded-xl text-white focus:outline-none focus:border-brand-500 disabled:opacity-50"
               >
                 <option value="admin">Admin (Full Operational Controls)</option>
                 <option value="moderator">Moderator (Read-Only & Dispatch)</option>
@@ -211,10 +257,10 @@ export const Settings: React.FC = () => {
 
             <button
               type="submit"
-              disabled={addingAdmin}
-              className="w-full mt-2 py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl shadow-md transition-colors"
+              disabled={addingAdmin || adminProfile?.role !== 'superadmin'}
+              className="w-full mt-2 py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl shadow-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {addingAdmin ? 'Saving...' : 'Authorize Admin'}
+              {addingAdmin ? 'Granting via Cloud Function...' : 'Authorize Admin'}
             </button>
           </form>
         </div>
@@ -235,25 +281,35 @@ export const Settings: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
-              {adminsList.map((a) => (
-                <tr key={a.uid} className="hover:bg-slate-800/30">
-                  <td className="py-3 px-4">
-                    <p className="font-bold text-white">{a.displayName || 'Administrator'}</p>
-                    <p className="text-slate-400">{a.email}</p>
-                  </td>
-                  <td className="py-3 px-4 font-mono text-sky-400">{a.uid}</td>
-                  <td className="py-3 px-4">
-                    <Badge variant={a.role === 'superadmin' ? 'purple' : 'info'} size="sm">
-                      {a.role || 'admin'}
-                    </Badge>
-                  </td>
-                  <td className="py-3 px-4">
-                    <Badge variant={a.status === 'suspended' ? 'danger' : 'success'} size="sm">
-                      {a.status || 'active'}
-                    </Badge>
-                  </td>
+              {loadingAdmins ? (
+                <tr>
+                  <td colSpan={4} className="py-6 text-center text-slate-500">Loading administrators…</td>
                 </tr>
-              ))}
+              ) : adminsList.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="py-6 text-center text-slate-500">No administrators found.</td>
+                </tr>
+              ) : (
+                adminsList.map((a) => (
+                  <tr key={a.uid} className="hover:bg-slate-800/30">
+                    <td className="py-3 px-4">
+                      <p className="font-bold text-white">{a.displayName || 'Administrator'}</p>
+                      <p className="text-slate-400"><Mail className="inline w-3 h-3 mr-1" />{a.email}</p>
+                    </td>
+                    <td className="py-3 px-4 font-mono text-sky-400">{a.uid}</td>
+                    <td className="py-3 px-4">
+                      <Badge variant={a.role === 'superadmin' ? 'purple' : 'info'} size="sm">
+                        {a.role || 'admin'}
+                      </Badge>
+                    </td>
+                    <td className="py-3 px-4">
+                      <Badge variant={a.status === 'suspended' ? 'danger' : 'success'} size="sm">
+                        {a.status || 'active'}
+                      </Badge>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

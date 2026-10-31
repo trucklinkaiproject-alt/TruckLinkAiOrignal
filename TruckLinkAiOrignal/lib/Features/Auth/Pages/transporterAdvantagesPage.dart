@@ -70,7 +70,7 @@ class TransporterAdvantagesPage extends StatelessWidget {
                               vertical: 5,
                             ),
                             decoration: BoxDecoration(
-                              color: Appcolors.tertiaryGreen.withOpacity(0.1),
+                              color: Appcolors.tertiaryGreen.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(

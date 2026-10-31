@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:trucklinkai_orignal/Core/Services/appLogger.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/bloc/getBrokerBloc/getBrokerState.dart';
 
 class GetBrokerCubit extends Cubit<GetBrokerState> {
@@ -11,6 +11,7 @@ class GetBrokerCubit extends Cubit<GetBrokerState> {
   List<Map<String, dynamic>> brokers = [];
   Map<String, dynamic> selectedBroker = {};
   StreamSubscription<QuerySnapshot>? _brokerSubscription;
+  Timer? _debounceTimer;
   String? _activeVehicleTypeFilter;
 
   /// Helper to check if a broker is currently online
@@ -95,8 +96,8 @@ class GetBrokerCubit extends Cubit<GetBrokerState> {
           return true;
         }
       }
-    } catch (e) {
-      debugPrint("GetBrokerCubit error checking broker network vehicles: $e");
+    } catch (e, stack) {
+      AppLogger.error("GetBrokerCubit error checking broker network vehicles", e, stack, "GetBrokerCubit");
     }
 
     return false;
@@ -105,6 +106,10 @@ class GetBrokerCubit extends Cubit<GetBrokerState> {
   /// Fetches and listens to brokers filtered by:
   /// 1. Broker is currently ONLINE
   /// 2. Broker has at least ONE driver in their network with the required vehicle type
+  /// Optimized (Phase 2.12):
+  /// - Fast path: checks broker.vehicle_types array without secondary Firestore queries
+  /// - Parallel resolution: uses Future.wait instead of sequential awaits
+  /// - Debouncing: prevents UI thrashing on frequent broker updates
   void listenToEligibleBrokers(String requiredVehicleType) {
     try {
       if (isClosed) return;
@@ -113,55 +118,80 @@ class GetBrokerCubit extends Cubit<GetBrokerState> {
 
       _brokerSubscription?.cancel();
       _brokerSubscription = _firestore.collection("Broker").snapshots().listen(
-        (snapshot) async {
+        (snapshot) {
           if (isClosed) return;
 
-          final allBrokers = snapshot.docs.map((doc) {
-            return {
-              "id": doc.id,
-              "brokerId": doc.id,
-              "uid": doc.id,
-              ...doc.data(),
-            };
-          }).toList();
+          _debounceTimer?.cancel();
+          _debounceTimer = Timer(const Duration(milliseconds: 250), () async {
+            if (isClosed) return;
 
-          final List<Map<String, dynamic>> eligibleBrokers = [];
+            final allBrokers = snapshot.docs.map((doc) {
+              return {
+                "id": doc.id,
+                "brokerId": doc.id,
+                "uid": doc.id,
+                ...doc.data(),
+              };
+            }).toList();
 
-          for (final broker in allBrokers) {
-            // CONDITION 1: Broker must be currently Online
-            if (!isBrokerOnline(broker)) {
-              continue;
-            }
+            final targetVehicle = _activeVehicleTypeFilter ?? requiredVehicleType;
 
-            // CONDITION 2: Broker must have at least one driver with required vehicle type
-            final String brokerId = (broker['brokerId'] ?? broker['uid'] ?? broker['id'] ?? '').toString();
-            if (brokerId.isEmpty) continue;
+            // Resolve eligible brokers in parallel
+            final checkResults = await Future.wait(allBrokers.map((broker) async {
+              // CONDITION 1: Broker must be currently Online
+              if (!isBrokerOnline(broker)) {
+                return null;
+              }
 
-            final bool hasVehicle = await brokerHasRequiredVehicle(
-              firestore: _firestore,
-              brokerId: brokerId,
-              requiredVehicleType: _activeVehicleTypeFilter ?? requiredVehicleType,
-            );
+              final String brokerId = (broker['brokerId'] ?? broker['uid'] ?? broker['id'] ?? '').toString();
+              if (brokerId.isEmpty) return null;
 
-            if (hasVehicle) {
-              eligibleBrokers.add({
-                ...broker,
-                'matched_vehicle_type': requiredVehicleType,
-                'is_online': true,
-              });
-            }
-          }
+              // FAST PATH: Check maintained vehicle_types array on Broker doc
+              final dynamic vTypesRaw = broker['vehicle_types'] ?? broker['vehicleTypes'];
+              if (vTypesRaw is List && vTypesRaw.isNotEmpty) {
+                final hasMatch = vTypesRaw.any((vt) => matchesVehicleType(vt?.toString(), targetVehicle));
+                if (hasMatch) {
+                  return {
+                    ...broker,
+                    'matched_vehicle_type': targetVehicle,
+                    'is_online': true,
+                  };
+                }
+                return null;
+              }
 
-          if (isClosed) return;
+              // FALLBACK: Query network if array is not populated yet
+              final bool hasVehicle = await brokerHasRequiredVehicle(
+                firestore: _firestore,
+                brokerId: brokerId,
+                requiredVehicleType: targetVehicle,
+              );
 
-          brokers = eligibleBrokers;
-          emit(GetBrokerLoadedState());
+              if (hasVehicle) {
+                return {
+                  ...broker,
+                  'matched_vehicle_type': targetVehicle,
+                  'is_online': true,
+                };
+              }
+
+              return null;
+            }));
+
+            if (isClosed) return;
+
+            final eligibleBrokers = checkResults.whereType<Map<String, dynamic>>().toList();
+            brokers = eligibleBrokers;
+            emit(GetBrokerLoadedState());
+          });
         },
-        onError: (e) {
+        onError: (e, stack) {
+          AppLogger.error("Broker stream error", e, stack, "GetBrokerCubit");
           if (!isClosed) emit(GetBrokerErrorState(e.toString()));
         },
       );
-    } catch (e) {
+    } catch (e, stack) {
+      AppLogger.error("listenToEligibleBrokers error", e, stack, "GetBrokerCubit");
       if (!isClosed) emit(GetBrokerErrorState(e.toString()));
     }
   }
@@ -202,9 +232,21 @@ class GetBrokerCubit extends Cubit<GetBrokerState> {
     listenToBrokers();
   }
 
+  void stopListening() {
+    _debounceTimer?.cancel();
+    _brokerSubscription?.cancel();
+    _brokerSubscription = null;
+    brokers.clear();
+    selectedBroker.clear();
+    _activeVehicleTypeFilter = null;
+    if (!isClosed) emit(GetBrokerInitialState());
+  }
+
   @override
   Future<void> close() {
+    _debounceTimer?.cancel();
     _brokerSubscription?.cancel();
     return super.close();
   }
 }
+

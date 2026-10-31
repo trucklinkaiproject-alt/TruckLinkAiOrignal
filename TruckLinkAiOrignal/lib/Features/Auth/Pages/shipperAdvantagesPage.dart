@@ -76,7 +76,7 @@ class _ShipperAdvantagesPageState extends State<ShipperAdvantagesPage> {
                               vertical: 5,
                             ),
                             decoration: BoxDecoration(
-                              color: Appcolors.primaryBlue.withOpacity(0.1),
+                              color: Appcolors.primaryBlue.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(

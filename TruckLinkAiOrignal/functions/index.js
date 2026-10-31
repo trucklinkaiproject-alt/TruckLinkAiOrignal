@@ -1,4 +1,4 @@
-const { onDocumentCreated } = require("firebase-functions/v2/firestore");
+const { onDocumentCreated, onDocumentUpdated, onDocumentWritten } = require("firebase-functions/v2/firestore");
 const admin = require("firebase-admin");
 
 if (!admin.apps.length) {
@@ -148,3 +148,123 @@ exports.sendPushNotificationOnFirestoreCreate = onDocumentCreated(
     }
   }
 );
+
+/**
+ * Cloud Function Trigger: Syncs Driver updates (location, rating, status, vehicle)
+ * to Broker/{brokerId}/DriverNetwork/{driverId} subcollection mirror (Phase 2.11).
+ */
+exports.syncDriverToDriverNetwork = onDocumentUpdated(
+  "Driver/{driverId}",
+  async (event) => {
+    const { driverId } = event.params;
+    const beforeData = event.data.before ? event.data.before.data() : null;
+    const afterData = event.data.after ? event.data.after.data() : null;
+
+    if (!afterData) return;
+
+    const brokerId = afterData.broker_id || afterData.brokerId;
+    if (!brokerId) return;
+
+    // Check if relevant fields changed
+    const relevantKeys = [
+      'name', 'driver_name', 'email', 'phone', 'vehicle_number', 'vehicle_type',
+      'driver_rating', 'rating', 'total_trips', 'completed_trips', 'cancelled_trips',
+      'availability_status', 'is_online', 'isOnline', 'driver_latitude',
+      'driver_longitude', 'last_location_update', 'location'
+    ];
+
+    let hasChange = false;
+    if (!beforeData) {
+      hasChange = true;
+    } else {
+      for (const k of relevantKeys) {
+        if (JSON.stringify(beforeData[k]) !== JSON.stringify(afterData[k])) {
+          hasChange = true;
+          break;
+        }
+      }
+    }
+
+    if (!hasChange) return;
+
+    try {
+      const networkRef = admin
+        .firestore()
+        .collection("Broker")
+        .doc(brokerId)
+        .collection("DriverNetwork")
+        .doc(driverId);
+
+      const networkSnap = await networkRef.get();
+      if (!networkSnap.exists) {
+        // Driver is not in this broker's network
+        return;
+      }
+
+      const syncPayload = {
+        updated_at: admin.firestore.FieldValue.serverTimestamp(),
+      };
+
+      relevantKeys.forEach((k) => {
+        if (afterData[k] !== undefined) {
+          syncPayload[k] = afterData[k];
+        }
+      });
+
+      await networkRef.set(syncPayload, { merge: true });
+      console.log(`[DriverNetwork Sync] Successfully synced driver ${driverId} to broker ${brokerId}`);
+    } catch (err) {
+      console.error(`[DriverNetwork Sync] Error syncing driver ${driverId} to broker ${brokerId}:`, err);
+    }
+  }
+);
+
+/**
+ * Cloud Function Trigger: Automatically maintains vehicle_types array on the Broker doc
+ * whenever drivers join, leave, or update within Broker/{brokerId}/DriverNetwork (Phase 2.12).
+ */
+exports.syncBrokerVehicleTypes = onDocumentWritten(
+  "Broker/{brokerId}/DriverNetwork/{driverId}",
+  async (event) => {
+    const { brokerId } = event.params;
+
+    try {
+      const networkSnap = await admin
+        .firestore()
+        .collection("Broker")
+        .doc(brokerId)
+        .collection("DriverNetwork")
+        .get();
+
+      const uniqueTypes = new Set();
+
+      networkSnap.forEach((doc) => {
+        const data = doc.data();
+        const vType = (data.vehicle_type || data.vehicleType || "").toString().trim();
+        if (vType) {
+          uniqueTypes.add(vType);
+        }
+      });
+
+      const vehicleTypesList = Array.from(uniqueTypes);
+
+      await admin
+        .firestore()
+        .collection("Broker")
+        .doc(brokerId)
+        .set(
+          {
+            vehicle_types: vehicleTypesList,
+            vehicleTypes: vehicleTypesList,
+            updated_at: admin.firestore.FieldValue.serverTimestamp(),
+          },
+          { merge: true }
+        );
+
+      console.log(`[Broker Vehicle Types] Updated vehicle_types for broker ${brokerId}:`, vehicleTypesList);
+    } catch (err) {
+      console.error(`[Broker Vehicle Types] Error updating vehicle_types for broker ${brokerId}:`, err);
+    }
+  }
+);
+

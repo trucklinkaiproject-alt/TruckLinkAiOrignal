@@ -77,7 +77,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                               width: badgeSize,
                               height: badgeSize,
                               decoration: BoxDecoration(
-                                color: Appcolors.primaryBlue.withOpacity(0.1),
+                                color: Appcolors.primaryBlue.withValues(alpha: 0.1),
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
@@ -137,7 +137,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                   backgroundColor: Appcolors.primaryBlue,
                                   disabledBackgroundColor: Appcolors
                                       .primaryBlue
-                                      .withOpacity(0.6),
+                                      .withValues(alpha: 0.6),
                                   elevation: 0,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(28),

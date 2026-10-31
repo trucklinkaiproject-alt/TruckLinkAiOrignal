@@ -14,6 +14,13 @@ class BrokerListPage extends StatefulWidget {
 class _BrokerListPageState extends State<BrokerListPage> {
   final TextEditingController _searchController = TextEditingController();
   int _selectedSort = 0; // 0=Top Rated, 1=Nearest, 2=Fastest
+  late final Stream<QuerySnapshot> _brokersStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _brokersStream = FirebaseFirestore.instance.collection("Broker").snapshots();
+  }
 
   List<Map<String, dynamic>> _filterAndSortBrokers(List<Map<String, dynamic>> rawBrokers) {
     final query = _searchController.text.trim().toLowerCase();
@@ -62,7 +69,7 @@ class _BrokerListPageState extends State<BrokerListPage> {
       backgroundColor: const Color(0xFFF5F6FA),
       body: SafeArea(
         child: StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance.collection("Broker").snapshots(),
+          stream: _brokersStream,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator(color: Appcolors.primaryBlue));
@@ -187,7 +194,7 @@ class _BrokerListPageState extends State<BrokerListPage> {
                                 24,
                               ),
                               itemCount: filteredBrokers.length,
-                              separatorBuilder: (_, __) => const SizedBox(height: 12),
+                              separatorBuilder: (_, _) => const SizedBox(height: 12),
                               itemBuilder: (context, index) {
                                 final brokerData = filteredBrokers[index];
                                 return _BrokerCard(
@@ -232,7 +239,7 @@ class _BackButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withValues(alpha: 0.06),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -278,7 +285,7 @@ class _SearchField extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: Colors.grey.withOpacity(0.15)),
+          borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.15)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
@@ -311,10 +318,10 @@ class _FilterChip extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? Appcolors.primaryBlue.withOpacity(0.12) : Colors.white,
+          color: selected ? Appcolors.primaryBlue.withValues(alpha: 0.12) : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: selected ? Appcolors.primaryBlue : Colors.grey.withOpacity(0.2),
+            color: selected ? Appcolors.primaryBlue : Colors.grey.withValues(alpha: 0.2),
             width: 1.2,
           ),
         ),
@@ -377,7 +384,7 @@ class _BrokerCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 10,
               offset: const Offset(0, 3),
             ),
@@ -390,7 +397,7 @@ class _BrokerCard extends StatelessWidget {
               width: 52,
               height: 52,
               decoration: BoxDecoration(
-                color: Appcolors.primaryBlue.withOpacity(0.1),
+                color: Appcolors.primaryBlue.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,
@@ -530,7 +537,7 @@ class _EmptyState extends StatelessWidget {
               width: 84,
               height: 84,
               decoration: BoxDecoration(
-                color: Appcolors.primaryBlue.withOpacity(0.1),
+                color: Appcolors.primaryBlue.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: const Icon(

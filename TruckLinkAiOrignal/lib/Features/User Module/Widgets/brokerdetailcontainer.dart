@@ -5,7 +5,7 @@ class Brokerdetailcontainer extends StatelessWidget {
   const Brokerdetailcontainer({
     super.key,
     required this.name,
-    required this.Location,
+    required this.location,
     required this.rating,
     required this.reviews,
     required this.estTime,
@@ -13,7 +13,7 @@ class Brokerdetailcontainer extends StatelessWidget {
     required this.brokerUid,
   });
   final String name;
-  final String Location;
+  final String location;
   final String rating;
   final String reviews;
   final String estTime;
@@ -80,7 +80,7 @@ class Brokerdetailcontainer extends StatelessWidget {
                   ),
                   SizedBox(width: 5),
                   Text(
-                    Location,
+                    location,
                     style: TextStyle(color: Colors.grey, fontSize: 10),
                   ),
                 ],

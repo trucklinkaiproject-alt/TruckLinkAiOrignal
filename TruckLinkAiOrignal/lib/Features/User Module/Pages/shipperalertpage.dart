@@ -38,6 +38,22 @@ class _ShipperAlertPageState extends State<ShipperAlertPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _isClearing = false;
+  Stream<QuerySnapshot>? _notificationStream;
+
+  @override
+  void initState() {
+    super.initState();
+    final String? userUid = _auth.currentUser?.uid;
+    if (userUid != null && userUid.isNotEmpty) {
+      _notificationStream = _firestore
+          .collection("User")
+          .doc(userUid)
+          .collection("Notifications")
+          .orderBy("timestamp", descending: true)
+          .limit(50)
+          .snapshots();
+    }
+  }
 
   Future<void> _markAllAsRead(List<QueryDocumentSnapshot> docs) async {
     final String? userUid = _auth.currentUser?.uid;
@@ -181,12 +197,7 @@ class _ShipperAlertPageState extends State<ShipperAlertPage> {
       backgroundColor: const Color(0xFFF5F6FA),
       body: SafeArea(
         child: StreamBuilder<QuerySnapshot>(
-          stream: _firestore
-              .collection("User")
-              .doc(userUid)
-              .collection("Notifications")
-              .orderBy("timestamp", descending: true)
-              .snapshots(),
+          stream: _notificationStream ?? const Stream.empty(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
               return const Center(child: CircularProgressIndicator(color: Appcolors.primaryBlue));
@@ -300,7 +311,7 @@ class _ShipperAlertPageState extends State<ShipperAlertPage> {
                                 24,
                               ),
                               itemCount: items.length,
-                              separatorBuilder: (_, __) => const SizedBox(height: 12),
+                              separatorBuilder: (_, _) => const SizedBox(height: 12),
                               itemBuilder: (context, index) {
                                 return _NotificationCard(
                                   item: items[index],
@@ -367,7 +378,7 @@ class _NotificationCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 10,
               offset: const Offset(0, 3),
             ),
@@ -380,7 +391,7 @@ class _NotificationCard extends StatelessWidget {
               width: 42,
               height: 42,
               decoration: BoxDecoration(
-                color: style.color.withOpacity(0.12),
+                color: style.color.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(style.icon, color: style.color, size: 22),
@@ -464,7 +475,7 @@ class _EmptyState extends StatelessWidget {
               width: 84,
               height: 84,
               decoration: BoxDecoration(
-                color: Appcolors.primaryBlue.withOpacity(0.1),
+                color: Appcolors.primaryBlue.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: const Icon(

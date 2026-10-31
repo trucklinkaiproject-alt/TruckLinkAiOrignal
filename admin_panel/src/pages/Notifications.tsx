@@ -16,8 +16,9 @@ export const Notifications: React.FC = () => {
   const [sending, setSending] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  const { adminProfile } = useAuth();
-  const adminEmail = adminProfile?.email || 'admin@trucklink.ai';
+  const { adminProfile, currentUser } = useAuth();
+  const adminEmail = currentUser?.email || adminProfile?.email || 'admin@trucklink.ai';
+  const adminId = currentUser?.uid || adminProfile?.uid || 'admin';
 
   useEffect(() => {
     const unsub = subscribeNotifications((data) => {
@@ -33,7 +34,7 @@ export const Notifications: React.FC = () => {
     setSending(true);
     setSuccessMsg(null);
     try {
-      await sendBroadcastNotification(title, message, targetAudience, adminEmail);
+      await sendBroadcastNotification(title, message, targetAudience, adminId, adminEmail);
       setTitle('');
       setMessage('');
       setSuccessMsg('Broadcast alert dispatched successfully & FCM push notification sent to active mobile devices.');

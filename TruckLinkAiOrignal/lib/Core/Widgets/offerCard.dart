@@ -35,7 +35,6 @@ class _OfferCardState extends State<OfferCard> {
   String? _realName;
   double? _realRating;
   int _realReviewCount = 0;
-  List<Map<String, dynamic>> _brokerReviews = [];
 
   @override
   void initState() {
@@ -81,7 +80,6 @@ class _OfferCardState extends State<OfferCard> {
             .get();
         if (revSnap.docs.isNotEmpty && mounted) {
           setState(() {
-            _brokerReviews = revSnap.docs.map((d) => d.data()).toList();
             if (_realReviewCount == 0) _realReviewCount = revSnap.docs.length;
           });
         }
@@ -106,7 +104,7 @@ class _OfferCardState extends State<OfferCard> {
         border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 15,
             offset: const Offset(0, 6),
           ),
@@ -514,12 +512,12 @@ class _OfferCardState extends State<OfferCard> {
 //         borderRadius: BorderRadius.circular(20),
 //         boxShadow: [
 //           BoxShadow(
-//             color: Colors.black.withOpacity(0.06),
+//             color: Colors.black.withValues(alpha: 0.06),
 //             blurRadius: 20,
 //             offset: const Offset(0, 8),
 //           ),
 //           BoxShadow(
-//             color: Colors.black.withOpacity(0.03),
+//             color: Colors.black.withValues(alpha: 0.03),
 //             blurRadius: 4,
 //             offset: const Offset(0, 1),
 //           ),
@@ -551,7 +549,7 @@ class _OfferCardState extends State<OfferCard> {
 //                           borderRadius: BorderRadius.circular(16),
 //                           boxShadow: [
 //                             BoxShadow(
-//                               color: Colors.blue.withOpacity(0.3),
+//                               color: Colors.blue.withValues(alpha: 0.3),
 //                               blurRadius: 8,
 //                               offset: const Offset(0, 4),
 //                             ),
@@ -588,7 +586,7 @@ class _OfferCardState extends State<OfferCard> {
 //                                     vertical: 3,
 //                                   ),
 //                                   decoration: BoxDecoration(
-//                                     color: Colors.amber.withOpacity(0.12),
+//                                     color: Colors.amber.withValues(alpha: 0.12),
 //                                     borderRadius: BorderRadius.circular(8),
 //                                   ),
 //                                   child: Row(
@@ -731,7 +729,7 @@ class _OfferCardState extends State<OfferCard> {
 //                         borderRadius: BorderRadius.circular(14),
 //                         boxShadow: [
 //                           BoxShadow(
-//                             color: Colors.green.withOpacity(0.3),
+//                             color: Colors.green.withValues(alpha: 0.3),
 //                             blurRadius: 10,
 //                             offset: const Offset(0, 4),
 //                           ),

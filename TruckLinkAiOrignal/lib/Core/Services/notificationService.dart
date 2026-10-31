@@ -12,6 +12,8 @@ class NotificationTypes {
   static const String driverAccepted = 'driver_accepted';
   static const String driverRejected = 'driver_rejected';
   static const String driverAtPickup = 'driver_at_pickup';
+  static const String driverAtDrop = 'driver_at_drop';
+  static const String driverArrived = 'driver_arrived';
   static const String tripStarted = 'trip_started';
   static const String tripCompleted = 'trip_completed';
   static const String newReview = 'new_review';

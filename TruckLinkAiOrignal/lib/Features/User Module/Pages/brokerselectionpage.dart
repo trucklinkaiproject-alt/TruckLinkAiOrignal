@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
+import 'package:trucklinkai_orignal/Features/User%20Module/Models/brokerRecommendationModel.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/Pages/brokerDetailpage.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/Pages/brokerListPage.dart';
+import 'package:trucklinkai_orignal/Features/User%20Module/Widgets/aiRecommendationCard.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/Widgets/appBar.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/Widgets/brokerdetailcontainer.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/bloc/CreateReqBloc/createReqcubit.dart';
+import 'package:trucklinkai_orignal/Features/User%20Module/bloc/brokerRecommendationBloc/brokerRecommendationCubit.dart';
+import 'package:trucklinkai_orignal/Features/User%20Module/bloc/brokerRecommendationBloc/brokerRecommendationState.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/bloc/getBrokerBloc/getBrokerCubit.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/bloc/getBrokerBloc/getBrokerState.dart';
 
@@ -35,6 +39,52 @@ class _BrokerSelectionPageState extends State<BrokerSelectionPage> {
     } else {
       context.read<GetBrokerCubit>().fetchAllBroker();
     }
+
+    _fetchAiRecommendations();
+  }
+
+  void _fetchAiRecommendations() {
+    final currentReq = context.read<CreateReqCubit>().currentRequest;
+    if (currentReq != null) {
+      context.read<BrokerRecommendationCubit>().fetchRecommendations(request: currentReq);
+    }
+  }
+
+  void _selectBrokerFromAi(BrokerRecommendationModel rec) {
+    final currentReq = context.read<CreateReqCubit>().currentRequest;
+    if (currentReq != null) {
+      currentReq.brokerId = rec.brokerId;
+    }
+
+    final allBrokers = context.read<GetBrokerCubit>().brokers;
+    Map<String, dynamic> brokerData;
+    final matchIndex = allBrokers.indexWhere(
+      (b) => (b['uid'] ?? b['brokerId'] ?? b['id']) == rec.brokerId,
+    );
+
+    if (matchIndex != -1) {
+      brokerData = allBrokers[matchIndex];
+    } else {
+      brokerData = {
+        'brokerId': rec.brokerId,
+        'uid': rec.brokerId,
+        'name': rec.brokerName,
+        'broker_name': rec.brokerName,
+        'phone': rec.brokerPhone,
+        'rating': rec.brokerRating,
+        'reviews': rec.totalReviews,
+        'vehicleType': rec.requiredVehicleType,
+        'nearest_driver_distance_km': rec.nearestDriverDistanceKm,
+        'recommendation_score': rec.recommendationScore,
+      };
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BrokerDetailPage(brokerData: brokerData),
+      ),
+    );
   }
 
   @override
@@ -64,10 +114,10 @@ class _BrokerSelectionPageState extends State<BrokerSelectionPage> {
                     ),
                     margin: const EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(
-                      color: Appcolors.primaryBlue.withOpacity(0.08),
+                      color: Appcolors.primaryBlue.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                        color: Appcolors.primaryBlue.withOpacity(0.2),
+                        color: Appcolors.primaryBlue.withValues(alpha: 0.2),
                       ),
                     ),
                     child: Row(
@@ -75,7 +125,7 @@ class _BrokerSelectionPageState extends State<BrokerSelectionPage> {
                         Container(
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
-                            color: Appcolors.primaryBlue.withOpacity(0.15),
+                            color: Appcolors.primaryBlue.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Icon(
@@ -114,7 +164,7 @@ class _BrokerSelectionPageState extends State<BrokerSelectionPage> {
                             vertical: 3,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.green.withOpacity(0.15),
+                            color: Colors.green.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Row(
@@ -140,8 +190,170 @@ class _BrokerSelectionPageState extends State<BrokerSelectionPage> {
                     ),
                   ),
 
+                // ── AI Recommendation Section ──────────────────────────
+                BlocBuilder<BrokerRecommendationCubit, BrokerRecommendationState>(
+                  builder: (context, aiState) {
+                    if (aiState is BrokerRecommendationLoadingState) {
+                      return Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.only(bottom: 20),
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(
+                            color: Appcolors.primaryBlue.withValues(alpha: 0.2),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.2,
+                                color: Appcolors.primaryBlue,
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "AI Recommender Running...",
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    aiState.message,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.black54,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    if (aiState is BrokerRecommendationLoadedState &&
+                        aiState.recommendations.isNotEmpty) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(5),
+                                decoration: BoxDecoration(
+                                  color: Appcolors.primaryBlue.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(
+                                  Icons.auto_awesome,
+                                  color: Appcolors.primaryBlue,
+                                  size: 16,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Text(
+                                "Top AI Broker Matches",
+                                style: TextStyle(
+                                  fontSize: 15.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              const Spacer(),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: Appcolors.primaryBlue.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  "${aiState.recommendations.length} Best Ranked",
+                                  style: const TextStyle(
+                                    color: Appcolors.primaryBlue,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          ...aiState.recommendations.map((rec) {
+                            return AiRecommendationCard(
+                              recommendation: rec,
+                              onTap: () => _selectBrokerFromAi(rec),
+                            );
+                          }),
+                          const SizedBox(height: 14),
+                        ],
+                      );
+                    }
+
+                    if (aiState is BrokerRecommendationErrorState) {
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 18),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.amber.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.info_outline, color: Colors.orange, size: 18),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                aiState.error,
+                                style: const TextStyle(fontSize: 11.5, color: Colors.black87),
+                              ),
+                            ),
+                            if (aiState.canRetry) ...[
+                              const SizedBox(width: 8),
+                              InkWell(
+                                onTap: _fetchAiRecommendations,
+                                borderRadius: BorderRadius.circular(8),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                  decoration: BoxDecoration(
+                                    color: Appcolors.primaryBlue,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Text(
+                                    "Retry AI",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      );
+                    }
+
+                    return const SizedBox.shrink();
+                  },
+                ),
+
                 const Text(
-                  "Recommended Brokers",
+                  "All Online Verified Brokers",
                   style: TextStyle(
                     color: Colors.black87,
                     fontSize: 15,
@@ -188,7 +400,7 @@ class _BrokerSelectionPageState extends State<BrokerSelectionPage> {
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.03),
+                              color: Colors.black.withValues(alpha: 0.03),
                               blurRadius: 10,
                               offset: const Offset(0, 3),
                             ),
@@ -200,7 +412,7 @@ class _BrokerSelectionPageState extends State<BrokerSelectionPage> {
                               width: 64,
                               height: 64,
                               decoration: BoxDecoration(
-                                color: Colors.orange.withOpacity(0.12),
+                                color: Colors.orange.withValues(alpha: 0.12),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
@@ -244,7 +456,7 @@ class _BrokerSelectionPageState extends State<BrokerSelectionPage> {
 
                         return Brokerdetailcontainer(
                           name: broker["name"] ?? broker["broker_name"] ?? "Broker",
-                          Location:
+                          location:
                               broker["location"] ?? broker["address"] ?? broker["city"] ?? "Location not specified",
                           rating: broker["rating"]?.toString() ?? "0.0",
                           reviews: broker["reviews"]?.toString() ?? broker["total_reviews"]?.toString() ?? "0",

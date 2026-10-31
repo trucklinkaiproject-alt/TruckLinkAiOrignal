@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
+import 'package:trucklinkai_orignal/Core/Services/appLogger.dart';
 import 'package:trucklinkai_orignal/Core/Widgets/backArrowButton.dart';
 import 'package:trucklinkai_orignal/Features/User Module/Pages/brokerchatpage.dart';
 
@@ -106,7 +108,9 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
         _participantCache[participantId] = result;
         return result;
       }
-    } catch (_) {}
+    } catch (e, stack) {
+      AppLogger.error("Failed to load participant profile for $participantId", e, stack, "BrokerChatInboxPage");
+    }
 
     _participantCache[participantId] = result;
     return result;
@@ -246,7 +250,7 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.03),
+                              color: Colors.black.withValues(alpha: 0.03),
                               blurRadius: 10,
                               offset: const Offset(0, 3),
                             ),
@@ -381,6 +385,11 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
                           docDt = lastMessageTime;
                         }
 
+                        final Map<String, dynamic>? pNames = chatData['participantNames'] as Map<String, dynamic>?;
+                        final String denormName = (pNames?[otherId] ?? chatData['name_$otherId'] ?? '').toString();
+                        final Map<String, dynamic>? pRoles = chatData['participantRoles'] as Map<String, dynamic>?;
+                        final String denormRole = (pRoles?[otherId] ?? chatData['role_$otherId'] ?? inferredRole ?? '').toString();
+
                         if (!conversationMap.containsKey(otherId)) {
                           conversationMap[otherId] = _BrokerConversationItem(
                             canonicalChatId: canonicalChatId,
@@ -393,6 +402,8 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
                             orderId: orderId,
                             inferredRole: inferredRole,
                             rawChatId: rawChatId,
+                            denormalizedName: denormName,
+                            denormalizedRole: denormRole,
                           );
                         } else {
                           final existing = conversationMap[otherId]!;
@@ -410,6 +421,8 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
                               orderId: orderId.isNotEmpty ? orderId : existing.orderId,
                               inferredRole: inferredRole ?? existing.inferredRole,
                               rawChatId: rawChatId,
+                              denormalizedName: denormName.isNotEmpty ? denormName : existing.denormalizedName,
+                              denormalizedRole: denormRole.isNotEmpty ? denormRole : existing.denormalizedRole,
                             );
                           } else {
                             existing.unreadCount = combinedUnread;
@@ -440,10 +453,51 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
                           20,
                         ),
                         itemCount: sortedConversations.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 10),
+                        separatorBuilder: (_, _) => const SizedBox(height: 10),
                         itemBuilder: (context, index) {
                           final conv = sortedConversations[index];
 
+                          // FAST PATH (Phase 2.14): Use denormalized participant data if available, eliminating N+1 queries
+                          if (conv.denormalizedName != null && conv.denormalizedName!.isNotEmpty) {
+                            final String participantName = conv.denormalizedName!;
+                            final String participantRole = conv.denormalizedRole.isNotEmpty ? conv.denormalizedRole : (conv.inferredRole ?? 'Customer');
+
+                            // Filter by search query
+                            if (_searchQuery.isNotEmpty) {
+                              final matchesName = participantName.toLowerCase().contains(_searchQuery);
+                              final matchesOrder = conv.orderId.toLowerCase().contains(_searchQuery);
+                              final matchesMsg = conv.lastMessage.toLowerCase().contains(_searchQuery);
+
+                              if (!matchesName && !matchesOrder && !matchesMsg) {
+                                return const SizedBox.shrink();
+                              }
+                            }
+
+                            // Filter by role chip
+                            if (_selectedFilter == "Customers" && participantRole != "Customer") {
+                              return const SizedBox.shrink();
+                            }
+                            if (_selectedFilter == "Drivers" && participantRole != "Driver") {
+                              return const SizedBox.shrink();
+                            }
+
+                            return _buildConversationTile(
+                              context: context,
+                              chatId: conv.canonicalChatId,
+                              participantId: conv.otherParticipantId,
+                              participantName: participantName,
+                              participantRole: participantRole,
+                              avatarUrl: null,
+                              orderId: conv.orderId,
+                              lastMessage: conv.lastMessage,
+                              lastMessageTime: conv.lastMessageTime,
+                              lastSenderId: conv.lastSenderId,
+                              currentBrokerId: currentBrokerId,
+                              unreadCount: conv.unreadCount,
+                            );
+                          }
+
+                          // FALLBACK: Query profile if chat document is from legacy data
                           return FutureBuilder<Map<String, dynamic>>(
                             future: _getParticipantProfile(conv.otherParticipantId, conv.inferredRole),
                             builder: (context, profileSnap) {
@@ -517,12 +571,12 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
           color: isSelected ? Appcolors.secondaryPurple : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? Appcolors.secondaryPurple : Colors.grey.withOpacity(0.2),
+            color: isSelected ? Appcolors.secondaryPurple : Colors.grey.withValues(alpha: 0.2),
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: Appcolors.secondaryPurple.withOpacity(0.25),
+                    color: Appcolors.secondaryPurple.withValues(alpha: 0.25),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   )
@@ -564,6 +618,14 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
         onTap: () {
+          try {
+            _firestore.collection('chats').doc(chatId).set({
+              'unreadCount_$currentBrokerId': 0,
+            }, SetOptions(merge: true));
+          } catch (e, stack) {
+            AppLogger.error("Failed to reset unread count", e, stack, "BrokerChatInboxPage");
+          }
+
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -587,15 +649,15 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
               color: isUnread
-                  ? Appcolors.secondaryPurple.withOpacity(0.35)
-                  : Colors.grey.withOpacity(0.12),
+                  ? Appcolors.secondaryPurple.withValues(alpha: 0.35)
+                  : Colors.grey.withValues(alpha: 0.12),
               width: isUnread ? 1.4 : 1.0,
             ),
             boxShadow: [
               BoxShadow(
                 color: isUnread
-                    ? Appcolors.secondaryPurple.withOpacity(0.06)
-                    : Colors.black.withOpacity(0.03),
+                    ? Appcolors.secondaryPurple.withValues(alpha: 0.06)
+                    : Colors.black.withValues(alpha: 0.03),
                 blurRadius: 10,
                 offset: const Offset(0, 3),
               ),
@@ -612,19 +674,19 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
                     height: 50,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: roleColor.withOpacity(0.12),
+                      color: roleColor.withValues(alpha: 0.12),
                       border: Border.all(
-                        color: roleColor.withOpacity(0.3),
+                        color: roleColor.withValues(alpha: 0.3),
                         width: 1.5,
                       ),
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(25),
                       child: avatarUrl != null && avatarUrl.isNotEmpty
-                          ? Image.network(
-                              avatarUrl,
+                          ? CachedNetworkImage(
+                              imageUrl: avatarUrl,
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Center(
+                              errorWidget: (_, _, _) => Center(
                                 child: Text(
                                   participantName.isNotEmpty
                                       ? participantName[0].toUpperCase()
@@ -711,7 +773,7 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: roleColor.withOpacity(0.1),
+                            color: roleColor.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
@@ -728,7 +790,7 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: Colors.grey.withOpacity(0.1),
+                              color: Colors.grey.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
@@ -745,7 +807,7 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: Colors.amber.withOpacity(0.12),
+                              color: Colors.amber.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: const Text(
@@ -822,7 +884,7 @@ class _BrokerChatInboxPageState extends State<BrokerChatInboxPage> {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: Appcolors.secondaryPurple.withOpacity(0.1),
+                color: Appcolors.secondaryPurple.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -868,6 +930,8 @@ class _BrokerConversationItem {
   String orderId;
   String? inferredRole;
   String rawChatId;
+  String? denormalizedName;
+  String denormalizedRole;
 
   _BrokerConversationItem({
     required this.canonicalChatId,
@@ -880,5 +944,7 @@ class _BrokerConversationItem {
     required this.orderId,
     this.inferredRole,
     required this.rawChatId,
+    this.denormalizedName,
+    this.denormalizedRole = '',
   });
 }

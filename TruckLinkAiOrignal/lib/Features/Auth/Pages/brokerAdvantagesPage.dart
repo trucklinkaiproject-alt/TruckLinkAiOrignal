@@ -72,7 +72,7 @@ class BrokerAdvantagesPage extends StatelessWidget {
                             ),
                             decoration: BoxDecoration(
                               color:
-                                  Appcolors.secondaryPurple.withOpacity(0.1),
+                                  Appcolors.secondaryPurple.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(

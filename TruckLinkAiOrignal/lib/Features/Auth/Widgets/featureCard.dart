@@ -5,7 +5,7 @@ class FeatureCard extends StatelessWidget {
   final Color color;
   final List<String> items;
 
-  const FeatureCard({required this.color, required this.items});
+  const FeatureCard({super.key, required this.color, required this.items});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,7 @@ class FeatureCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -34,7 +34,7 @@ class FeatureCard extends StatelessWidget {
                     width: 30,
                     height: 30,
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.12),
+                      color: color.withValues(alpha: 0.12),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(Icons.check, color: color, size: 17),
@@ -55,7 +55,7 @@ class FeatureCard extends StatelessWidget {
               if (!isLast)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Divider(height: 1, color: Colors.grey.withOpacity(0.15)),
+                  child: Divider(height: 1, color: Colors.grey.withValues(alpha: 0.15)),
                 )
               else
                 const SizedBox(height: 14),

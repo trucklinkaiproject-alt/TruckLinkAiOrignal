@@ -24,10 +24,19 @@ class ShipperHomePage extends StatefulWidget {
 
 class _ShipperHomePageState extends State<ShipperHomePage> {
   bool _dialogShowing = false;
+  Stream<QuerySnapshot>? _chatStream;
 
   @override
   void initState() {
     super.initState();
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null && uid.isNotEmpty) {
+      _chatStream = FirebaseFirestore.instance
+          .collection("chats")
+          .where("participants", arrayContains: uid)
+          .limit(30)
+          .snapshots();
+    }
     context.read<UserCubit>().fetchUserData().then((_) {
       if (!mounted) return;
       context.read<OrderDetailCubit>().fetchOrderDetails(
@@ -154,13 +163,7 @@ class _ShipperHomePageState extends State<ShipperHomePage> {
                         ),
                         // Real-time Chat Entry Point with Unread Badge
                         StreamBuilder<QuerySnapshot>(
-                          stream: FirebaseAuth.instance.currentUser?.uid != null
-                              ? FirebaseFirestore.instance
-                                  .collection("chats")
-                                  .where("participants",
-                                      arrayContains: FirebaseAuth.instance.currentUser!.uid)
-                                  .snapshots()
-                              : const Stream.empty(),
+                          stream: _chatStream ?? const Stream.empty(),
                           builder: (context, chatSnap) {
                             int totalUnread = 0;
                             final currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
@@ -192,7 +195,7 @@ class _ShipperHomePageState extends State<ShipperHomePage> {
                                   borderRadius: BorderRadius.circular(14),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.06),
+                                      color: Colors.black.withValues(alpha: 0.06),
                                       blurRadius: 8,
                                       offset: const Offset(0, 2),
                                     ),
@@ -443,7 +446,7 @@ class _HeroActionCard extends StatelessWidget {
           boxShadow: [
             BoxShadow(
               color: (filled ? Appcolors.primaryBlue : Colors.black)
-                  .withOpacity(filled ? 0.18 : 0.04),
+                  .withValues(alpha: filled ? 0.18 : 0.04),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -457,8 +460,8 @@ class _HeroActionCard extends StatelessWidget {
               height: 38,
               decoration: BoxDecoration(
                 color: filled
-                    ? Colors.white.withOpacity(0.18)
-                    : Appcolors.primaryBlue.withOpacity(0.1),
+                    ? Colors.white.withValues(alpha: 0.18)
+                    : Appcolors.primaryBlue.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(11),
               ),
               child: Icon(
@@ -479,7 +482,7 @@ class _HeroActionCard extends StatelessWidget {
             Text(
               title2,
               style: TextStyle(
-                color: filled ? Colors.white.withOpacity(0.9) : Colors.grey[600],
+                color: filled ? Colors.white.withValues(alpha: 0.9) : Colors.grey[600],
                 fontSize: 15.5,
                 fontWeight: FontWeight.w800,
               ),
@@ -515,7 +518,7 @@ class _QuickActionCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 10,
               offset: const Offset(0, 3),
             ),
@@ -527,7 +530,7 @@ class _QuickActionCard extends StatelessWidget {
               width: 34,
               height: 34,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(icon, color: color, size: 18),

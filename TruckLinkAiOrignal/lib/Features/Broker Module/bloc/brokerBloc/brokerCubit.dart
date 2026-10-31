@@ -1,60 +1,10 @@
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:flutter_bloc/flutter_bloc.dart';
-// import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerBloc/brokerStates.dart';
-
-// class BrokerCubit extends Cubit<BrokerState> {
-//   BrokerCubit() : super(BrokerInitialState());
-//   List<Map<String, dynamic>> incomingRequests = [];
-
-//   final FirebaseAuth _auth = FirebaseAuth.instance;
-//   final FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
-//   String userName = '';
-//   String brokerId = '';
-// Future<void> fetchUserData() async {
-//   try {
-//     emit(BrokerLoadingState());
-
-//     brokerId = _auth.currentUser!.uid;
-
-//     final userDoc = await firebaseFirestore
-//         .collection('Broker')
-//         .doc(brokerId)
-//         .get();
-
-//     userName = userDoc['name'];
-
-//     await fetchIncomingReq();
-//   } catch (e) {
-//     emit(BrokerErrorState(e.toString()));
-//   }
-// }
-// Future<void> fetchIncomingReq() async {
-//   final snapshot = await firebaseFirestore
-//       .collection("Broker")
-//       .doc(brokerId)
-//       .collection("IncomingRequests")
-//       .get();
-
-//   incomingRequests = snapshot.docs
-//       .map((doc) => doc.data() )
-//       .toList();
-
-//   emit(
-//     BrokerLoadedState(
-//       userData: userName,
-//       uid: brokerId,
-//       incomingRequests: incomingRequests,
-//     ),
-//   );
-// }
-// }
-
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:trucklinkai_orignal/Core/Services/appLogger.dart';
 import 'package:trucklinkai_orignal/Core/Services/notificationService.dart';
+import 'package:trucklinkai_orignal/Core/Services/brokerStatsService.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerBloc/brokerStates.dart';
 
 class BrokerCubit extends Cubit<BrokerState> {
@@ -97,16 +47,13 @@ class BrokerCubit extends Cubit<BrokerState> {
         .collection("Broker")
         .doc(brokerId)
         .collection("IncomingRequests")
+        .where("status", isEqualTo: "pending")
+        .limit(50)
         .snapshots()
         .listen(
       (snapshot) {
-        // Filter incoming requests so ONLY status == 'pending' appears on the Broker Main Page
         incomingRequests = snapshot.docs
             .map((doc) => {"orderId": doc.id, ...doc.data()})
-            .where((doc) {
-              final status = (doc['status'] ?? '').toString().toLowerCase();
-              return status == 'pending';
-            })
             .toList();
 
         emit(
@@ -134,7 +81,9 @@ class BrokerCubit extends Cubit<BrokerState> {
         'status': status,
         'updated_at': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
-    } catch (_) {}
+    } catch (e, stack) {
+      AppLogger.error("Failed to update broker availability status", e, stack, "BrokerCubit");
+    }
   }
 
   /// Accept a pending request.
@@ -152,25 +101,33 @@ class BrokerCubit extends Cubit<BrokerState> {
         'updated_at': FieldValue.serverTimestamp(),
       };
 
-      // 1. Update Broker/brokerId/IncomingRequests/orderId
-      await firebaseFirestore
+      final batch = firebaseFirestore.batch();
+
+      // 1. Broker/IncomingRequests
+      final brokerReqRef = firebaseFirestore
           .collection("Broker")
           .doc(brokerId)
           .collection("IncomingRequests")
-          .doc(orderId)
-          .update(updatePayload);
+          .doc(orderId);
+      batch.set(brokerReqRef, updatePayload, SetOptions(merge: true));
 
-      // 2. Update User/userUid/Requests/orderId (if doc exists)
+      // 2. User/Requests
       if (userUid.isNotEmpty) {
-        try {
-          await firebaseFirestore
-              .collection("User")
-              .doc(userUid)
-              .collection("Requests")
-              .doc(orderId)
-              .update(updatePayload);
-        } catch (_) {}
+        final userReqRef = firebaseFirestore
+            .collection("User")
+            .doc(userUid)
+            .collection("Requests")
+            .doc(orderId);
+        batch.set(userReqRef, updatePayload, SetOptions(merge: true));
+      }
 
+      // 3. Central Orders doc
+      final orderRef = firebaseFirestore.collection("Orders").doc(orderId);
+      batch.set(orderRef, updatePayload, SetOptions(merge: true));
+
+      await batch.commit();
+
+      if (userUid.isNotEmpty) {
         try {
           final String notifId = "accept_$orderId";
           final num amountNum = requestData['brokerOffer'] ??
@@ -200,16 +157,10 @@ class BrokerCubit extends Cubit<BrokerState> {
               'amount': amountNum,
             },
           );
-        } catch (_) {}
+        } catch (e, stack) {
+          AppLogger.error("Failed to send accept notification to user", e, stack, "BrokerCubit");
+        }
       }
-
-      // 3. Update main Orders/orderId (if doc exists)
-      try {
-        await firebaseFirestore
-            .collection("Orders")
-            .doc(orderId)
-            .update(updatePayload);
-      } catch (_) {}
 
       // 4. Broker notification
       try {
@@ -227,39 +178,15 @@ class BrokerCubit extends Cubit<BrokerState> {
           senderId: brokerId,
           receiverRole: 'Broker',
         );
-      } catch (_) {}
+      } catch (e, stack) {
+        AppLogger.error("Failed to send accept notification to broker", e, stack, "BrokerCubit");
+      }
 
-      // ── AI STATS: increment accepted_requests atomically ────────────────
-      await firebaseFirestore.runTransaction((txn) async {
-        final brokerRef = firebaseFirestore.collection('Broker').doc(brokerId);
-        final snap = await txn.get(brokerRef);
-        final data = snap.data() ?? {};
-
-        final int total = (data['total_requests'] as num?)?.toInt() ?? 0;
-        final int accepted = ((data['accepted_requests'] as num?)?.toInt() ?? 0) + 1;
-        final int cancelled = (data['cancelled_requests'] as num?)?.toInt() ?? 0;
-        final int completed = (data['completed_requests'] as num?)?.toInt() ?? 0;
-
-        final double acceptanceRate = total > 0 ? (accepted / total) * 100.0 : 0.0;
-        final double cancellationRate = total > 0 ? (cancelled / total) * 100.0 : 0.0;
-        final double completionRate = accepted > 0 ? (completed / accepted) * 100.0 : 0.0;
-
-        txn.set(
-          brokerRef,
-          {
-            'accepted_requests': accepted,
-            'total_requests': total,
-            'cancelled_requests': cancelled,
-            'completed_requests': completed,
-            'acceptance_rate': acceptanceRate,
-            'cancellation_rate': cancellationRate,
-            'completion_rate': completionRate,
-            'broker_rating': (data['broker_rating'] as num?)?.toDouble() ?? 0.0,
-            'broker_id': brokerId,
-          },
-          SetOptions(merge: true),
-        );
-      });
+      // ── AI STATS: increment accepted_requests atomically & idempotently ──
+      await BrokerStatsService().recordAcceptedRequest(
+        brokerId: brokerId,
+        orderId: orderId,
+      );
       // ────────────────────────────────────────────────────────────────────
     } catch (e) {
       emit(BrokerErrorState("Failed to accept request: ${e.toString()}"));
@@ -281,65 +208,38 @@ class BrokerCubit extends Cubit<BrokerState> {
         'updated_at': FieldValue.serverTimestamp(),
       };
 
-      // 1. Update Broker/brokerId/IncomingRequests/orderId
-      await firebaseFirestore
+      final batch = firebaseFirestore.batch();
+
+      // 1. Broker/IncomingRequests
+      final brokerReqRef = firebaseFirestore
           .collection("Broker")
           .doc(brokerId)
           .collection("IncomingRequests")
-          .doc(orderId)
-          .update(updatePayload);
+          .doc(orderId);
+      batch.set(brokerReqRef, updatePayload, SetOptions(merge: true));
 
-      // 2. Update User/userUid/Requests/orderId (if doc exists)
+      // 2. User/Requests
       if (userUid.isNotEmpty) {
-        try {
-          await firebaseFirestore
-              .collection("User")
-              .doc(userUid)
-              .collection("Requests")
-              .doc(orderId)
-              .update(updatePayload);
-        } catch (_) {}
+        final userReqRef = firebaseFirestore
+            .collection("User")
+            .doc(userUid)
+            .collection("Requests")
+            .doc(orderId);
+        batch.set(userReqRef, updatePayload, SetOptions(merge: true));
       }
 
-      // 3. Update main Orders/orderId (if doc exists)
-      try {
-        await firebaseFirestore
-            .collection("Orders")
-            .doc(orderId)
-            .update(updatePayload);
-      } catch (_) {}
+      // 3. Central Orders doc
+      final orderRef = firebaseFirestore.collection("Orders").doc(orderId);
+      batch.set(orderRef, updatePayload, SetOptions(merge: true));
 
-      // ── AI STATS: increment cancelled_requests atomically ────────────────
-      await firebaseFirestore.runTransaction((txn) async {
-        final brokerRef = firebaseFirestore.collection('Broker').doc(brokerId);
-        final snap = await txn.get(brokerRef);
-        final data = snap.data() ?? {};
+      await batch.commit();
 
-        final int total = (data['total_requests'] as num?)?.toInt() ?? 0;
-        final int accepted = (data['accepted_requests'] as num?)?.toInt() ?? 0;
-        final int cancelled = ((data['cancelled_requests'] as num?)?.toInt() ?? 0) + 1;
-        final int completed = (data['completed_requests'] as num?)?.toInt() ?? 0;
-
-        final double acceptanceRate = total > 0 ? (accepted / total) * 100.0 : 0.0;
-        final double cancellationRate = total > 0 ? (cancelled / total) * 100.0 : 0.0;
-        final double completionRate = accepted > 0 ? (completed / accepted) * 100.0 : 0.0;
-
-        txn.set(
-          brokerRef,
-          {
-            'cancelled_requests': cancelled,
-            'total_requests': total,
-            'accepted_requests': accepted,
-            'completed_requests': completed,
-            'acceptance_rate': acceptanceRate,
-            'cancellation_rate': cancellationRate,
-            'completion_rate': completionRate,
-            'broker_rating': (data['broker_rating'] as num?)?.toDouble() ?? 0.0,
-            'broker_id': brokerId,
-          },
-          SetOptions(merge: true),
-        );
-      });
+      // ── AI STATS: increment cancelled_requests atomically & idempotently ─
+      await BrokerStatsService().recordCancelledRequest(
+        brokerId: brokerId,
+        orderId: orderId,
+        reason: 'broker_rejected',
+      );
       // ────────────────────────────────────────────────────────────────────
     } catch (e) {
       emit(BrokerErrorState("Failed to reject request: ${e.toString()}"));
@@ -379,7 +279,9 @@ class BrokerCubit extends Cubit<BrokerState> {
               .collection("Requests")
               .doc(orderId)
               .update(updatePayload);
-        } catch (_) {}
+        } catch (e, stack) {
+          AppLogger.error("Failed to update User request on complete", e, stack, "BrokerCubit");
+        }
       }
 
       // 3. Update main Orders collection (if exists)
@@ -388,7 +290,9 @@ class BrokerCubit extends Cubit<BrokerState> {
             .collection("Orders")
             .doc(orderId)
             .update(updatePayload);
-      } catch (_) {}
+      } catch (e, stack) {
+        AppLogger.error("Failed to update Orders doc on complete", e, stack, "BrokerCubit");
+      }
 
       // 4. Broker notification
       try {
@@ -406,45 +310,29 @@ class BrokerCubit extends Cubit<BrokerState> {
           senderId: brokerId,
           receiverRole: 'Broker',
         );
-      } catch (_) {}
+      } catch (e, stack) {
+        AppLogger.error("Failed to send complete notification to broker", e, stack, "BrokerCubit");
+      }
 
-      // ── AI STATS: increment completed_requests atomically ────────────────
-      // Transaction prevents double-counting if this is called multiple times.
-      await firebaseFirestore.runTransaction((txn) async {
-        final brokerRef = firebaseFirestore.collection('Broker').doc(brokerId);
-        final snap = await txn.get(brokerRef);
-        final data = snap.data() ?? {};
-
-        final int total = (data['total_requests'] as num?)?.toInt() ?? 0;
-        final int accepted = (data['accepted_requests'] as num?)?.toInt() ?? 0;
-        final int cancelled = (data['cancelled_requests'] as num?)?.toInt() ?? 0;
-        final int completed = ((data['completed_requests'] as num?)?.toInt() ?? 0) + 1;
-
-        final double acceptanceRate = total > 0 ? (accepted / total) * 100.0 : 0.0;
-        final double cancellationRate = total > 0 ? (cancelled / total) * 100.0 : 0.0;
-        // completion_rate = completed / accepted — measures delivery success rate
-        final double completionRate = accepted > 0 ? (completed / accepted) * 100.0 : 0.0;
-
-        txn.set(
-          brokerRef,
-          {
-            'completed_requests': completed,
-            'total_requests': total,
-            'accepted_requests': accepted,
-            'cancelled_requests': cancelled,
-            'acceptance_rate': acceptanceRate,
-            'cancellation_rate': cancellationRate,
-            'completion_rate': completionRate,
-            'broker_rating': (data['broker_rating'] as num?)?.toDouble() ?? 0.0,
-            'broker_id': brokerId,
-          },
-          SetOptions(merge: true),
-        );
-      });
+      // ── AI STATS: increment completed_requests atomically & idempotently (Phase 2.1 & Phase 5) ──
+      await BrokerStatsService().recordCompletedRequest(
+        brokerId: brokerId,
+        orderId: orderId,
+        itemType: (requestData['itemType'] ?? requestData['item_type'])?.toString(),
+      );
       // ────────────────────────────────────────────────────────────────────
     } catch (e) {
       emit(BrokerErrorState("Failed to complete order: ${e.toString()}"));
     }
+  }
+
+  Future<void> stopListening() async {
+    await _incomingReqSubscription?.cancel();
+    _incomingReqSubscription = null;
+    incomingRequests.clear();
+    userName = '';
+    brokerId = '';
+    if (!isClosed) emit(BrokerInitialState());
   }
 
   @override
@@ -452,4 +340,4 @@ class BrokerCubit extends Cubit<BrokerState> {
     _incomingReqSubscription?.cancel();
     return super.close();
   }
-}
+}

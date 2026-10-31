@@ -15,16 +15,18 @@ class OrderTrackingPage extends StatefulWidget {
 
 class _OrderTrackingPageState extends State<OrderTrackingPage> {
   final MapController _mapController = MapController();
-  bool _showMap = true;
+
+  @override
+  void dispose() {
+    _mapController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final initialData = widget.orderStatusDetail;
     final String orderId = (initialData["orderId"] ?? initialData["id"] ?? initialData["orderNo"] ?? "").toString();
     final String orderNo = (initialData["orderNo"] ?? orderId).toString();
-    final String userUid = (initialData["userUid"] ?? initialData["user_uid"] ?? "").toString();
-    final String brokerId = (initialData["brokerId"] ?? initialData["broker_id"] ?? "").toString();
-    final String assignedDriverId = (initialData["assigned_driver_id"] ?? initialData["driver_id"] ?? "").toString();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
@@ -43,9 +45,6 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
             final String rawStatus = (order["status"] ?? "pending").toString().toLowerCase();
             final String pickupCity = (order["pickupCity"] ?? order["pickup_city"] ?? "Pickup").toString();
             final String dropCity = (order["dropCity"] ?? order["drop_city"] ?? "Drop").toString();
-            final String pickupComp = (order["pickupComp"] ?? order["pickup_comp"] ?? "").toString();
-            final String dropComp = (order["dropComp"] ?? order["drop_comp"] ?? "").toString();
-            final String itemType = (order["itemType"] ?? order["item_type"] ?? "Cargo").toString();
             final String driverName = (order["assigned_driver_name"] ?? order["driver_name"] ?? "Assigned Driver").toString();
             final String driverPhone = (order["assigned_driver_phone"] ?? order["driver_phone"] ?? "N/A").toString();
 
@@ -67,7 +66,6 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
             final LatLng dropLocation = LatLng(dLat, dLng);
 
             // Status stage checks
-            final bool isPending = rawStatus == 'pending' || rawStatus == 'driver_offer_sent';
             final bool isAccepted = rawStatus == 'accepted_by_driver' || rawStatus == 'accepted';
             final bool isInTransit = rawStatus == 'in_transit' || rawStatus == 'in_progress' || rawStatus == 'arrived_at_pickup' || rawStatus == 'heading_to_drop';
             final bool isCompleted = rawStatus == 'completed' || rawStatus == 'delivered';
@@ -117,10 +115,10 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                             decoration: BoxDecoration(
                               color: isCompleted
-                                  ? Appcolors.tertiaryGreen.withOpacity(0.12)
+                                  ? Appcolors.tertiaryGreen.withValues(alpha: 0.12)
                                   : isInTransit
-                                      ? Appcolors.primaryBlue.withOpacity(0.12)
-                                      : Colors.amber.withOpacity(0.12),
+                                      ? Appcolors.primaryBlue.withValues(alpha: 0.12)
+                                      : Colors.amber.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
@@ -149,7 +147,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.06),
+                              color: Colors.black.withValues(alpha: 0.06),
                               blurRadius: 12,
                               offset: const Offset(0, 4),
                             ),
@@ -165,7 +163,12 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
                                 initialZoom: 13.0,
                                 minZoom: 4.5,
                                 maxZoom: 18.5,
-                                cameraConstraint: const CameraConstraint.unconstrained(),
+                                cameraConstraint: CameraConstraint.containCenter(
+                                  bounds: LatLngBounds(
+                                    const LatLng(-85.0, -180.0),
+                                    const LatLng(85.0, 180.0),
+                                  ),
+                                ),
                                 interactionOptions: const InteractionOptions(
                                   flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
                                 ),
@@ -174,8 +177,9 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
                                 TileLayer(
                                   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                                   userAgentPackageName: "com.trucklinkai.app",
+                                  maxNativeZoom: 18,
                                   maxZoom: 19,
-                                  minZoom: 4,
+                                  minZoom: 1,
                                   keepBuffer: 1,
                                   panBuffer: 0,
                                   errorTileCallback: (tile, error, stackTrace) {
@@ -193,7 +197,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
                                           ? [pickupLocation, driverLocation, dropLocation]
                                           : [pickupLocation, dropLocation],
                                       strokeWidth: 3.0,
-                                      color: Appcolors.primaryBlue.withOpacity(0.65),
+                                      color: Appcolors.primaryBlue.withValues(alpha: 0.65),
                                       pattern: const StrokePattern.dotted(),
                                     ),
                                   ],
@@ -212,7 +216,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
                                           border: Border.all(color: Colors.white, width: 2.5),
                                           boxShadow: [
                                             BoxShadow(
-                                              color: Colors.black.withOpacity(0.2),
+                                              color: Colors.black.withValues(alpha: 0.2),
                                               blurRadius: 6,
                                             ),
                                           ],
@@ -236,7 +240,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
                                           border: Border.all(color: Colors.white, width: 2.5),
                                           boxShadow: [
                                             BoxShadow(
-                                              color: Colors.black.withOpacity(0.2),
+                                              color: Colors.black.withValues(alpha: 0.2),
                                               blurRadius: 6,
                                             ),
                                           ],
@@ -261,7 +265,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
                                             border: Border.all(color: Colors.white, width: 3),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: Appcolors.primaryBlue.withOpacity(0.4),
+                                                color: Appcolors.primaryBlue.withValues(alpha: 0.4),
                                                 blurRadius: 10,
                                                 spreadRadius: 2,
                                               ),
@@ -334,11 +338,11 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.92),
+                                    color: Colors.white.withValues(alpha: 0.92),
                                     borderRadius: BorderRadius.circular(16),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withOpacity(0.08),
+                                        color: Colors.black.withValues(alpha: 0.08),
                                         blurRadius: 6,
                                       ),
                                     ],
@@ -374,11 +378,11 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
                               child: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.94),
+                                  color: Colors.white.withValues(alpha: 0.94),
                                   borderRadius: BorderRadius.circular(12),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.08),
+                                      color: Colors.black.withValues(alpha: 0.08),
                                       blurRadius: 6,
                                     ),
                                   ],
@@ -463,7 +467,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
                           borderRadius: BorderRadius.circular(18),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.04),
+                              color: Colors.black.withValues(alpha: 0.04),
                               blurRadius: 10,
                               offset: const Offset(0, 3),
                             ),
@@ -475,7 +479,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
                               width: 44,
                               height: 44,
                               decoration: BoxDecoration(
-                                color: Appcolors.tertiaryGreen.withOpacity(0.12),
+                                color: Appcolors.tertiaryGreen.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Icon(
@@ -620,7 +624,7 @@ class _TimelineTile extends StatelessWidget {
                   boxShadow: highlight
                       ? [
                           BoxShadow(
-                            color: activeColor.withOpacity(0.3),
+                            color: activeColor.withValues(alpha: 0.3),
                             blurRadius: 8,
                             spreadRadius: 1,
                           ),

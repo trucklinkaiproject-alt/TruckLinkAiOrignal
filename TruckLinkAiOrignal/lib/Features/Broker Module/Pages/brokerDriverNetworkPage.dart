@@ -260,7 +260,7 @@ class _BrokerDriversNetworkPageState extends State<BrokerDriversNetworkPage> {
                             24,
                           ),
                           itemCount: filteredDrivers.length,
-                          separatorBuilder: (_, __) =>
+                          separatorBuilder: (_, _) =>
                               const SizedBox(height: 12),
                           itemBuilder: (context, index) {
                             return _NetworkDriverCard(
@@ -671,6 +671,8 @@ class _AddDriverSheetState extends State<_AddDriverSheet> {
     phoneController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
+    vehicleTypeController.dispose();
+    vehicleNumberController.dispose();
     super.dispose();
   }
 
@@ -680,6 +682,9 @@ class _AddDriverSheetState extends State<_AddDriverSheet> {
     final String phone = phoneController.text.trim();
     final String password = passwordController.text.trim();
     final String confirmPassword = confirmPasswordController.text.trim();
+    final String vehicleType = vehicleTypeController.text.trim();
+    final String vehicleNumber = vehicleNumberController.text.trim();
+    final String currentBrokerName = context.read<BrokerCubit>().userName;
 
     // Validations
     if (name.isEmpty) {
@@ -726,8 +731,8 @@ class _AddDriverSheetState extends State<_AddDriverSheet> {
       final String newDriverUid = userCredential.user!.uid;
 
       final String brokerId = FirebaseAuth.instance.currentUser?.uid ?? '';
-      final String brokerName = context.read<BrokerCubit>().userName.isNotEmpty
-          ? context.read<BrokerCubit>().userName
+      final String brokerName = currentBrokerName.isNotEmpty
+          ? currentBrokerName
           : 'Broker';
 
       final Map<String, dynamic> driverData = {
@@ -736,9 +741,9 @@ class _AddDriverSheetState extends State<_AddDriverSheet> {
         'name': name,
         'email': email,
         'phone': phone,
-        'vehicle_type': '',
-        'vehicle_number': '',
-        'truck_details_completed': false,
+        'vehicle_type': vehicleType,
+        'vehicle_number': vehicleNumber,
+        'truck_details_completed': vehicleNumber.isNotEmpty,
         'onboarding_completed': false,
         'broker_id': brokerId,
         'broker_name': brokerName,
@@ -765,6 +770,16 @@ class _AddDriverSheetState extends State<_AddDriverSheet> {
             .collection("DriverNetwork")
             .doc(newDriverUid)
             .set(driverData);
+
+        if (vehicleType.trim().isNotEmpty) {
+          await FirebaseFirestore.instance
+              .collection("Broker")
+              .doc(brokerId)
+              .set({
+            'vehicle_types': FieldValue.arrayUnion([vehicleType.trim()]),
+            'vehicleTypes': FieldValue.arrayUnion([vehicleType.trim()]),
+          }, SetOptions(merge: true));
+        }
       }
 
       // 4. Clean up temporary FirebaseApp auth instance
@@ -976,7 +991,6 @@ class _SheetTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final bool obscureText;
   final Widget? suffixIcon;
-  final TextCapitalization textCapitalization;
 
   const _SheetTextField({
     required this.controller,
@@ -984,7 +998,6 @@ class _SheetTextField extends StatelessWidget {
     this.keyboardType,
     this.obscureText = false,
     this.suffixIcon,
-    this.textCapitalization = TextCapitalization.none,
   });
 
   @override
@@ -993,7 +1006,7 @@ class _SheetTextField extends StatelessWidget {
       controller: controller,
       keyboardType: keyboardType,
       obscureText: obscureText,
-      textCapitalization: textCapitalization,
+      textCapitalization: TextCapitalization.none,
       style: const TextStyle(fontSize: 14),
       decoration: InputDecoration(
         hintText: hintText,

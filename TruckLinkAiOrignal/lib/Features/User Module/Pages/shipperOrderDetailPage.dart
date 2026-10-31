@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
+import 'package:trucklinkai_orignal/Core/Services/appLogger.dart';
 import 'package:trucklinkai_orignal/Core/Services/reviewService.dart';
 import 'package:trucklinkai_orignal/Core/Widgets/backArrowButton.dart';
 import 'package:trucklinkai_orignal/Core/Widgets/builtyPage.dart';
@@ -58,7 +59,9 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
           data['brokerId'] = bData['brokerId'] ?? bData['broker_id'] ?? brokerId;
           data['brokerRating'] = (bData['rating'] as num?)?.toDouble() ?? (bData['overall_rating'] as num?)?.toDouble() ?? 0.0;
         }
-      } catch (_) {}
+      } catch (e, stack) {
+        AppLogger.error("Failed to load broker profile in ShipperOrderDetailPage", e, stack, "ShipperOrderDetailPage");
+      }
     }
 
     if (userUid != null && userUid.isNotEmpty) {
@@ -69,7 +72,9 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
           data['userName'] = uData['name'] ?? uData['user_name'] ?? FirebaseAuth.instance.currentUser?.displayName ?? 'Shipper';
           data['userId'] = uData['userId'] ?? uData['user_id'] ?? userUid;
         }
-      } catch (_) {}
+      } catch (e, stack) {
+        AppLogger.error("Failed to load user profile in ShipperOrderDetailPage", e, stack, "ShipperOrderDetailPage");
+      }
     }
 
     if (driverUid != null && driverUid.isNotEmpty) {
@@ -83,7 +88,9 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
           data['vehicleType'] = dData['vehicle_type'] ?? dData['truck_type'] ?? dData['vehicleType'] ?? data['vehicleType'];
           data['vehicleNumber'] = dData['vehicle_number'] ?? dData['truck_no'] ?? dData['vehicleNumber'] ?? data['vehicleNumber'];
         }
-      } catch (_) {}
+      } catch (e, stack) {
+        AppLogger.error("Failed to load driver profile in ShipperOrderDetailPage", e, stack, "ShipperOrderDetailPage");
+      }
     }
 
     return data;
@@ -193,7 +200,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                                 borderRadius: BorderRadius.circular(14),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.06),
+                                    color: Colors.black.withValues(alpha: 0.06),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),
@@ -244,8 +251,8 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                             ),
                             decoration: BoxDecoration(
                               color: status != "rejected"
-                                  ? Appcolors.tertiaryGreen.withOpacity(0.12)
-                                  : Colors.red.withOpacity(0.12),
+                                  ? Appcolors.tertiaryGreen.withValues(alpha: 0.12)
+                                  : Colors.red.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Row(
@@ -287,7 +294,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                             style: OutlinedButton.styleFrom(
                               backgroundColor: Colors.white,
                               side: BorderSide(
-                                color: Appcolors.primaryBlue.withOpacity(0.3),
+                                color: Appcolors.primaryBlue.withValues(alpha: 0.3),
                               ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(26),
@@ -335,7 +342,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
 
                       // -------- FutureBuilder for Profiles --------
                       FutureBuilder<Map<String, dynamic>>(
-                        future: _fetchProfiles(orderDetails),
+                        future: _profilesFuture,
                         builder: (context, profileSnapshot) {
                           final p = profileSnapshot.data ?? {};
                           final String brokerRealName = p['brokerName'] ?? 'Broker';
@@ -364,7 +371,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                                   borderRadius: BorderRadius.circular(18),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.04),
+                                      color: Colors.black.withValues(alpha: 0.04),
                                       blurRadius: 10,
                                       offset: const Offset(0, 3),
                                     ),
@@ -377,7 +384,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                                       children: [
                                         CircleAvatar(
                                           radius: 24,
-                                          backgroundColor: Appcolors.secondaryPurple.withOpacity(0.12),
+                                          backgroundColor: Appcolors.secondaryPurple.withValues(alpha: 0.12),
                                           child: Text(
                                             brokerRealName
                                                 .trim()
@@ -421,7 +428,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                                       ],
                                     ),
                                     const SizedBox(height: 12),
-                                    Divider(height: 1, color: Colors.grey.withOpacity(0.15)),
+                                    Divider(height: 1, color: Colors.grey.withValues(alpha: 0.15)),
                                     const SizedBox(height: 10),
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -448,7 +455,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                                           style: OutlinedButton.styleFrom(
                                             foregroundColor: Appcolors.secondaryPurple,
                                             side: BorderSide(
-                                              color: Appcolors.secondaryPurple.withOpacity(0.4),
+                                              color: Appcolors.secondaryPurple.withValues(alpha: 0.4),
                                             ),
                                             shape: RoundedRectangleBorder(
                                               borderRadius: BorderRadius.circular(21),
@@ -498,7 +505,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                                   borderRadius: BorderRadius.circular(18),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.04),
+                                      color: Colors.black.withValues(alpha: 0.04),
                                       blurRadius: 10,
                                       offset: const Offset(0, 3),
                                     ),
@@ -508,7 +515,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                                   children: [
                                     CircleAvatar(
                                       radius: 22,
-                                      backgroundColor: Appcolors.primaryBlue.withOpacity(0.12),
+                                      backgroundColor: Appcolors.primaryBlue.withValues(alpha: 0.12),
                                       child: const Icon(Icons.person, color: Appcolors.primaryBlue, size: 22),
                                     ),
                                     const SizedBox(width: 14),
@@ -552,7 +559,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                                     borderRadius: BorderRadius.circular(18),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withOpacity(0.04),
+                                        color: Colors.black.withValues(alpha: 0.04),
                                         blurRadius: 10,
                                         offset: const Offset(0, 3),
                                       ),
@@ -562,7 +569,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                                     children: [
                                       CircleAvatar(
                                         radius: 22,
-                                        backgroundColor: Appcolors.tertiaryGreen.withOpacity(0.12),
+                                        backgroundColor: Appcolors.tertiaryGreen.withValues(alpha: 0.12),
                                         child: const Icon(Icons.badge_outlined, color: Appcolors.tertiaryGreen, size: 22),
                                       ),
                                       const SizedBox(width: 14),
@@ -677,13 +684,13 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                         ),
                         decoration: BoxDecoration(
                           color: status != "rejected"
-                              ? Appcolors.tertiaryGreen.withOpacity(0.08)
-                              : Colors.red.withOpacity(0.08),
+                              ? Appcolors.tertiaryGreen.withValues(alpha: 0.08)
+                              : Colors.red.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(18),
                           border: Border.all(
                             color: status != "rejected"
-                                ? Appcolors.tertiaryGreen.withOpacity(0.3)
-                                : Colors.red.withOpacity(0.3),
+                                ? Appcolors.tertiaryGreen.withValues(alpha: 0.3)
+                                : Colors.red.withValues(alpha: 0.3),
                           ),
                         ),
                         child: Column(
@@ -742,7 +749,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                             borderRadius: BorderRadius.circular(18),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.04),
+                                color: Colors.black.withValues(alpha: 0.04),
                                 blurRadius: 10,
                                 offset: const Offset(0, 3),
                               ),
@@ -754,7 +761,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                                 width: 44,
                                 height: 44,
                                 decoration: BoxDecoration(
-                                  color: Appcolors.primaryBlue.withOpacity(0.1),
+                                  color: Appcolors.primaryBlue.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: const Icon(
@@ -877,7 +884,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                             borderRadius: BorderRadius.circular(18),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.04),
+                                color: Colors.black.withValues(alpha: 0.04),
                                 blurRadius: 10,
                                 offset: const Offset(0, 3),
                               ),
@@ -892,7 +899,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                                     width: 38,
                                     height: 38,
                                     decoration: BoxDecoration(
-                                      color: Appcolors.tertiaryGreen.withOpacity(0.12),
+                                      color: Appcolors.tertiaryGreen.withValues(alpha: 0.12),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: const Icon(Icons.timer_outlined, color: Appcolors.tertiaryGreen, size: 20),
@@ -927,7 +934,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                     decoration: BoxDecoration(
-                                      color: Appcolors.tertiaryGreen.withOpacity(0.12),
+                                      color: Appcolors.tertiaryGreen.withValues(alpha: 0.12),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: const Text(
@@ -992,7 +999,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                             width: double.infinity,
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
-                              color: Appcolors.tertiaryGreen.withOpacity(0.1),
+                              color: Appcolors.tertiaryGreen.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: const Row(
@@ -1112,7 +1119,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                       decoration: BoxDecoration(
                         color: const Color(0xFFF9FAFB),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+                        border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1121,7 +1128,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                             children: [
                               CircleAvatar(
                                 radius: 16,
-                                backgroundColor: Appcolors.secondaryPurple.withOpacity(0.12),
+                                backgroundColor: Appcolors.secondaryPurple.withValues(alpha: 0.12),
                                 child: const Icon(Icons.business_rounded, color: Appcolors.secondaryPurple, size: 16),
                               ),
                               const SizedBox(width: 10),
@@ -1159,7 +1166,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                               contentPadding: const EdgeInsets.all(12),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
+                                borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
                               ),
                             ),
                           ),
@@ -1176,7 +1183,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                       decoration: BoxDecoration(
                         color: const Color(0xFFF9FAFB),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+                        border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1185,7 +1192,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                             children: [
                               CircleAvatar(
                                 radius: 16,
-                                backgroundColor: Appcolors.tertiaryGreen.withOpacity(0.12),
+                                backgroundColor: Appcolors.tertiaryGreen.withValues(alpha: 0.12),
                                 child: const Icon(Icons.badge_outlined, color: Appcolors.tertiaryGreen, size: 16),
                               ),
                               const SizedBox(width: 10),
@@ -1223,7 +1230,7 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
                               contentPadding: const EdgeInsets.all(12),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
+                                borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
                               ),
                             ),
                           ),
@@ -1301,7 +1308,10 @@ class _ShipperOrderDetailPageState extends State<ShipperOrderDetailPage> {
           );
         },
       ),
-    );
+    ).whenComplete(() {
+      brokerCommentCtrl.dispose();
+      driverCommentCtrl.dispose();
+    });
   }
 }
 
@@ -1343,7 +1353,7 @@ class _InfoCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -1356,7 +1366,7 @@ class _InfoCard extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.12),
+              color: iconColor.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: iconColor, size: 19),

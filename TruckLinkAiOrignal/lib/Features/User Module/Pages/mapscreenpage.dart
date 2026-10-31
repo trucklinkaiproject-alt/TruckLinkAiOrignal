@@ -26,11 +26,11 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
   final MapController mapController = MapController();
   final TextEditingController searchController = TextEditingController();
 
-  // Safe zoom limits: Country/regional view as minimum zoom (4.5), building level as maximum (18.0)
+
   static const double kMinSafeZoom = 4.5;
   static const double kMaxSafeZoom = 18.0;
 
-  // Authoritative coordinate double
+
   late LatLng selectedLocation;
   String addressTitle = "Tap on map or move pin";
   String addressSubtitle = "Locating...";
@@ -41,7 +41,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
   List<_NominatimSearchResult> searchResults = [];
   bool showSearchResults = false;
   Timer? _debounceTimer;
-  Timer? _cameraIdleTimer;
+  Timer? _geocodeDebounceTimer;
   int _geocodeRequestId = 0;
 
   @override
@@ -51,8 +51,8 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
     if (widget.initialTitle != null && widget.initialTitle!.isNotEmpty) {
       addressTitle = widget.initialTitle!;
     }
-    
-    // If no initial location passed, try fetching current GPS position
+
+
     if (widget.initialLocation == null) {
       getCurrentLocation();
     } else {
@@ -63,14 +63,22 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
   @override
   void dispose() {
     _debounceTimer?.cancel();
-    _cameraIdleTimer?.cancel();
+    _geocodeDebounceTimer?.cancel();
     searchController.dispose();
+    mapController.dispose();
     super.dispose();
   }
 
-  // ---------------------------------------------------------------------------
-  // Parse Nominatim Address details into specific title & descriptive subtitle
-  // ---------------------------------------------------------------------------
+  void reverseGeocodeDebounced(LatLng point) {
+    _geocodeDebounceTimer?.cancel();
+    _geocodeDebounceTimer = Timer(const Duration(milliseconds: 350), () {
+      if (mounted) {
+        reverseGeocode(point);
+      }
+    });
+  }
+
+
   static Map<String, dynamic> _parseNominatimAddress(Map<String, dynamic> data) {
     final addr = (data['address'] as Map<String, dynamic>?) ?? {};
 
@@ -93,7 +101,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
     final String country = (addr['country'] as String?) ?? '';
     final String type = (data['type'] as String?) ?? (data['class'] as String?) ?? '';
 
-    // Determine the most specific place name
+
     String title = '';
     if (data['name'] != null && (data['name'] as String).isNotEmpty) {
       title = data['name'];
@@ -119,7 +127,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
       title = displayName.split(',').first.trim();
     }
 
-    // Build subtitle from supporting locality components
+
     final List<String> subtitleParts = [];
     if (road.isNotEmpty && title != road) subtitleParts.add(road);
     if (neighbourhood.isNotEmpty && title != neighbourhood) subtitleParts.add(neighbourhood);
@@ -149,9 +157,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
     };
   }
 
-  // ---------------------------------------------------------------------------
-  // Reverse Geocoding with stale-response protection & full precision preservation
-  // ---------------------------------------------------------------------------
+
   Future<void> reverseGeocode(LatLng point) async {
     final int currentRequestId = ++_geocodeRequestId;
     if (!mounted) return;
@@ -171,7 +177,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
         },
       ).timeout(const Duration(seconds: 8));
 
-      // Discard stale response if user tapped again while this request was flying
+
       if (currentRequestId != _geocodeRequestId) return;
 
       if (response.statusCode == 200) {
@@ -244,9 +250,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Device GPS Location
-  // ---------------------------------------------------------------------------
+
   Future<void> getCurrentLocation() async {
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -295,9 +299,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Multi-Result OpenStreetMap / Nominatim Search
-  // ---------------------------------------------------------------------------
+
   void onSearchTextChanged(String text) {
     _debounceTimer?.cancel();
     if (text.trim().length < 2) {
@@ -363,7 +365,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
           ));
         }
 
-        // Rank results: specific POIs/roads/neighbourhoods first, administrative boundaries last
+
         results.sort((a, b) {
           int scoreA = _getTypePriority(a.placeType);
           int scoreB = _getTypePriority(b.placeType);
@@ -405,9 +407,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
     return 7;
   }
 
-  // ---------------------------------------------------------------------------
-  // Select a search result
-  // ---------------------------------------------------------------------------
+
   void selectSearchResult(_NominatimSearchResult result) {
     FocusScope.of(context).unfocus();
     searchController.text = result.title;
@@ -424,9 +424,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
     reverseGeocode(point);
   }
 
-  // ---------------------------------------------------------------------------
-  // Confirm Location and Return LocationModel
-  // ---------------------------------------------------------------------------
+
   void confirmLocation() {
     final String city = currentLocationData?.city ?? "Selected Location";
     final String finalAddress = addressSubtitle.isNotEmpty
@@ -453,9 +451,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
     Navigator.pop(context, resultModel);
   }
 
-  // ---------------------------------------------------------------------------
-  // UI Build
-  // ---------------------------------------------------------------------------
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -463,7 +459,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
       body: SafeArea(
         child: Stack(
           children: [
-            // ── Interactive Flutter Map with Safe Zoom Limits & Optimized Tile Layer ──────────
+
             FlutterMap(
               mapController: mapController,
               options: MapOptions(
@@ -471,27 +467,35 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                 initialZoom: 15.0,
                 minZoom: kMinSafeZoom,
                 maxZoom: kMaxSafeZoom,
-                cameraConstraint: const CameraConstraint.unconstrained(),
+
+
+                // Center constraint keeps camera center within world boundaries
+                // without returning null on wide viewports (preventing zoom-out assertion crashes)
+                cameraConstraint: CameraConstraint.containCenter(
+                  bounds: LatLngBounds(
+                    const LatLng(-85.0, -180.0),
+                    const LatLng(85.0, 180.0),
+                  ),
+                ),
                 interactionOptions: const InteractionOptions(
                   flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
                 ),
                 onTap: (tapPosition, point) {
-                  // Marker placement on explicit user tap with reverse geocoding
+
                   setState(() {
                     selectedLocation = point;
                     showSearchResults = false;
                   });
-                  final double safeCurrentZoom = mapController.camera.zoom.clamp(kMinSafeZoom, kMaxSafeZoom);
-                  mapController.move(point, safeCurrentZoom);
-                  reverseGeocode(point);
+                  reverseGeocodeDebounced(point);
                 },
               ),
               children: [
                 TileLayer(
                   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                   userAgentPackageName: "com.trucklinkai.app",
+                  maxNativeZoom: 18,
                   maxZoom: 19,
-                  minZoom: 4,
+                  minZoom: 1,
                   keepBuffer: 1,
                   panBuffer: 0,
                   errorTileCallback: (tile, error, stackTrace) {
@@ -501,7 +505,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                 const SimpleAttributionWidget(
                   source: Text('© OpenStreetMap contributors'),
                 ),
-                // ── Interactive Place Marker Layer ────────────────────────
+
                 MarkerLayer(
                   markers: [
                     Marker(
@@ -520,7 +524,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
               ],
             ),
 
-            // ── Search Bar & Back Navigation ───────────────────────────────
+
             Positioned(
               top: 12,
               left: 16,
@@ -543,7 +547,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.08),
+                                color: Colors.black.withValues(alpha: 0.08),
                                 blurRadius: 10,
                                 offset: const Offset(0, 3),
                               ),
@@ -610,7 +614,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                     ],
                   ),
 
-                  // ── Search Suggestions List Card ───────────────────────────
+
                   if (showSearchResults && searchResults.isNotEmpty)
                     Container(
                       margin: const EdgeInsets.only(top: 8),
@@ -620,7 +624,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                         borderRadius: BorderRadius.circular(18),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.12),
+                            color: Colors.black.withValues(alpha: 0.12),
                             blurRadius: 14,
                             offset: const Offset(0, 4),
                           ),
@@ -644,7 +648,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                               leading: Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: Appcolors.primaryBlue.withOpacity(0.1),
+                                  color: Appcolors.primaryBlue.withValues(alpha: 0.1),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
@@ -693,7 +697,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.08),
+                            color: Colors.black.withValues(alpha: 0.08),
                             blurRadius: 8,
                           ),
                         ],
@@ -719,7 +723,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
               ),
             ),
 
-            // ── Map Floating Action Controls (Zoom & My Location) ──────────
+
             Positioned(
               right: 16,
               bottom: 230,
@@ -769,7 +773,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
               ),
             ),
 
-            // ── Confirmation & High Precision Location Card ────────────────
+
             Positioned(
               bottom: 18,
               left: 16,
@@ -781,7 +785,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.12),
+                      color: Colors.black.withValues(alpha: 0.12),
                       blurRadius: 20,
                       offset: const Offset(0, 6),
                     ),
@@ -791,14 +795,14 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Location title and icon
+
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: Appcolors.primaryBlue.withOpacity(0.12),
+                            color: Appcolors.primaryBlue.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(14),
                           ),
                           child: const Icon(
@@ -841,13 +845,13 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
 
                     const SizedBox(height: 12),
 
-                    // Exact 6-decimal coordinates preview badge
+
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF4F6F9),
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+                        border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
                       ),
                       child: Row(
                         children: [
@@ -870,7 +874,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
 
                     const SizedBox(height: 14),
 
-                    // Confirm Button
+
                     SizedBox(
                       width: double.infinity,
                       height: 52,
@@ -961,7 +965,7 @@ class _RoundIconButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 10,
               offset: const Offset(0, 3),
             ),

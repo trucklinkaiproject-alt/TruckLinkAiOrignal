@@ -5,13 +5,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/Pages/brokerAlertPage.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/Pages/brokerChatInboxPage.dart';
-import 'package:trucklinkai_orignal/Features/Broker%20Module/Pages/brokerDriverNetworkPage.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/Pages/brokerOrderPage.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/Pages/orderDetailPage.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerBloc/brokerCubit.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/bloc/brokerBloc/brokerStates.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/widgets/brokerincomingreqcontainer.dart';
-import 'package:trucklinkai_orignal/Features/User%20Module/Pages/brokerchatpage.dart';
 
 class BrokerHomePage extends StatefulWidget {
   const BrokerHomePage({super.key});
@@ -21,9 +19,39 @@ class BrokerHomePage extends StatefulWidget {
 }
 
 class _BrokerHomePageState extends State<BrokerHomePage> {
+  Stream<QuerySnapshot>? _chatStream;
+  Stream<QuerySnapshot>? _notifStream;
+  Stream<DocumentSnapshot>? _brokerDocStream;
+  Stream<QuerySnapshot>? _incomingRequestsStream;
+
   @override
   void initState() {
     super.initState();
+
+    final String currentBrokerId =
+        FirebaseAuth.instance.currentUser?.uid ?? '';
+    if (currentBrokerId.isNotEmpty) {
+      _chatStream = FirebaseFirestore.instance
+          .collection("chats")
+          .where("participants", arrayContains: currentBrokerId)
+          .snapshots();
+      _notifStream = FirebaseFirestore.instance
+          .collection("Broker")
+          .doc(currentBrokerId)
+          .collection("Notifications")
+          .where("is_read", isEqualTo: false)
+          .limit(20)
+          .snapshots();
+      _brokerDocStream = FirebaseFirestore.instance
+          .collection("Broker")
+          .doc(currentBrokerId)
+          .snapshots();
+      _incomingRequestsStream = FirebaseFirestore.instance
+          .collection("Broker")
+          .doc(currentBrokerId)
+          .collection("IncomingRequests")
+          .snapshots();
+    }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BrokerCubit>().fetchUserData();
@@ -39,12 +67,7 @@ class _BrokerHomePageState extends State<BrokerHomePage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
       floatingActionButton: StreamBuilder<QuerySnapshot>(
-        stream: currentBrokerId.isNotEmpty
-            ? FirebaseFirestore.instance
-                .collection("chats")
-                .where("participants", arrayContains: currentBrokerId)
-                .snapshots()
-            : const Stream.empty(),
+        stream: _chatStream ?? const Stream.empty(),
         builder: (context, chatSnap) {
           int totalUnreadChats = 0;
           if (chatSnap.hasData && chatSnap.data != null) {
@@ -134,7 +157,7 @@ class _BrokerHomePageState extends State<BrokerHomePage> {
                       gradient: LinearGradient(
                         colors: [
                           Appcolors.secondaryPurple,
-                          Appcolors.secondaryPurple.withOpacity(0.85),
+                          Appcolors.secondaryPurple.withValues(alpha: 0.85),
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -142,7 +165,7 @@ class _BrokerHomePageState extends State<BrokerHomePage> {
                       borderRadius: BorderRadius.circular(22),
                       boxShadow: [
                         BoxShadow(
-                          color: Appcolors.secondaryPurple.withOpacity(0.3),
+                          color: Appcolors.secondaryPurple.withValues(alpha: 0.3),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),
@@ -154,7 +177,7 @@ class _BrokerHomePageState extends State<BrokerHomePage> {
                           width: 48,
                           height: 48,
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: const Icon(
@@ -199,14 +222,7 @@ class _BrokerHomePageState extends State<BrokerHomePage> {
 
                         // Notification Bell with Real Unread Badge
                         StreamBuilder<QuerySnapshot>(
-                          stream: currentBrokerId.isNotEmpty
-                              ? FirebaseFirestore.instance
-                                  .collection("Broker")
-                                  .doc(currentBrokerId)
-                                  .collection("Notifications")
-                                  .where("is_read", isEqualTo: false)
-                                  .snapshots()
-                              : const Stream.empty(),
+                          stream: _notifStream ?? const Stream.empty(),
                           builder: (context, notifSnap) {
                             final unreadCount =
                                 notifSnap.data?.docs.length ?? 0;
@@ -224,7 +240,7 @@ class _BrokerHomePageState extends State<BrokerHomePage> {
                                 height: 42,
                                 margin: const EdgeInsets.only(right: 8),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
+                                  color: Colors.white.withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(14),
                                 ),
                                 child: Stack(
@@ -269,12 +285,7 @@ class _BrokerHomePageState extends State<BrokerHomePage> {
 
                         // Real-Time Broker Availability Control (Online / Offline)
                         StreamBuilder<DocumentSnapshot>(
-                          stream: currentBrokerId.isNotEmpty
-                              ? FirebaseFirestore.instance
-                                  .collection("Broker")
-                                  .doc(currentBrokerId)
-                                  .snapshots()
-                              : const Stream.empty(),
+                          stream: _brokerDocStream ?? const Stream.empty(),
                           builder: (context, bSnap) {
                             final bData = bSnap.data?.data() as Map<String, dynamic>? ?? {};
                             final String currentStatus = (bData['availability_status'] ?? bData['status'] ?? 'online')
@@ -320,7 +331,7 @@ class _BrokerHomePageState extends State<BrokerHomePage> {
                                       color: (isOnline
                                               ? Appcolors.tertiaryGreen
                                               : Colors.black)
-                                          .withOpacity(0.25),
+                                          .withValues(alpha: 0.25),
                                       blurRadius: 6,
                                       offset: const Offset(0, 2),
                                     ),
@@ -366,13 +377,7 @@ class _BrokerHomePageState extends State<BrokerHomePage> {
 
                   // -------- Live Real-Time Firebase Metrics --------
                   StreamBuilder<QuerySnapshot>(
-                    stream: currentBrokerId.isNotEmpty
-                        ? FirebaseFirestore.instance
-                            .collection("Broker")
-                            .doc(currentBrokerId)
-                            .collection("IncomingRequests")
-                            .snapshots()
-                        : const Stream.empty(),
+                    stream: _incomingRequestsStream ?? const Stream.empty(),
                     builder: (context, snapshot) {
                       int newRequestsCount = 0;
                       int activeOrdersCount = 0;
@@ -478,7 +483,7 @@ class _BrokerHomePageState extends State<BrokerHomePage> {
                                 ),
                                 decoration: BoxDecoration(
                                   color: Appcolors.secondaryPurple
-                                      .withOpacity(0.12),
+                                      .withValues(alpha: 0.12),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(
@@ -532,7 +537,7 @@ class _BrokerHomePageState extends State<BrokerHomePage> {
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(18),
                                 border: Border.all(
-                                  color: Colors.grey.withOpacity(0.15),
+                                  color: Colors.grey.withValues(alpha: 0.15),
                                 ),
                               ),
                               child: Column(
@@ -542,7 +547,7 @@ class _BrokerHomePageState extends State<BrokerHomePage> {
                                     padding: const EdgeInsets.all(16),
                                     decoration: BoxDecoration(
                                       color: Appcolors.secondaryPurple
-                                          .withOpacity(0.08),
+                                          .withValues(alpha: 0.08),
                                       shape: BoxShape.circle,
                                     ),
                                     child: Icon(
@@ -680,7 +685,7 @@ class _StatCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -694,7 +699,7 @@ class _StatCard extends StatelessWidget {
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.12),
+              color: color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: color, size: 17),

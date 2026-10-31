@@ -167,6 +167,17 @@ class BrokerDriverRequestsCubit extends Cubit<BrokerDriverRequestsState> {
           'created_at': FieldValue.serverTimestamp(),
           'status': 'active',
         });
+
+        // 9. Update Broker's vehicle_types array (Phase 2.12)
+        final String? vType = (driverData?['vehicle_type'] ?? reqData?['vehicle_type'])?.toString().trim();
+        if (vType != null && vType.isNotEmpty) {
+          final brokerDocRef = _firestore.collection("Broker").doc(brokerId);
+          transaction.set(brokerDocRef, {
+            'vehicle_types': FieldValue.arrayUnion([vType]),
+            'vehicleTypes': FieldValue.arrayUnion([vType]),
+            'updated_at': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true));
+        }
       });
 
       if (!isClosed) {

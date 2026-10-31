@@ -36,7 +36,7 @@ class _BrokerAssignDriverPageState extends State<BrokerAssignDriverPage> {
     Map<String, dynamic> driver,
   ) {
     final TextEditingController fareController = TextEditingController();
-    final _formKey = GlobalKey<FormState>();
+    final formKey = GlobalKey<FormState>();
 
     final String driverName = (driver['name'] ?? driver['driver_name'] ?? 'Driver').toString();
     final String vehicleType = (driver['vehicle_type'] ?? 'Truck').toString();
@@ -60,7 +60,7 @@ class _BrokerAssignDriverPageState extends State<BrokerAssignDriverPage> {
             24 + MediaQuery.of(sheetContext).viewInsets.bottom,
           ),
           child: Form(
-            key: _formKey,
+            key: formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,7 +204,7 @@ class _BrokerAssignDriverPageState extends State<BrokerAssignDriverPage> {
                       ),
                     ),
                     onPressed: () {
-                      if (!_formKey.currentState!.validate()) return;
+                      if (!formKey.currentState!.validate()) return;
                       final fare = double.parse(fareController.text.trim());
 
                       Navigator.pop(sheetContext);
@@ -230,7 +230,7 @@ class _BrokerAssignDriverPageState extends State<BrokerAssignDriverPage> {
           ),
         );
       },
-    );
+    ).whenComplete(() => fareController.dispose());
   }
 
   @override
@@ -419,7 +419,7 @@ class _BrokerAssignDriverPageState extends State<BrokerAssignDriverPage> {
           24,
         ),
         itemCount: drivers.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        separatorBuilder: (_, _) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
           final driver = drivers[index];
           final String name = (driver['name'] ?? driver['driver_name'] ?? 'Driver').toString();

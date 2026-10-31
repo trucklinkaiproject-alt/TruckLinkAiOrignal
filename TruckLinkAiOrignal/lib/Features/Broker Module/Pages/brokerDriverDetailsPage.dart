@@ -174,9 +174,9 @@ class BrokerDriverDetailsPage extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                             decoration: BoxDecoration(
-                              color: statusColor.withOpacity(0.12),
+                              color: statusColor.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: statusColor.withOpacity(0.4)),
+                              border: Border.all(color: statusColor.withValues(alpha: 0.4)),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -214,7 +214,7 @@ class BrokerDriverDetailsPage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(22),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.04),
+                              color: Colors.black.withValues(alpha: 0.04),
                               blurRadius: 12,
                               offset: const Offset(0, 4),
                             ),
@@ -226,7 +226,7 @@ class BrokerDriverDetailsPage extends StatelessWidget {
                               width: 76,
                               height: 76,
                               decoration: BoxDecoration(
-                                color: Appcolors.secondaryPurple.withOpacity(0.12),
+                                color: Appcolors.secondaryPurple.withValues(alpha: 0.12),
                                 shape: BoxShape.circle,
                               ),
                               alignment: Alignment.center,
@@ -276,7 +276,7 @@ class BrokerDriverDetailsPage extends StatelessWidget {
                                     child: OutlinedButton.icon(
                                       style: OutlinedButton.styleFrom(
                                         foregroundColor: Appcolors.primaryBlue,
-                                        side: BorderSide(color: Appcolors.primaryBlue.withOpacity(0.4)),
+                                        side: BorderSide(color: Appcolors.primaryBlue.withValues(alpha: 0.4)),
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(22),
                                         ),
@@ -382,7 +382,7 @@ class BrokerDriverDetailsPage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.04),
+                              color: Colors.black.withValues(alpha: 0.04),
                               blurRadius: 10,
                               offset: const Offset(0, 3),
                             ),
@@ -427,7 +427,7 @@ class BrokerDriverDetailsPage extends StatelessWidget {
                               return Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                 decoration: BoxDecoration(
-                                  color: Appcolors.secondaryPurple.withOpacity(0.12),
+                                  color: Appcolors.secondaryPurple.withValues(alpha: 0.12),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Text(
@@ -472,7 +472,7 @@ class BrokerDriverDetailsPage extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(18),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.04),
+                                    color: Colors.black.withValues(alpha: 0.04),
                                     blurRadius: 10,
                                     offset: const Offset(0, 3),
                                   ),
@@ -505,7 +505,7 @@ class BrokerDriverDetailsPage extends StatelessWidget {
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             itemCount: docs.length,
-                            separatorBuilder: (_, __) => const SizedBox(height: 10),
+                            separatorBuilder: (_, _) => const SizedBox(height: 10),
                             itemBuilder: (context, index) {
                               final rData = docs[index].data() as Map<String, dynamic>;
                               final String reviewerName = (rData['reviewer_name'] ?? 'Verified Shipper').toString();
@@ -521,7 +521,7 @@ class BrokerDriverDetailsPage extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(18),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.03),
+                                      color: Colors.black.withValues(alpha: 0.03),
                                       blurRadius: 8,
                                       offset: const Offset(0, 2),
                                     ),
@@ -534,7 +534,7 @@ class BrokerDriverDetailsPage extends StatelessWidget {
                                       children: [
                                         CircleAvatar(
                                           radius: 16,
-                                          backgroundColor: Appcolors.secondaryPurple.withOpacity(0.12),
+                                          backgroundColor: Appcolors.secondaryPurple.withValues(alpha: 0.12),
                                           child: Text(
                                             reviewerName.isNotEmpty ? reviewerName[0].toUpperCase() : "U",
                                             style: const TextStyle(
@@ -657,7 +657,7 @@ class _StatCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

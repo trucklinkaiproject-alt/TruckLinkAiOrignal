@@ -136,7 +136,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                             borderRadius: BorderRadius.circular(14),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.06),
+                                color: Colors.black.withValues(alpha: 0.06),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),
@@ -242,7 +242,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                                   style: OutlinedButton.styleFrom(
                                     foregroundColor: Appcolors.primaryBlue,
                                     side: BorderSide(
-                                      color: Appcolors.primaryBlue.withOpacity(0.4),
+                                      color: Appcolors.primaryBlue.withValues(alpha: 0.4),
                                     ),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(21),
@@ -399,7 +399,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(16),
                                   borderSide: BorderSide(
-                                    color: Colors.grey.withOpacity(0.2),
+                                    color: Colors.grey.withValues(alpha: 0.2),
                                   ),
                                 ),
                                 focusedBorder: OutlineInputBorder(
@@ -442,7 +442,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Appcolors.secondaryPurple,
                                         disabledBackgroundColor: Appcolors.secondaryPurple
-                                            .withOpacity(0.6),
+                                            .withValues(alpha: 0.6),
                                         elevation: 0,
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(28),
@@ -483,17 +483,17 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
                               color: (rawStatus == 'rejected' || rawStatus == 'cancelled')
-                                  ? Colors.red.withOpacity(0.08)
+                                  ? Colors.red.withValues(alpha: 0.08)
                                   : isPending
-                                      ? Colors.amber.withOpacity(0.08)
-                                      : Appcolors.secondaryPurple.withOpacity(0.08),
+                                      ? Colors.amber.withValues(alpha: 0.08)
+                                      : Appcolors.secondaryPurple.withValues(alpha: 0.08),
                               borderRadius: BorderRadius.circular(18),
                               border: Border.all(
                                 color: (rawStatus == 'rejected' || rawStatus == 'cancelled')
-                                    ? Colors.red.withOpacity(0.3)
+                                    ? Colors.red.withValues(alpha: 0.3)
                                     : isPending
-                                        ? Colors.amber.withOpacity(0.3)
-                                        : Appcolors.secondaryPurple.withOpacity(0.3),
+                                        ? Colors.amber.withValues(alpha: 0.3)
+                                        : Appcolors.secondaryPurple.withValues(alpha: 0.3),
                                 width: 1.2,
                               ),
                             ),
@@ -573,7 +573,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                                 borderRadius: BorderRadius.circular(18),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.04),
+                                    color: Colors.black.withValues(alpha: 0.04),
                                     blurRadius: 10,
                                     offset: const Offset(0, 3),
                                   ),
@@ -606,7 +606,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                                   ),
                                   if (docData["driver_fare"] != null || docData["driverFare"] != null || docData["assigned_fare"] != null) ...[
                                     const SizedBox(height: 12),
-                                    Divider(height: 1, color: Colors.grey.withOpacity(0.15)),
+                                    Divider(height: 1, color: Colors.grey.withValues(alpha: 0.15)),
                                     const SizedBox(height: 12),
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -704,7 +704,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                                     borderRadius: BorderRadius.circular(18),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withOpacity(0.04),
+                                        color: Colors.black.withValues(alpha: 0.04),
                                         blurRadius: 10,
                                         offset: const Offset(0, 3),
                                       ),
@@ -717,8 +717,8 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                                         height: 44,
                                         decoration: BoxDecoration(
                                           color: hasLocation
-                                              ? Appcolors.tertiaryGreen.withOpacity(0.12)
-                                              : Colors.grey.withOpacity(0.12),
+                                              ? Appcolors.tertiaryGreen.withValues(alpha: 0.12)
+                                              : Colors.grey.withValues(alpha: 0.12),
                                           shape: BoxShape.circle,
                                         ),
                                         child: Icon(
@@ -774,7 +774,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                                                 style: OutlinedButton.styleFrom(
                                                   foregroundColor: Appcolors.primaryBlue,
                                                   side: BorderSide(
-                                                    color: Appcolors.primaryBlue.withOpacity(0.35),
+                                                    color: Appcolors.primaryBlue.withValues(alpha: 0.35),
                                                   ),
                                                   shape: RoundedRectangleBorder(
                                                     borderRadius: BorderRadius.circular(19),
@@ -819,7 +819,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                               child: OutlinedButton.icon(
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: Colors.red[700],
-                                  side: BorderSide(color: Colors.red.withOpacity(0.4)),
+                                  side: BorderSide(color: Colors.red.withValues(alpha: 0.4)),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(25),
                                   ),
@@ -957,7 +957,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                                 borderRadius: BorderRadius.circular(18),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.04),
+                                    color: Colors.black.withValues(alpha: 0.04),
                                     blurRadius: 10,
                                     offset: const Offset(0, 3),
                                   ),
@@ -969,7 +969,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                                     width: 38,
                                     height: 38,
                                     decoration: BoxDecoration(
-                                      color: Appcolors.tertiaryGreen.withOpacity(0.12),
+                                      color: Appcolors.tertiaryGreen.withValues(alpha: 0.12),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: const Icon(Icons.timer_outlined, color: Appcolors.tertiaryGreen, size: 20),
@@ -1004,7 +1004,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                     decoration: BoxDecoration(
-                                      color: Appcolors.tertiaryGreen.withOpacity(0.12),
+                                      color: Appcolors.tertiaryGreen.withValues(alpha: 0.12),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: const Text(
@@ -1066,7 +1066,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                                 width: double.infinity,
                                 padding: const EdgeInsets.all(14),
                                 decoration: BoxDecoration(
-                                  color: Appcolors.secondaryPurple.withOpacity(0.1),
+                                  color: Appcolors.secondaryPurple.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                                 child: const Row(
@@ -1119,9 +1119,9 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.amber.withOpacity(0.08),
+          color: Colors.amber.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Colors.amber.withOpacity(0.3), width: 1.2),
+          border: Border.all(color: Colors.amber.withValues(alpha: 0.3), width: 1.2),
         ),
         child: Row(
           children: [
@@ -1166,9 +1166,9 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF1565C0).withOpacity(0.08),
+          color: const Color(0xFF1565C0).withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: const Color(0xFF1565C0).withOpacity(0.3), width: 1.2),
+          border: Border.all(color: const Color(0xFF1565C0).withValues(alpha: 0.3), width: 1.2),
         ),
         child: Row(
           children: [
@@ -1212,9 +1212,9 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.red.withOpacity(0.08),
+          color: Colors.red.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Colors.red.withOpacity(0.3), width: 1.2),
+          border: Border.all(color: Colors.red.withValues(alpha: 0.3), width: 1.2),
         ),
         child: Row(
           children: [
@@ -1259,9 +1259,9 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Appcolors.tertiaryGreen.withOpacity(0.08),
+          color: Appcolors.tertiaryGreen.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Appcolors.tertiaryGreen.withOpacity(0.3), width: 1.2),
+          border: Border.all(color: Appcolors.tertiaryGreen.withValues(alpha: 0.3), width: 1.2),
         ),
         child: Row(
           children: [
@@ -1306,9 +1306,9 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Appcolors.primaryBlue.withOpacity(0.08),
+          color: Appcolors.primaryBlue.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Appcolors.primaryBlue.withOpacity(0.3), width: 1.2),
+          border: Border.all(color: Appcolors.primaryBlue.withValues(alpha: 0.3), width: 1.2),
         ),
         child: Row(
           children: [
@@ -1353,9 +1353,9 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Appcolors.tertiaryGreen.withOpacity(0.08),
+          color: Appcolors.tertiaryGreen.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Appcolors.tertiaryGreen.withOpacity(0.3), width: 1.2),
+          border: Border.all(color: Appcolors.tertiaryGreen.withValues(alpha: 0.3), width: 1.2),
         ),
         child: Row(
           children: [
@@ -1466,7 +1466,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Appcolors.primaryBlue,
                     side: BorderSide(
-                      color: Appcolors.primaryBlue.withOpacity(0.4),
+                      color: Appcolors.primaryBlue.withValues(alpha: 0.4),
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
@@ -1598,7 +1598,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                       contentPadding: const EdgeInsets.all(14),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
+                        borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
                       ),
                     ),
                   ),
@@ -1660,7 +1660,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
           );
         },
       ),
-    );
+    ).whenComplete(() => commentCtrl.dispose());
   }
 }
 
@@ -1702,7 +1702,7 @@ class _InfoCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -1715,7 +1715,7 @@ class _InfoCard extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.12),
+              color: iconColor.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: iconColor, size: 19),

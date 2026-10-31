@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
 import 'package:trucklinkai_orignal/Core/Services/notificationNavigationService.dart';
 import 'package:trucklinkai_orignal/Core/Services/notificationService.dart';
-import 'package:trucklinkai_orignal/Features/Broker%20Module/Pages/brokerChatInboxPage.dart';
 
 class BrokerAlertPage extends StatefulWidget {
   const BrokerAlertPage({super.key});
@@ -17,6 +16,22 @@ class _BrokerAlertPageState extends State<BrokerAlertPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _isClearing = false;
+  Stream<QuerySnapshot>? _notificationStream;
+
+  @override
+  void initState() {
+    super.initState();
+    final String? brokerId = _auth.currentUser?.uid;
+    if (brokerId != null && brokerId.isNotEmpty) {
+      _notificationStream = _firestore
+          .collection("Broker")
+          .doc(brokerId)
+          .collection("Notifications")
+          .orderBy("timestamp", descending: true)
+          .limit(50)
+          .snapshots();
+    }
+  }
 
   Future<void> _markAllAsRead(List<QueryDocumentSnapshot> docs) async {
     final String? brokerId = _auth.currentUser?.uid;
@@ -201,12 +216,7 @@ class _BrokerAlertPageState extends State<BrokerAlertPage> {
       backgroundColor: const Color(0xFFF5F6FA),
       body: SafeArea(
         child: StreamBuilder<QuerySnapshot>(
-          stream: _firestore
-              .collection("Broker")
-              .doc(brokerId)
-              .collection("Notifications")
-              .orderBy("timestamp", descending: true)
-              .snapshots(),
+          stream: _notificationStream ?? const Stream.empty(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
               return const Center(
@@ -246,7 +256,7 @@ class _BrokerAlertPageState extends State<BrokerAlertPage> {
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.04),
+                                    color: Colors.black.withValues(alpha: 0.04),
                                     blurRadius: 6,
                                   ),
                                 ],
@@ -328,7 +338,7 @@ class _BrokerAlertPageState extends State<BrokerAlertPage> {
                                 24,
                               ),
                               itemCount: docs.length,
-                              separatorBuilder: (_, __) => const SizedBox(height: 12),
+                              separatorBuilder: (_, _) => const SizedBox(height: 12),
                               itemBuilder: (context, index) {
                                 final data = docs[index].data() as Map<String, dynamic>;
                                 final String id = docs[index].id;
@@ -361,7 +371,7 @@ class _BrokerAlertPageState extends State<BrokerAlertPage> {
                                       borderRadius: BorderRadius.circular(18),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.black.withOpacity(0.04),
+                                          color: Colors.black.withValues(alpha: 0.04),
                                           blurRadius: 10,
                                           offset: const Offset(0, 3),
                                         ),
@@ -374,7 +384,7 @@ class _BrokerAlertPageState extends State<BrokerAlertPage> {
                                           width: 42,
                                           height: 42,
                                           decoration: BoxDecoration(
-                                            color: color.withOpacity(0.12),
+                                            color: color.withValues(alpha: 0.12),
                                             borderRadius: BorderRadius.circular(12),
                                           ),
                                           child: Icon(icon, color: color, size: 22),
@@ -463,7 +473,7 @@ class _BrokerEmptyAlertState extends StatelessWidget {
               width: 84,
               height: 84,
               decoration: BoxDecoration(
-                color: Appcolors.secondaryPurple.withOpacity(0.1),
+                color: Appcolors.secondaryPurple.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: const Icon(

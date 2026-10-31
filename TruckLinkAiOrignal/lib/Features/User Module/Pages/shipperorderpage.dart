@@ -94,7 +94,7 @@ class _ShipperOrderPageState extends State<ShipperOrderPage>
       backgroundColor: Colors.white,
       automaticallyImplyLeading: false,
       elevation: 0.5,
-      shadowColor: Colors.black.withOpacity(0.05),
+      shadowColor: Colors.black.withValues(alpha: 0.05),
       surfaceTintColor: Colors.white,
       
       title: const Text(
@@ -127,7 +127,7 @@ class _ShipperOrderPageState extends State<ShipperOrderPage>
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -140,7 +140,7 @@ class _ShipperOrderPageState extends State<ShipperOrderPage>
           borderRadius: BorderRadius.circular(30),
           boxShadow: [
             BoxShadow(
-              color: Appcolors.primaryBlue.withOpacity(0.3),
+              color: Appcolors.primaryBlue.withValues(alpha: 0.3),
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),
@@ -269,7 +269,7 @@ class _ShipperOrderPageState extends State<ShipperOrderPage>
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.08),
+                      color: Colors.blue.withValues(alpha: 0.08),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
@@ -307,7 +307,7 @@ class _ShipperOrderPageState extends State<ShipperOrderPage>
 class OrderCard extends StatelessWidget {
   final Map<String, dynamic> order;
 
-  const OrderCard({Key? key, required this.order}) : super(key: key);
+  const OrderCard({super.key, required this.order});
 
   @override
   Widget build(BuildContext context) {

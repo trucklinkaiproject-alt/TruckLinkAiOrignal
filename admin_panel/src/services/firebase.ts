@@ -2,16 +2,25 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
-// Firebase config copied from lib/Core/Constants/firebase_options.dart (web configuration)
+// Firebase config is read from environment variables.
+// Copy .env.example to .env.local and fill in your values.
+// NEVER hardcode credentials in source code.
 const firebaseConfig = {
-  apiKey: 'AIzaSyActpi6mWY1fd7bDPrh3ALSuh1cB9N4uxI',
-  authDomain: 'trucklink-ai-orignal.firebaseapp.com',
-  projectId: 'trucklink-ai-orignal',
-  storageBucket: 'trucklink-ai-orignal.firebasestorage.app',
-  messagingSenderId: '848099422906',
-  appId: '1:848099422906:web:a0fbf7518c75a12a060883',
-  measurementId: 'G-Z9R9W65TQN',
+  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId:             import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId:     import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
+
+if (!firebaseConfig.apiKey) {
+  throw new Error(
+    '[firebase.ts] Firebase config is missing. ' +
+    'Copy admin_panel/.env.example to admin_panel/.env.local and fill in your VITE_FIREBASE_* values.'
+  );
+}
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);

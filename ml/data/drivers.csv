@@ -1,0 +1,251 @@
+driver_id,driver_name,broker_id,vehicle_type,vehicle_number,is_available,availability_status,driver_latitude,driver_longitude,driver_rating,total_trips,status
+driver_0001,Driver 1,broker_025,PickUp Truck,TL-954-C,True,online,31.30246,73.28819,5.0,5,active
+driver_0002,Driver 2,broker_011,Shahzore,TL-786-C,True,online,24.79262,66.94748,4.17,38,active
+driver_0003,Driver 3,broker_045,Van,TL-275-L,True,online,24.88255,66.95719,4.41,68,active
+driver_0004,Driver 4,broker_047,Container,TL-488-C,True,online,31.79367,73.46531,4.71,71,active
+driver_0005,Driver 5,broker_041,Container,TL-963-A,True,online,31.2196,72.99982,4.21,94,active
+driver_0006,Driver 6,broker_015,Truck,TL-510-C,True,online,25.22706,67.22559,4.54,104,active
+driver_0007,Driver 7,broker_005,Container,TL-680-C,False,offline,33.35604,72.82777,4.95,73,on-trip
+driver_0008,Driver 8,broker_014,Other,TL-758-K,True,online,33.22465,73.01928,4.51,14,active
+driver_0009,Driver 9,broker_010,PickUp Truck,TL-862-L,True,online,25.05674,67.43898,4.46,8,active
+driver_0010,Driver 10,broker_035,PickUp Truck,TL-538-L,True,online,31.63938,73.18317,4.36,6,active
+driver_0011,Driver 11,broker_026,Shahzore,TL-241-L,True,online,33.58912,72.93664,4.35,54,active
+driver_0012,Driver 12,broker_032,Van,TL-981-A,True,online,31.72367,74.13417,4.38,65,active
+driver_0013,Driver 13,broker_010,Trailer,TL-532-L,True,online,25.15099,67.09743,4.48,78,active
+driver_0014,Driver 14,broker_005,Loader Rickshaw,TL-579-L,True,online,33.37766,72.91459,3.95,16,active
+driver_0015,Driver 15,broker_017,Truck,TL-217-L,True,online,34.04818,71.45531,4.22,30,active
+driver_0016,Driver 16,broker_049,PickUp Truck,TL-448-A,True,online,33.50143,72.85181,4.81,119,active
+driver_0017,Driver 17,broker_019,Loader Rickshaw,TL-103-C,True,online,32.18701,74.21819,4.68,33,active
+driver_0018,Driver 18,broker_033,Trailer,TL-208-C,True,online,30.47275,71.57971,4.1,40,active
+driver_0019,Driver 19,broker_041,Container,TL-880-B,True,online,31.41197,73.08529,3.58,107,active
+driver_0020,Driver 20,broker_035,Truck,TL-600-A,True,online,31.31983,73.25455,4.39,100,active
+driver_0021,Driver 21,broker_008,Shahzore,TL-951-C,False,offline,31.51359,74.41205,4.63,109,on-trip
+driver_0022,Driver 22,broker_016,Truck,TL-680-A,True,online,33.67509,73.03459,3.4,88,active
+driver_0023,Driver 23,broker_006,Other,TL-878-L,True,online,33.44378,73.27982,4.2,16,active
+driver_0024,Driver 24,broker_050,Trailer,TL-586-L,True,online,31.54387,74.25826,4.25,99,active
+driver_0025,Driver 25,broker_011,PickUp Truck,TL-721-K,True,online,24.90878,67.08689,3.97,103,active
+driver_0026,Driver 26,broker_014,Container,TL-508-C,True,online,33.75303,73.23647,5.0,89,active
+driver_0027,Driver 27,broker_029,Other,TL-330-A,True,online,31.72372,74.55868,4.02,99,active
+driver_0028,Driver 28,broker_022,Truck,TL-335-L,True,online,33.71931,73.30667,4.46,115,active
+driver_0029,Driver 29,broker_015,Truck,TL-746-A,True,online,25.0082,67.03617,3.97,11,active
+driver_0030,Driver 30,broker_015,Van,TL-980-C,False,offline,24.98281,66.90481,4.15,13,on-trip
+driver_0031,Driver 31,broker_005,Container,TL-597-B,True,online,33.4778,73.14582,4.76,75,active
+driver_0032,Driver 32,broker_035,Trailer,TL-684-L,True,online,31.43131,72.99023,4.21,65,active
+driver_0033,Driver 33,broker_031,Container,TL-926-K,True,online,34.34141,71.39801,3.98,71,active
+driver_0034,Driver 34,broker_013,Van,TL-541-C,True,online,33.4497,72.85906,3.7,62,active
+driver_0035,Driver 35,broker_028,Loader Rickshaw,TL-846-A,True,online,30.34274,71.56403,4.52,7,active
+driver_0036,Driver 36,broker_044,Van,TL-845-C,True,online,31.65474,74.45318,4.34,67,active
+driver_0037,Driver 37,broker_007,Container,TL-649-K,True,online,31.30527,74.33355,3.27,62,active
+driver_0038,Driver 38,broker_009,Loader Rickshaw,TL-573-B,True,online,34.103,71.62135,4.31,105,active
+driver_0039,Driver 39,broker_005,Other,TL-976-L,True,online,33.52047,72.85499,4.02,5,active
+driver_0040,Driver 40,broker_007,Truck,TL-653-A,True,online,31.28724,74.5204,5.0,20,active
+driver_0041,Driver 41,broker_006,Container,TL-597-K,True,online,33.5773,73.16887,3.95,12,active
+driver_0042,Driver 42,broker_014,Loader Rickshaw,TL-268-K,False,offline,33.40394,73.13735,3.88,12,on-trip
+driver_0043,Driver 43,broker_001,Loader Rickshaw,TL-902-K,True,online,31.66423,74.01383,3.53,88,active
+driver_0044,Driver 44,broker_019,Loader Rickshaw,TL-848-L,True,online,32.33472,74.04432,4.57,17,active
+driver_0045,Driver 45,broker_043,Other,TL-403-B,True,online,33.30701,73.32511,4.77,100,active
+driver_0046,Driver 46,broker_004,Truck,TL-158-A,True,online,33.46048,72.86514,4.87,63,active
+driver_0047,Driver 47,broker_038,Other,TL-973-L,True,online,31.44924,74.39775,3.32,5,active
+driver_0048,Driver 48,broker_011,Truck,TL-182-B,False,offline,24.75904,67.04899,5.0,9,on-trip
+driver_0049,Driver 49,broker_005,Van,TL-340-K,True,online,33.39472,73.02199,4.12,82,active
+driver_0050,Driver 50,broker_008,Container,TL-140-L,True,online,31.63967,74.14875,3.99,49,active
+driver_0051,Driver 51,broker_006,Loader Rickshaw,TL-678-L,True,online,33.31697,73.21777,4.72,96,active
+driver_0052,Driver 52,broker_021,PickUp Truck,TL-833-C,True,online,24.97483,66.48953,4.19,7,active
+driver_0053,Driver 53,broker_016,PickUp Truck,TL-787-C,True,online,33.72995,72.94979,5.0,98,active
+driver_0054,Driver 54,broker_030,Shahzore,TL-174-A,False,offline,31.84878,74.32229,4.84,51,on-trip
+driver_0055,Driver 55,broker_030,Van,TL-318-L,True,online,31.795,74.20174,4.76,107,active
+driver_0056,Driver 56,broker_017,Trailer,TL-170-B,False,offline,34.08481,71.70747,3.6,34,on-trip
+driver_0057,Driver 57,broker_024,PickUp Truck,TL-953-L,True,online,30.02206,71.56995,4.44,101,active
+driver_0058,Driver 58,broker_046,PickUp Truck,TL-926-L,True,online,33.76106,72.92494,4.83,110,active
+driver_0059,Driver 59,broker_001,PickUp Truck,TL-206-B,False,offline,31.25383,74.27702,4.45,57,on-trip
+driver_0060,Driver 60,broker_017,Van,TL-860-L,False,offline,34.00113,71.3765,4.06,47,on-trip
+driver_0061,Driver 61,broker_010,PickUp Truck,TL-315-C,True,online,25.02952,67.07548,3.86,60,active
+driver_0062,Driver 62,broker_014,PickUp Truck,TL-357-A,True,online,33.51232,73.21751,4.21,31,active
+driver_0063,Driver 63,broker_006,Loader Rickshaw,TL-145-A,True,online,33.3744,73.21306,4.09,65,active
+driver_0064,Driver 64,broker_022,Trailer,TL-368-B,True,online,33.6017,73.04225,4.1,9,active
+driver_0065,Driver 65,broker_048,Other,TL-537-L,True,online,31.23384,74.30318,4.32,49,active
+driver_0066,Driver 66,broker_001,Van,TL-807-B,True,online,31.16692,74.19156,4.19,51,active
+driver_0067,Driver 67,broker_035,Truck,TL-696-L,True,online,31.39796,73.1301,4.26,5,active
+driver_0068,Driver 68,broker_010,Loader Rickshaw,TL-415-C,True,online,25.01481,67.11401,3.99,56,active
+driver_0069,Driver 69,broker_003,Shahzore,TL-355-A,True,online,31.37775,72.97015,5.0,91,active
+driver_0070,Driver 70,broker_023,Loader Rickshaw,TL-867-B,False,offline,33.8067,71.63851,4.4,30,on-trip
+driver_0071,Driver 71,broker_016,Trailer,TL-930-B,False,offline,33.63954,72.98635,5.0,113,on-trip
+driver_0072,Driver 72,broker_027,Truck,TL-440-K,True,online,33.84515,72.88393,4.66,119,active
+driver_0073,Driver 73,broker_043,Container,TL-906-A,True,online,33.38346,72.91471,4.23,61,active
+driver_0074,Driver 74,broker_025,Truck,TL-327-B,False,offline,31.42392,72.92811,4.38,17,on-trip
+driver_0075,Driver 75,broker_030,Shahzore,TL-914-B,True,online,31.83855,74.39248,4.3,115,active
+driver_0076,Driver 76,broker_015,Truck,TL-508-C,True,online,25.16825,67.35515,4.52,115,active
+driver_0077,Driver 77,broker_018,Van,TL-385-C,False,offline,33.48205,73.22006,4.14,10,on-trip
+driver_0078,Driver 78,broker_042,Loader Rickshaw,TL-963-L,True,online,30.10805,71.47238,4.64,63,active
+driver_0079,Driver 79,broker_022,Truck,TL-367-B,True,online,33.51084,73.11907,4.04,79,active
+driver_0080,Driver 80,broker_038,PickUp Truck,TL-710-K,True,online,31.33482,74.38203,4.66,79,active
+driver_0081,Driver 81,broker_023,Shahzore,TL-623-A,True,online,33.88891,71.41244,4.01,55,active
+driver_0082,Driver 82,broker_025,Container,TL-825-K,True,online,31.3512,73.24714,4.63,79,active
+driver_0083,Driver 83,broker_001,Container,TL-171-C,True,online,31.25893,74.36685,4.03,72,active
+driver_0084,Driver 84,broker_040,Shahzore,TL-227-C,True,online,31.64385,74.39483,3.2,117,active
+driver_0085,Driver 85,broker_033,PickUp Truck,TL-434-K,True,online,30.53192,71.63311,4.21,15,active
+driver_0086,Driver 86,broker_045,PickUp Truck,TL-296-K,True,online,24.95123,66.95819,4.49,7,active
+driver_0087,Driver 87,broker_043,Loader Rickshaw,TL-278-L,True,online,33.48276,72.98927,4.06,105,active
+driver_0088,Driver 88,broker_037,PickUp Truck,TL-953-A,True,online,32.24,74.57512,4.06,39,active
+driver_0089,Driver 89,broker_020,PickUp Truck,TL-904-L,True,online,31.4808,73.07833,4.45,13,active
+driver_0090,Driver 90,broker_039,Shahzore,TL-552-B,True,online,34.00267,71.44771,3.8,5,active
+driver_0091,Driver 91,broker_033,Other,TL-915-B,True,online,30.32808,71.83024,4.25,109,active
+driver_0092,Driver 92,broker_043,Van,TL-779-L,True,online,33.5221,73.16482,4.56,39,active
+driver_0093,Driver 93,broker_022,Van,TL-869-B,True,online,33.7798,72.97147,4.42,8,active
+driver_0094,Driver 94,broker_044,PickUp Truck,TL-303-B,True,online,31.85607,74.50232,3.62,22,active
+driver_0095,Driver 95,broker_002,Truck,TL-586-L,True,online,24.78457,67.20939,4.03,42,active
+driver_0096,Driver 96,broker_050,Van,TL-744-L,True,online,31.08122,73.8505,4.9,101,active
+driver_0097,Driver 97,broker_013,Loader Rickshaw,TL-349-B,True,online,33.67454,72.91232,4.63,108,active
+driver_0098,Driver 98,broker_042,Truck,TL-981-A,False,offline,29.87664,71.47478,3.69,74,on-trip
+driver_0099,Driver 99,broker_050,Loader Rickshaw,TL-923-L,True,online,31.44055,74.28479,3.95,19,active
+driver_0100,Driver 100,broker_030,Truck,TL-968-A,True,online,31.52542,74.25832,4.72,98,active
+driver_0101,Driver 101,broker_030,Trailer,TL-783-L,True,online,31.61276,74.29746,4.12,105,active
+driver_0102,Driver 102,broker_036,Shahzore,TL-553-L,False,offline,24.66381,66.93824,4.46,72,on-trip
+driver_0103,Driver 103,broker_047,Loader Rickshaw,TL-661-K,True,online,31.68342,73.2073,4.16,42,active
+driver_0104,Driver 104,broker_011,Other,TL-869-B,True,online,25.0186,66.6609,4.57,113,active
+driver_0105,Driver 105,broker_041,PickUp Truck,TL-633-K,True,online,31.28873,73.045,4.12,51,active
+driver_0106,Driver 106,broker_041,Container,TL-179-C,True,online,31.38581,73.40395,4.11,31,active
+driver_0107,Driver 107,broker_016,PickUp Truck,TL-653-A,True,online,33.76095,73.09095,3.65,73,active
+driver_0108,Driver 108,broker_009,Trailer,TL-810-B,True,online,33.97373,71.41107,4.03,27,active
+driver_0109,Driver 109,broker_046,Container,TL-517-C,True,online,33.60142,72.98961,4.41,66,active
+driver_0110,Driver 110,broker_035,Other,TL-311-K,True,online,31.3341,73.05767,4.12,108,active
+driver_0111,Driver 111,broker_025,Truck,TL-883-L,False,offline,31.69841,73.25073,4.39,110,on-trip
+driver_0112,Driver 112,broker_025,Other,TL-460-C,True,online,31.49741,73.07179,4.82,13,active
+driver_0113,Driver 113,broker_049,Loader Rickshaw,TL-955-K,False,offline,33.81436,72.94387,3.9,25,on-trip
+driver_0114,Driver 114,broker_035,Container,TL-379-K,True,online,31.48405,73.03763,4.13,91,active
+driver_0115,Driver 115,broker_032,Truck,TL-784-K,True,online,32.00515,74.36792,4.06,13,active
+driver_0116,Driver 116,broker_047,Trailer,TL-230-L,True,online,31.43694,73.23942,4.05,30,active
+driver_0117,Driver 117,broker_035,Truck,TL-706-L,False,offline,31.3511,72.84977,4.63,6,on-trip
+driver_0118,Driver 118,broker_043,Truck,TL-538-B,True,online,33.51604,72.81703,3.19,95,active
+driver_0119,Driver 119,broker_030,Trailer,TL-488-C,True,online,31.36007,74.22112,3.85,28,active
+driver_0120,Driver 120,broker_014,Other,TL-879-K,True,online,33.41681,72.8888,4.41,92,active
+driver_0121,Driver 121,broker_018,Loader Rickshaw,TL-183-K,True,online,33.70395,72.87802,3.94,118,active
+driver_0122,Driver 122,broker_002,Truck,TL-458-B,False,offline,24.714,66.86165,4.51,88,on-trip
+driver_0123,Driver 123,broker_042,Van,TL-767-A,True,online,30.54981,71.19408,4.34,108,active
+driver_0124,Driver 124,broker_049,Truck,TL-304-A,False,offline,33.74483,73.40655,4.32,17,on-trip
+driver_0125,Driver 125,broker_040,Trailer,TL-584-A,True,online,31.35385,74.06618,4.07,34,active
+driver_0126,Driver 126,broker_037,Container,TL-362-C,True,online,32.29529,74.60213,3.86,22,active
+driver_0127,Driver 127,broker_011,Van,TL-267-C,True,online,25.05023,66.84753,5.0,117,active
+driver_0128,Driver 128,broker_007,Truck,TL-689-K,False,offline,31.72477,74.52725,3.47,67,on-trip
+driver_0129,Driver 129,broker_026,Container,TL-807-B,True,online,33.53385,72.88707,4.34,14,active
+driver_0130,Driver 130,broker_007,PickUp Truck,TL-714-A,False,offline,31.40472,74.46532,3.77,101,on-trip
+driver_0131,Driver 131,broker_037,Truck,TL-538-C,True,online,32.26631,74.40737,4.59,76,active
+driver_0132,Driver 132,broker_005,Shahzore,TL-530-K,True,online,33.22457,73.02975,4.25,71,active
+driver_0133,Driver 133,broker_007,Loader Rickshaw,TL-750-K,False,offline,31.45379,74.48708,4.64,92,on-trip
+driver_0134,Driver 134,broker_046,Trailer,TL-851-L,True,online,33.59678,73.10459,4.48,111,active
+driver_0135,Driver 135,broker_042,PickUp Truck,TL-651-K,True,online,30.16694,71.27985,4.06,78,active
+driver_0136,Driver 136,broker_030,Loader Rickshaw,TL-706-C,True,online,31.54691,74.00976,5.0,6,active
+driver_0137,Driver 137,broker_021,Container,TL-188-C,True,online,24.77771,67.12346,4.7,71,active
+driver_0138,Driver 138,broker_029,Container,TL-683-L,True,online,31.532,74.22513,4.54,9,active
+driver_0139,Driver 139,broker_043,Loader Rickshaw,TL-606-C,True,online,33.68282,72.94988,4.68,103,active
+driver_0140,Driver 140,broker_012,Other,TL-916-C,True,online,31.51282,74.57549,4.29,100,active
+driver_0141,Driver 141,broker_022,PickUp Truck,TL-818-C,False,offline,33.66609,73.02608,4.42,113,on-trip
+driver_0142,Driver 142,broker_036,Truck,TL-295-A,True,online,24.53476,66.80902,4.11,26,active
+driver_0143,Driver 143,broker_016,Loader Rickshaw,TL-876-B,True,online,33.35979,72.95478,3.65,21,active
+driver_0144,Driver 144,broker_045,Other,TL-602-K,True,online,25.01323,66.97753,3.27,80,active
+driver_0145,Driver 145,broker_002,Van,TL-514-B,True,online,24.86049,67.16163,4.97,75,active
+driver_0146,Driver 146,broker_020,Shahzore,TL-643-C,True,online,31.5464,73.28672,4.4,89,active
+driver_0147,Driver 147,broker_028,Shahzore,TL-564-C,True,online,30.27249,71.09332,4.16,40,active
+driver_0148,Driver 148,broker_020,PickUp Truck,TL-838-B,True,online,31.42402,73.07504,4.78,40,active
+driver_0149,Driver 149,broker_021,Van,TL-880-B,True,online,24.59724,67.16931,3.92,115,active
+driver_0150,Driver 150,broker_013,Container,TL-383-L,True,online,34.02036,72.68197,4.25,115,active
+driver_0151,Driver 151,broker_049,PickUp Truck,TL-952-B,False,offline,33.66652,72.79267,4.3,113,on-trip
+driver_0152,Driver 152,broker_019,Container,TL-409-A,True,online,32.18153,74.3277,3.88,70,active
+driver_0153,Driver 153,broker_046,Trailer,TL-155-L,True,online,33.49802,73.26357,4.05,43,active
+driver_0154,Driver 154,broker_019,Trailer,TL-870-K,True,online,32.55222,74.41937,4.06,53,active
+driver_0155,Driver 155,broker_007,Truck,TL-580-K,True,online,31.23441,74.3064,4.73,12,active
+driver_0156,Driver 156,broker_029,Shahzore,TL-152-C,True,online,31.62606,74.6513,4.58,105,active
+driver_0157,Driver 157,broker_031,Van,TL-510-K,True,online,34.24476,71.59881,4.27,19,active
+driver_0158,Driver 158,broker_005,Truck,TL-930-L,True,online,33.14479,72.97244,4.35,30,active
+driver_0159,Driver 159,broker_020,Van,TL-221-L,False,offline,31.51701,73.12887,4.48,118,on-trip
+driver_0160,Driver 160,broker_049,Loader Rickshaw,TL-909-L,True,online,33.54339,73.22408,4.16,99,active
+driver_0161,Driver 161,broker_015,Loader Rickshaw,TL-553-C,True,online,24.95051,67.12519,4.68,21,active
+driver_0162,Driver 162,broker_038,Loader Rickshaw,TL-735-A,True,online,31.33048,74.16483,4.87,112,active
+driver_0163,Driver 163,broker_040,Van,TL-312-B,False,offline,31.40189,74.54456,4.2,19,on-trip
+driver_0164,Driver 164,broker_017,Van,TL-277-L,True,online,34.02628,71.57502,4.86,90,active
+driver_0165,Driver 165,broker_005,Trailer,TL-561-L,True,online,33.54871,72.79211,4.41,70,active
+driver_0166,Driver 166,broker_031,PickUp Truck,TL-395-C,True,online,34.25311,71.63694,4.32,103,active
+driver_0167,Driver 167,broker_045,Other,TL-339-C,True,online,24.92681,66.9046,3.66,14,active
+driver_0168,Driver 168,broker_041,Container,TL-657-B,True,online,31.41439,73.15186,4.03,88,active
+driver_0169,Driver 169,broker_042,Trailer,TL-946-B,False,offline,30.07742,71.55753,4.18,34,on-trip
+driver_0170,Driver 170,broker_005,Truck,TL-414-L,True,online,33.27321,73.08312,4.6,41,active
+driver_0171,Driver 171,broker_048,PickUp Truck,TL-579-C,True,online,31.44375,74.36704,4.92,16,active
+driver_0172,Driver 172,broker_045,Loader Rickshaw,TL-612-L,False,offline,24.7807,67.07234,3.69,43,on-trip
+driver_0173,Driver 173,broker_032,Other,TL-140-K,True,online,31.97081,74.18975,4.77,113,active
+driver_0174,Driver 174,broker_048,Shahzore,TL-126-A,True,online,31.69212,74.26953,4.26,7,active
+driver_0175,Driver 175,broker_015,Truck,TL-788-C,False,offline,25.01654,67.19696,3.8,13,on-trip
+driver_0176,Driver 176,broker_037,Truck,TL-279-K,True,online,32.21168,74.16063,3.83,54,active
+driver_0177,Driver 177,broker_034,Other,TL-285-L,False,offline,30.33221,71.56236,4.27,17,on-trip
+driver_0178,Driver 178,broker_028,Other,TL-581-C,False,offline,30.35676,71.47922,3.69,77,on-trip
+driver_0179,Driver 179,broker_027,Shahzore,TL-207-B,True,online,33.34036,72.8059,4.23,71,active
+driver_0180,Driver 180,broker_022,Loader Rickshaw,TL-395-K,True,online,33.45635,73.11614,4.73,9,active
+driver_0181,Driver 181,broker_049,Truck,TL-422-C,True,online,33.43947,73.16678,4.21,22,active
+driver_0182,Driver 182,broker_021,Van,TL-513-L,False,offline,24.75894,66.93362,4.39,85,on-trip
+driver_0183,Driver 183,broker_001,Other,TL-292-L,True,online,31.64546,74.29073,5.0,44,active
+driver_0184,Driver 184,broker_024,Other,TL-878-A,True,online,30.27542,71.30658,4.49,10,active
+driver_0185,Driver 185,broker_014,PickUp Truck,TL-394-K,True,online,33.60442,73.07748,4.04,52,active
+driver_0186,Driver 186,broker_045,Other,TL-745-L,True,online,24.85933,67.11095,4.5,93,active
+driver_0187,Driver 187,broker_016,Trailer,TL-114-L,True,online,33.41382,73.02882,4.72,46,active
+driver_0188,Driver 188,broker_027,Van,TL-961-A,True,online,33.663,72.88211,3.97,34,active
+driver_0189,Driver 189,broker_030,Van,TL-257-K,True,online,31.82058,74.3117,3.99,17,active
+driver_0190,Driver 190,broker_046,PickUp Truck,TL-379-K,True,online,33.41102,73.02661,4.32,21,active
+driver_0191,Driver 191,broker_031,Other,TL-664-B,True,online,34.0772,71.39763,4.14,75,active
+driver_0192,Driver 192,broker_025,Container,TL-620-B,False,offline,31.33053,73.24289,4.32,67,on-trip
+driver_0193,Driver 193,broker_005,PickUp Truck,TL-974-K,True,online,33.21612,72.95511,4.61,24,active
+driver_0194,Driver 194,broker_022,PickUp Truck,TL-389-C,True,online,33.82215,72.96765,4.38,95,active
+driver_0195,Driver 195,broker_038,Other,TL-557-L,False,offline,31.48145,74.26537,4.21,26,on-trip
+driver_0196,Driver 196,broker_031,Shahzore,TL-881-L,True,online,34.39669,71.45791,4.35,54,active
+driver_0197,Driver 197,broker_025,Other,TL-990-B,False,offline,31.73415,73.05121,3.62,33,on-trip
+driver_0198,Driver 198,broker_045,Container,TL-339-K,True,online,25.13789,67.22271,4.27,62,active
+driver_0199,Driver 199,broker_003,Shahzore,TL-822-K,True,online,31.56158,73.14716,4.82,79,active
+driver_0200,Driver 200,broker_025,Trailer,TL-137-B,True,online,31.44724,73.33047,4.82,31,active
+driver_0201,Driver 201,broker_033,Shahzore,TL-995-K,False,offline,29.97785,71.50822,4.77,38,on-trip
+driver_0202,Driver 202,broker_007,Other,TL-247-K,True,online,31.29291,74.15261,4.88,19,active
+driver_0203,Driver 203,broker_042,Trailer,TL-900-C,True,online,30.58564,71.19002,4.13,97,active
+driver_0204,Driver 204,broker_022,Loader Rickshaw,TL-972-C,True,online,33.64836,73.14078,4.59,50,active
+driver_0205,Driver 205,broker_044,Loader Rickshaw,TL-741-K,False,offline,31.48923,74.38278,4.04,28,on-trip
+driver_0206,Driver 206,broker_035,Truck,TL-340-C,True,online,31.6435,73.12748,4.58,50,active
+driver_0207,Driver 207,broker_015,Van,TL-200-A,True,online,25.19198,67.34589,4.45,52,active
+driver_0208,Driver 208,broker_029,Trailer,TL-129-A,True,online,31.37116,74.3475,4.29,6,active
+driver_0209,Driver 209,broker_021,Truck,TL-483-K,True,online,24.64843,67.16062,4.19,22,active
+driver_0210,Driver 210,broker_010,Container,TL-679-B,True,online,25.04415,66.94623,4.95,115,active
+driver_0211,Driver 211,broker_011,Trailer,TL-991-K,True,online,24.65664,67.11168,4.61,106,active
+driver_0212,Driver 212,broker_040,Container,TL-697-B,True,online,31.62208,74.39157,4.49,55,active
+driver_0213,Driver 213,broker_015,Other,TL-570-C,True,online,24.90676,67.06024,5.0,24,active
+driver_0214,Driver 214,broker_043,Truck,TL-576-C,False,offline,33.50165,73.2279,4.04,118,on-trip
+driver_0215,Driver 215,broker_044,Trailer,TL-453-L,True,online,31.57602,74.07302,4.2,37,active
+driver_0216,Driver 216,broker_020,Loader Rickshaw,TL-567-C,True,online,31.29194,73.03812,4.73,107,active
+driver_0217,Driver 217,broker_013,Loader Rickshaw,TL-209-B,False,offline,33.65481,72.7858,4.7,102,on-trip
+driver_0218,Driver 218,broker_025,Shahzore,TL-816-C,True,online,31.52459,73.17745,4.19,108,active
+driver_0219,Driver 219,broker_002,Loader Rickshaw,TL-679-A,True,online,25.03199,67.15293,4.32,118,active
+driver_0220,Driver 220,broker_039,Other,TL-393-B,True,online,33.99623,71.71375,4.52,115,active
+driver_0221,Driver 221,broker_039,Shahzore,TL-294-L,True,online,34.11045,71.66649,4.22,7,active
+driver_0222,Driver 222,broker_017,Trailer,TL-742-A,True,online,34.20362,71.80156,4.12,16,active
+driver_0223,Driver 223,broker_020,Other,TL-473-B,True,online,31.29653,73.03621,4.17,59,active
+driver_0224,Driver 224,broker_006,PickUp Truck,TL-525-B,True,online,33.58588,73.38818,4.22,97,active
+driver_0225,Driver 225,broker_013,Trailer,TL-997-C,True,online,33.7183,73.11459,5.0,22,active
+driver_0226,Driver 226,broker_034,PickUp Truck,TL-363-K,True,online,30.29227,71.36613,4.78,60,active
+driver_0227,Driver 227,broker_019,Shahzore,TL-579-A,True,online,32.28605,74.28951,4.55,97,active
+driver_0228,Driver 228,broker_010,Container,TL-841-K,False,offline,24.89454,66.88508,4.15,11,on-trip
+driver_0229,Driver 229,broker_036,Shahzore,TL-504-A,True,online,24.95495,66.99616,4.67,24,active
+driver_0230,Driver 230,broker_017,Van,TL-788-C,True,online,34.137,71.75638,4.6,24,active
+driver_0231,Driver 231,broker_038,Loader Rickshaw,TL-480-A,True,online,31.87362,74.40805,5.0,102,active
+driver_0232,Driver 232,broker_044,Container,TL-734-L,True,online,31.60659,74.54108,4.28,38,active
+driver_0233,Driver 233,broker_021,Container,TL-750-K,True,online,24.83359,67.18129,3.79,22,active
+driver_0234,Driver 234,broker_045,PickUp Truck,TL-219-B,True,online,24.69813,67.1944,4.61,103,active
+driver_0235,Driver 235,broker_003,Truck,TL-604-A,True,online,31.38839,73.36261,4.96,18,active
+driver_0236,Driver 236,broker_007,Container,TL-238-K,False,offline,31.62366,74.33651,4.77,66,on-trip
+driver_0237,Driver 237,broker_030,Shahzore,TL-860-L,True,online,31.55549,74.1331,4.92,88,active
+driver_0238,Driver 238,broker_027,Trailer,TL-770-A,False,offline,33.94788,72.76432,4.43,93,on-trip
+driver_0239,Driver 239,broker_032,Loader Rickshaw,TL-386-A,False,offline,31.43015,74.46345,4.11,49,on-trip
+driver_0240,Driver 240,broker_045,Shahzore,TL-555-B,True,online,24.98243,66.87284,4.0,14,active
+driver_0241,Driver 241,broker_024,Van,TL-476-L,False,offline,29.83808,71.59062,4.2,24,on-trip
+driver_0242,Driver 242,broker_042,Shahzore,TL-382-B,True,online,30.39336,71.52664,4.35,61,active
+driver_0243,Driver 243,broker_008,Other,TL-317-L,True,online,31.49394,74.19484,4.17,117,active
+driver_0244,Driver 244,broker_002,Truck,TL-349-B,True,online,25.1336,66.94407,5.0,115,active
+driver_0245,Driver 245,broker_037,Container,TL-883-L,True,online,32.08046,74.2736,4.17,6,active
+driver_0246,Driver 246,broker_014,Container,TL-338-C,True,online,33.35653,73.0197,4.12,30,active
+driver_0247,Driver 247,broker_050,Trailer,TL-710-A,True,online,31.52567,74.18734,4.33,82,active
+driver_0248,Driver 248,broker_018,Trailer,TL-653-C,False,offline,33.2484,72.85058,4.95,118,on-trip
+driver_0249,Driver 249,broker_012,Van,TL-126-B,True,online,31.58787,74.4976,4.25,115,active
+driver_0250,Driver 250,broker_001,Shahzore,TL-343-L,True,online,31.67222,73.96712,4.42,42,active

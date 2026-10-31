@@ -19,8 +19,9 @@ export const Users: React.FC = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
 
-  const { adminProfile } = useAuth();
-  const adminEmail = adminProfile?.email || 'admin@trucklink.ai';
+  const { adminProfile, currentUser } = useAuth();
+  const adminEmail = currentUser?.email || adminProfile?.email || 'admin@trucklink.ai';
+  const adminId = currentUser?.uid || adminProfile?.uid || 'admin';
 
   useEffect(() => {
     const unsub = subscribeUsers((data) => {
@@ -34,7 +35,7 @@ export const Users: React.FC = () => {
     const newStatus = user.status === 'blocked' ? 'active' : 'blocked';
     setActionLoading(true);
     try {
-      await updateUserStatus(user.id, newStatus, adminEmail);
+      await updateUserStatus(user.id, newStatus, adminId, adminEmail);
     } catch (err) {
       console.error('Failed to update status:', err);
     } finally {
@@ -46,7 +47,7 @@ export const Users: React.FC = () => {
     if (!selectedUser) return;
     setActionLoading(true);
     try {
-      await deleteUserDoc(selectedUser.id, adminEmail);
+      await deleteUserDoc(selectedUser.id, adminId, adminEmail);
       setIsDeleteModalOpen(false);
       setSelectedUser(null);
     } catch (err) {

@@ -1,0 +1,47 @@
+{
+  "version": "1.0.0",
+  "canonical_vehicle_types": [
+    "Truck",
+    "Van",
+    "Trailer",
+    "Container",
+    "PickUp Truck",
+    "Shahzore",
+    "Loader Rickshaw",
+    "Other"
+  ],
+  "numeric_features": [
+    "nearest_driver_distance_km",
+    "active_drivers_count",
+    "broker_rating",
+    "broker_acceptance_rate",
+    "broker_completion_rate",
+    "broker_cancellation_rate",
+    "total_requests"
+  ],
+  "engineered_features": [
+    "distance_decay_score",
+    "broker_quality_index"
+  ],
+  "model_features": [
+    "nearest_driver_distance_km",
+    "active_drivers_count",
+    "broker_rating",
+    "broker_acceptance_rate",
+    "broker_completion_rate",
+    "broker_cancellation_rate",
+    "total_requests",
+    "distance_decay_score",
+    "broker_quality_index",
+    "vehicle_truck",
+    "vehicle_van",
+    "vehicle_trailer",
+    "vehicle_container",
+    "vehicle_pickup_truck",
+    "vehicle_shahzore",
+    "vehicle_loader_rickshaw",
+    "vehicle_other"
+  ],
+  "feature_count": 17,
+  "target_column": "is_successful"
+}

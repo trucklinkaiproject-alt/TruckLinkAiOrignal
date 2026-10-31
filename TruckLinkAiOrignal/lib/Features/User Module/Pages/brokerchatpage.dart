@@ -1,73 +1,13 @@
-// import 'package:flutter/material.dart';
-// import 'package:trucklinkai_orignal/Core/Constants/appColors.dart';
-// import 'package:trucklinkai_orignal/Features/User%20Module/Widgets/appBar.dart';
-
-// class BrokerChatPage extends StatefulWidget {
-//   const BrokerChatPage({super.key});
-
-//   @override
-//   State<BrokerChatPage> createState() => _BrokerChatPageState();
-// }
-
-// class _BrokerChatPageState extends State<BrokerChatPage> {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: SafeArea(
-//         child: Container(
-//           padding: EdgeInsets.symmetric(horizontal: 10),
-//           color:Appcolors.background,
-//           child: Column(
-            
-//             children: [
-//               AppBarContainer(title: "Chat with Broker",backArrow: true,),
-
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// broker_chat_page.dart
-//
-// Drop-in Flutter chat page: User ↔ Broker
-// Stack: Firebase Firestore + Cubit (no architecture layer)
-//
-// HOW TO INTEGRATE:
-//   1. Add dependencies in pubspec.yaml:
-//        flutter_bloc: ^8.1.5
-//        cloud_firestore: ^5.x.x
-//        firebase_auth: ^5.x.x
-//        intl: ^0.19.0
-//
-//   2. Firestore collection structure:
-//        /chats/{chatId}/messages/{messageId}
-//          - senderId   : String
-//          - text       : String
-//          - timestamp  : Timestamp
-//          - isRead     : bool
-//
-//   3. Navigate to this page:
-//        Navigator.push(context, MaterialPageRoute(
-//          builder: (_) => BrokerChatPage(
-//            chatId: 'your_chat_id',
-//            brokerId: 'broker_uid',
-//            brokerName: 'John Smith',
-//            brokerAvatar: 'https://...', // optional
-//          ),
-//        ));
-// ─────────────────────────────────────────────────────────────────────────────
-
 import 'dart:async';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:trucklinkai_orignal/Core/Services/appLogger.dart';
 import 'package:trucklinkai_orignal/Core/Services/notificationService.dart';
+
 
 // ══════════════════════════════════════════════════════════════════════════════
 // MODEL
@@ -223,17 +163,19 @@ class ChatCubit extends Cubit<ChatState> {
   void initialize() {
     emit(ChatLoading());
 
-    // Listen ONLY to this conversation's dedicated messages subcollection
+    // Listen ONLY to this conversation's dedicated messages subcollection (limit to latest 50 messages)
     _messagesSubscription = _firestore
         .collection('chats')
         .doc(chatId)
         .collection('messages')
-        .orderBy('timestamp', descending: false)
+        .orderBy('timestamp', descending: true)
+        .limit(50)
         .snapshots()
         .listen(
           (snapshot) {
+            // Reverse so oldest of the 50 is at top, newest at bottom
             final messages =
-                snapshot.docs.map(ChatMessage.fromFirestore).toList();
+                snapshot.docs.reversed.map(ChatMessage.fromFirestore).toList();
 
             final current = state;
             emit(ChatLoaded(
@@ -246,7 +188,10 @@ class ChatCubit extends Cubit<ChatState> {
 
             _markMessagesAsRead(snapshot.docs);
           },
-          onError: (e) => emit(ChatError('Failed to load messages: $e')),
+          onError: (e, stack) {
+            AppLogger.error("Failed to load messages", e, stack, "ChatCubit");
+            emit(ChatError('Failed to load messages: $e'));
+          },
         );
   }
 
@@ -269,6 +214,43 @@ class ChatCubit extends Cubit<ChatState> {
 
       final String senderName = _auth.currentUser?.displayName ?? 'User';
 
+      // Update parent conversation document metadata FIRST so that
+      // security rules on the messages subcollection validate participants successfully
+      final Map<String, dynamic> convData = {
+        'chatId': chatId,
+        'conversationId': chatId,
+        'lastMessage': trimmed,
+        'text': trimmed,
+        'lastMessageTime': FieldValue.serverTimestamp(),
+        'lastMessageTimestamp': FieldValue.serverTimestamp(),
+        'timestamp': FieldValue.serverTimestamp(),
+        'lastSenderId': currentUserId,
+        'lastMessageSenderId': currentUserId,
+        'participants': [currentUserId, receiverId],
+        'participantIds': [currentUserId, receiverId],
+        'participantNames': {
+          currentUserId: senderName,
+          receiverId: receiverName,
+        },
+        'participantRoles': {
+          receiverId: receiverRole,
+        },
+        'name_$currentUserId': senderName,
+        'name_$receiverId': receiverName,
+        'role_$receiverId': receiverRole,
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+
+      if (orderId.isNotEmpty) {
+        convData['orderId'] = orderId;
+      }
+      if (receiverId.isNotEmpty) {
+        convData['unreadCount_$receiverId'] = FieldValue.increment(1);
+      }
+      convData['unreadCount_$currentUserId'] = 0;
+
+      await _firestore.collection('chats').doc(chatId).set(convData, SetOptions(merge: true));
+
       await msgRef.set({
         'id': messageId,
         'messageId': messageId,
@@ -283,32 +265,6 @@ class ChatCubit extends Cubit<ChatState> {
         'chatId': chatId,
         'conversationId': chatId,
       });
-
-      // Update parent conversation document metadata
-      final Map<String, dynamic> convData = {
-        'chatId': chatId,
-        'conversationId': chatId,
-        'lastMessage': trimmed,
-        'text': trimmed,
-        'lastMessageTime': FieldValue.serverTimestamp(),
-        'lastMessageTimestamp': FieldValue.serverTimestamp(),
-        'timestamp': FieldValue.serverTimestamp(),
-        'lastSenderId': currentUserId,
-        'lastMessageSenderId': currentUserId,
-        'participants': [currentUserId, receiverId],
-        'participantIds': [currentUserId, receiverId],
-        'updatedAt': FieldValue.serverTimestamp(),
-      };
-
-      if (orderId.isNotEmpty) {
-        convData['orderId'] = orderId;
-      }
-      if (receiverId.isNotEmpty) {
-        convData['unreadCount_$receiverId'] = FieldValue.increment(1);
-      }
-      convData['unreadCount_$currentUserId'] = 0;
-
-      await _firestore.collection('chats').doc(chatId).set(convData, SetOptions(merge: true));
 
       // Deterministic notification to receiver
       if (receiverId.isNotEmpty) {
@@ -338,7 +294,8 @@ class ChatCubit extends Cubit<ChatState> {
           receiverRole: targetCollection,
         );
       }
-    } catch (e) {
+    } catch (e, stack) {
+      AppLogger.error("Message not sent", e, stack, "ChatCubit");
       emit(ChatError('Message not sent. Please try again.'));
       await Future.delayed(const Duration(seconds: 2));
       if (current is ChatLoaded) emit(current.copyWith(isSending: false));
@@ -368,7 +325,9 @@ class ChatCubit extends Cubit<ChatState> {
       );
 
       await batch.commit();
-    } catch (_) {}
+    } catch (e, stack) {
+      AppLogger.error("Failed to mark messages as read", e, stack, "ChatCubit");
+    }
   }
 
   @override
@@ -707,7 +666,7 @@ class _MessageBubble extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withValues(alpha: 0.06),
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),
@@ -735,7 +694,7 @@ class _MessageBubble extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 10.5,
                     color: isMe
-                        ? Colors.white.withOpacity(0.65)
+                        ? Colors.white.withValues(alpha: 0.65)
                         : const Color(0xFF9CA3AF),
                   ),
                 ),
@@ -746,7 +705,7 @@ class _MessageBubble extends StatelessWidget {
                     size: 13,
                     color: message.isRead
                         ? Colors.lightBlueAccent
-                        : Colors.white.withOpacity(0.65),
+                        : Colors.white.withValues(alpha: 0.65),
                   ),
                 ],
               ],
@@ -821,7 +780,7 @@ class _EmptyChat extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: const Color(0xFF4F46E5).withOpacity(0.08),
+                color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -988,7 +947,7 @@ class _BrokerAvatar extends StatelessWidget {
     if (avatarUrl != null && avatarUrl!.isNotEmpty) {
       return CircleAvatar(
         radius: radius,
-        backgroundImage: NetworkImage(avatarUrl!),
+        backgroundImage: CachedNetworkImageProvider(avatarUrl!),
         backgroundColor: const Color(0xFFE0E7FF),
       );
     }

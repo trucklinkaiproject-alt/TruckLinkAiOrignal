@@ -91,7 +91,7 @@ class MyReviewsPage extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: primaryColor.withOpacity(0.12),
+                          color: primaryColor.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -118,6 +118,7 @@ class MyReviewsPage extends StatelessWidget {
                         .doc(effectiveUserId)
                         .collection("Reviews")
                         .orderBy("created_at", descending: true)
+                        .limit(50)
                         .snapshots(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting &&
@@ -235,7 +236,7 @@ class MyReviewsPage extends StatelessWidget {
                                 shrinkWrap: true,
                                 physics: const NeverScrollableScrollPhysics(),
                                 itemCount: docs.length,
-                                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                                separatorBuilder: (_, _) => const SizedBox(height: 12),
                                 itemBuilder: (context, index) {
                                   final data = docs[index].data() as Map<String, dynamic>;
                                   final String reviewerName =
@@ -292,7 +293,7 @@ class MyReviewsPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 14,
             offset: const Offset(0, 4),
           ),
@@ -338,7 +339,7 @@ class MyReviewsPage extends StatelessWidget {
           Container(
             height: 90,
             width: 1,
-            color: Colors.grey.withOpacity(0.2),
+            color: Colors.grey.withValues(alpha: 0.2),
             margin: const EdgeInsets.symmetric(horizontal: 14),
           ),
 
@@ -442,10 +443,10 @@ class MyReviewsPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.grey.withOpacity(0.12)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.12)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -460,7 +461,7 @@ class MyReviewsPage extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 20,
-                backgroundColor: primaryColor.withOpacity(0.12),
+                backgroundColor: primaryColor.withValues(alpha: 0.12),
                 child: Text(
                   reviewerName.trim().isNotEmpty
                       ? reviewerName.trim()[0].toUpperCase()
@@ -495,7 +496,7 @@ class MyReviewsPage extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: primaryColor.withOpacity(0.08),
+                              color: primaryColor.withValues(alpha: 0.08),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
@@ -568,7 +569,7 @@ class MyReviewsPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -580,7 +581,7 @@ class MyReviewsPage extends StatelessWidget {
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: primaryColor.withOpacity(0.08),
+              color: primaryColor.withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
             child: Icon(Icons.star_border_rounded, color: primaryColor, size: 32),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class BackArrowButton extends StatelessWidget {
   final VoidCallback onTap;
-  const BackArrowButton({required this.onTap});
+  const BackArrowButton({super.key, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,7 @@ class BackArrowButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withValues(alpha: 0.06),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),

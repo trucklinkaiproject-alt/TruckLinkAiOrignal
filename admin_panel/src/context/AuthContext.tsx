@@ -1,9 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { 
+import {
   User as FirebaseUser,
   onAuthStateChanged,
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   signOut as firebaseSignOut
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
@@ -17,7 +16,6 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  registerInitialAdmin: (uid: string, email: string, name: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,6 +31,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setCurrentUser(user);
       if (user) {
         try {
+          // Force-refresh the token to get the latest custom claims
+          const idTokenResult = await user.getIdTokenResult(/* forceRefresh */ true);
+          const hasAdminClaim = idTokenResult.claims['admin'] === true;
+
+          if (!hasAdminClaim) {
+            // Not an admin — do NOT auto-promote based on email
+            setAdminProfile(null);
+            setIsAdmin(false);
+            setLoading(false);
+            return;
+          }
+
+          // Verify admin doc exists and is not suspended
           const adminDocRef = doc(db, 'Admins', user.uid);
           const adminSnap = await getDoc(adminDocRef);
 
@@ -41,37 +52,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (data.status !== 'suspended') {
               setAdminProfile({ ...data, uid: user.uid });
               setIsAdmin(true);
-              // Update last login
+              // Update last login timestamp
               await setDoc(adminDocRef, { lastLoginAt: serverTimestamp() }, { merge: true });
             } else {
               setAdminProfile(null);
               setIsAdmin(false);
             }
           } else {
-            // Check if user is recognized admin or default fallback for initial setup
-            // For production setup, if this is an authorized super-user email, register admin doc
-            const defaultAdminEmail = 'admin@trucklink.ai';
-            if (user.email === defaultAdminEmail || user.email?.includes('admin')) {
-              const newAdmin: AdminUser = {
-                uid: user.uid,
-                email: user.email || '',
-                displayName: user.displayName || 'Super Admin',
-                role: 'superadmin',
-                status: 'active',
-                createdAt: serverTimestamp(),
-                lastLoginAt: serverTimestamp(),
-              };
-              await setDoc(adminDocRef, newAdmin);
-              setAdminProfile(newAdmin);
-              setIsAdmin(true);
-            } else {
-              // Not an admin in Admins collection
-              setAdminProfile(null);
-              setIsAdmin(false);
-            }
+            // Has admin claim but no Admins doc — treat as unauthorized
+            setAdminProfile(null);
+            setIsAdmin(false);
           }
         } catch (error) {
           console.error('Error verifying admin permissions:', error);
+          setAdminProfile(null);
           setIsAdmin(false);
         }
       } else {
@@ -99,22 +93,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsAdmin(false);
   };
 
-  const registerInitialAdmin = async (uid: string, email: string, name: string) => {
-    const adminDocRef = doc(db, 'Admins', uid);
-    const newAdmin: AdminUser = {
-      uid,
-      email,
-      displayName: name,
-      role: 'superadmin',
-      status: 'active',
-      createdAt: serverTimestamp(),
-      lastLoginAt: serverTimestamp(),
-    };
-    await setDoc(adminDocRef, newAdmin);
-    setAdminProfile(newAdmin);
-    setIsAdmin(true);
-  };
-
   return (
     <AuthContext.Provider
       value={{
@@ -124,7 +102,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         loading,
         login,
         logout,
-        registerInitialAdmin,
       }}
     >
       {children}

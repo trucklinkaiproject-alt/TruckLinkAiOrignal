@@ -10,11 +10,10 @@ class VerifyEmailPage extends StatefulWidget {
   const VerifyEmailPage({
     super.key,
     required this.email,
-    required this.password,
+    // Password is no longer stored — the user stays signed-in until email is verified.
   });
 
   final String email;
-  final String password;
 
   @override
   State<VerifyEmailPage> createState() => _VerifyEmailPageState();
@@ -86,7 +85,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                           width: badgeSize,
                           height: badgeSize,
                           decoration: BoxDecoration(
-                            color: Appcolors.primaryBlue.withOpacity(0.1),
+                            color: Appcolors.primaryBlue.withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -149,7 +148,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                                       backgroundColor: Appcolors.primaryBlue,
                                       disabledBackgroundColor: Appcolors
                                           .primaryBlue
-                                          .withOpacity(0.6),
+                                          .withValues(alpha: 0.6),
                                       elevation: 0,
                                       shape: RoundedRectangleBorder(
                                         borderRadius:
@@ -162,8 +161,6 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                                             context
                                                 .read<AuthCubit>()
                                                 .checkEmailVerified(
-                                                  email: widget.email,
-                                                  password: widget.password,
                                                   role: context
                                                       .read<AuthCubit>()
                                                       .selectedRole,
@@ -202,10 +199,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                                       : () {
                                           context
                                               .read<AuthCubit>()
-                                              .resendVerificationEmail(
-                                                email: widget.email,
-                                                password: widget.password,
-                                              );
+                                              .resendVerificationEmail();
                                         },
                                   child: Text(
                                     "Resend email",
@@ -228,12 +222,12 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                                               .read<AuthCubit>()
                                               .cancelSignUp(
                                                 email: widget.email,
-                                                password: widget.password,
+                                                password: '',
                                               );
                                           if (context.mounted) {
                                             Navigator.pop(
                                               context,
-                                            ); // back to SignUpPage, form still filled
+                                            );
                                           }
                                         },
                                   child: const Text(

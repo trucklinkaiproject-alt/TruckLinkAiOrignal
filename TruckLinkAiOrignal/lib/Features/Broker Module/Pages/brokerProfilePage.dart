@@ -81,7 +81,7 @@ class BrokerProfilePage extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 50,
-                    backgroundColor: Appcolors.secondaryPurple.withOpacity(0.1),
+                    backgroundColor: Appcolors.secondaryPurple.withValues(alpha: 0.1),
                     child: Icon(
                       Icons.person,
                       size: 50,

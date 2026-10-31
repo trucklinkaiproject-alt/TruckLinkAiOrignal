@@ -13,8 +13,8 @@ import 'package:trucklinkai_orignal/Features/Auth/Widgets/pillTextField.dart';
 import 'package:trucklinkai_orignal/Features/Auth/Widgets/roleCard.dart';
 import 'package:trucklinkai_orignal/Features/Auth/Widgets/selectionLabel.dart';
 import 'package:trucklinkai_orignal/Features/Broker%20Module/Pages/brokernavbar.dart';
+import 'package:trucklinkai_orignal/Features/Driver%20Module/Pages/transporterHomePage.dart';
 import 'package:trucklinkai_orignal/Features/User%20Module/Widgets/shipperbottomnavbar.dart';
-import 'package:trucklinkai_orignal/Features/Transporter%20Module/Pages/transporterHomePage.dart';
 
 class LogInPage extends StatefulWidget {
   const LogInPage({super.key});
@@ -77,7 +77,6 @@ class _LogInPageState extends State<LogInPage> {
             MaterialPageRoute(
               builder: (context) => VerifyEmailPage(
                 email: state.email,
-                password: passwordController.text,
               ),
             ),
           );
@@ -127,14 +126,12 @@ class _LogInPageState extends State<LogInPage> {
                       Center(
                         child: Column(
                           children: [
-                            Container(
+                            SizedBox(
                               width: logoSize,
                               height: logoSize,
-                              
                               child: Image.asset(
                                 "assets/Images/TruckLink AI.png",
                                 fit: BoxFit.contain,
-                                
                               ),
                             ),
                             const SizedBox(height: 16),
@@ -335,7 +332,7 @@ class _LogInPageState extends State<LogInPage> {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Appcolors.primaryBlue,
                                 disabledBackgroundColor:
-                                    Appcolors.primaryBlue.withOpacity(0.6),
+                                    Appcolors.primaryBlue.withValues(alpha: 0.6),
                                 elevation: 0,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(28),

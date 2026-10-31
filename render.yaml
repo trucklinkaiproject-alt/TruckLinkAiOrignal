@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: trucklink-ai-recommendations
+    runtime: python
+    plan: free
+    region: oregon
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: python -m uvicorn ml.api.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: PYTHONPATH
+        value: .
+      - key: ENVIRONMENT
+        value: production
+      - key: MAX_ACCEPTABLE_DRIVER_DISTANCE_KM
+        value: "150.0"
+      - key: TOP_K_RECOMMENDATIONS
+        value: "3"
+      - key: FIREBASE_CREDENTIALS_JSON
+        sync: false
+

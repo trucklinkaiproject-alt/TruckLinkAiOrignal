@@ -31,8 +31,9 @@ export const Drivers: React.FC = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
 
-  const { adminProfile } = useAuth();
-  const adminEmail = adminProfile?.email || 'admin@trucklink.ai';
+  const { adminProfile, currentUser } = useAuth();
+  const adminEmail = currentUser?.email || adminProfile?.email || 'admin@trucklink.ai';
+  const adminId = currentUser?.uid || adminProfile?.uid || 'admin';
 
   useEffect(() => {
     const unsub = subscribeDrivers((data) => {
@@ -46,7 +47,7 @@ export const Drivers: React.FC = () => {
     const newStatus = driver.status === 'blocked' ? 'active' : 'blocked';
     setActionLoading(true);
     try {
-      await updateDriverStatus(driver.id, newStatus, adminEmail);
+      await updateDriverStatus(driver.id, newStatus, adminId, adminEmail);
     } catch (err) {
       console.error('Failed to update driver status:', err);
     } finally {
@@ -58,7 +59,7 @@ export const Drivers: React.FC = () => {
     if (!selectedDriver) return;
     setActionLoading(true);
     try {
-      await deleteDriverDoc(selectedDriver.id, adminEmail);
+      await deleteDriverDoc(selectedDriver.id, adminId, adminEmail);
       setIsDeleteModalOpen(false);
       setSelectedDriver(null);
     } catch (err) {

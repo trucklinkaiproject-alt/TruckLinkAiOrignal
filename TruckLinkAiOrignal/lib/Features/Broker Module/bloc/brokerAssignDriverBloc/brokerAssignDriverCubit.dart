@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:trucklinkai_orignal/Core/Services/appLogger.dart';
 import 'package:trucklinkai_orignal/Core/Services/notificationService.dart';
 import 'package:trucklinkai_orignal/Features/Broker Module/bloc/brokerAssignDriverBloc/brokerAssignDriverState.dart';
 
@@ -89,22 +90,33 @@ class BrokerAssignDriverCubit extends Cubit<BrokerAssignDriverState> {
 
       emit(BrokerAssignDriverSendingState(driverId));
 
-      // PART 28: Duplicate Active Offer Protection
-      final existingOfferCheck = await _firestore
+      // Phase 2.6: Prevent multiple active driver offers for the same order across ALL drivers.
+      final orderDoc = await _firestore.collection("Orders").doc(orderId).get();
+      final orderStatus = (orderDoc.data()?['status'] ?? '').toString().toLowerCase();
+      if (orderStatus == 'accepted_by_driver' ||
+          orderStatus == 'in_transit' ||
+          orderStatus == 'completed') {
+        emit(BrokerAssignDriverErrorState(
+          "Order #$orderNo has already been assigned or completed ($orderStatus).",
+        ));
+        return;
+      }
+
+      final anyActiveOffers = await _firestore
           .collection("Orders")
           .doc(orderId)
           .collection("DriverOffers")
-          .where("driver_id", isEqualTo: driverId)
+          .where("status", whereIn: ["pending", "accepted_by_driver"])
           .get();
 
-      for (var doc in existingOfferCheck.docs) {
-        final status = (doc.data()['status'] ?? '').toString();
-        if (status == 'pending' || status == 'accepted_by_driver') {
-          emit(BrokerAssignDriverErrorState(
-            "An active offer ($status) already exists for $driverName on Order #$orderNo.",
-          ));
-          return;
-        }
+      if (anyActiveOffers.docs.isNotEmpty) {
+        final activeDoc = anyActiveOffers.docs.first.data();
+        final activeDriverName = activeDoc['driver_name'] ?? 'another driver';
+        final activeStatus = activeDoc['status'];
+        emit(BrokerAssignDriverErrorState(
+          "An active offer ($activeStatus) already exists for $activeDriverName on Order #$orderNo. Wait for them to respond or cancel it first.",
+        ));
+        return;
       }
 
       final String offerId = DateTime.now().millisecondsSinceEpoch.toString();
@@ -176,7 +188,9 @@ class BrokerAssignDriverCubit extends Cubit<BrokerAssignDriverState> {
             'offer_id': offerId,
           },
         );
-      } catch (_) {}
+      } catch (e, stack) {
+        AppLogger.error("Failed to send driver assignment offer notification", e, stack, "BrokerAssignDriverCubit");
+      }
 
       final String driverPhone = (driverData['phone'] ?? driverData['driver_phone'] ?? '').toString();
 
@@ -214,14 +228,15 @@ class BrokerAssignDriverCubit extends Cubit<BrokerAssignDriverState> {
           orderId: orderId,
           orderNo: orderNo,
           senderId: brokerId,
-          receiverRole: 'Broker',
           additionalData: {
             'driver_id': driverId,
             'driver_name': driverName,
             'driver_fare': fareAmount,
           },
         );
-      } catch (_) {}
+      } catch (e, stack) {
+        AppLogger.error("Failed to send broker driver assignment confirmation notification", e, stack, "BrokerAssignDriverCubit");
+      }
 
       if (userUid.isNotEmpty) {
         try {
@@ -231,7 +246,9 @@ class BrokerAssignDriverCubit extends Cubit<BrokerAssignDriverState> {
               .collection("Requests")
               .doc(orderId)
               .update(updateData);
-        } catch (_) {}
+        } catch (e, stack) {
+          AppLogger.error("Failed to update User Request with assigned driver", e, stack, "BrokerAssignDriverCubit");
+        }
 
         try {
           final String notifId = "driver_${orderId}_$driverId";
@@ -252,7 +269,9 @@ class BrokerAssignDriverCubit extends Cubit<BrokerAssignDriverState> {
               'driver_phone': driverPhone,
             },
           );
-        } catch (_) {}
+        } catch (e, stack) {
+          AppLogger.error("Failed to send user driver assigned notification", e, stack, "BrokerAssignDriverCubit");
+        }
       }
 
       if (!isClosed) {

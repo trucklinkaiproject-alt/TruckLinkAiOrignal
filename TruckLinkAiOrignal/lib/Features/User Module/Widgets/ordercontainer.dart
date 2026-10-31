@@ -82,7 +82,7 @@ class OrderContainer extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.25),
+            color: Colors.grey.withValues(alpha: 0.25),
             spreadRadius: 1,
             blurRadius: 4,
             offset: const Offset(0, 2),
@@ -124,7 +124,7 @@ class OrderContainer extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(6),
-                  color: clr.withOpacity(0.1),
+                  color: clr.withValues(alpha: 0.1),
                 ),
                 child: Text(
                   status,

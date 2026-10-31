@@ -34,7 +34,7 @@
 // // //           borderRadius: BorderRadius.circular(10),
 // // //           boxShadow: [
 // // //             BoxShadow(
-// // //               color: Colors.grey.withOpacity(0.3),
+// // //               color: Colors.grey.withValues(alpha: 0.3),
 // // //               spreadRadius: 1,
 // // //               blurRadius: 1,
 // // //               offset: Offset(0, 1), // changes position of shadow
@@ -177,7 +177,7 @@
 // //           borderRadius: BorderRadius.circular(10),
 // //           boxShadow: [
 // //             BoxShadow(
-// //               color: Colors.grey.withOpacity(0.3),
+// //               color: Colors.grey.withValues(alpha: 0.3),
 // //               spreadRadius: 1,
 // //               blurRadius: 1,
 // //               offset: const Offset(0, 1),
@@ -332,7 +332,7 @@
 //           borderRadius: BorderRadius.circular(10),
 //           boxShadow: [
 //             BoxShadow(
-//               color: Colors.grey.withOpacity(0.3),
+//               color: Colors.grey.withValues(alpha: 0.3),
 //               spreadRadius: 1,
 //               blurRadius: 1,
 //               offset: const Offset(0, 1),
@@ -506,7 +506,7 @@ class BrokerIcomingReqContainer extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 10,
               offset: const Offset(0, 3),
             ),
@@ -538,7 +538,7 @@ class BrokerIcomingReqContainer extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    color: Appcolors.secondaryPurple.withOpacity(0.12),
+                    color: Appcolors.secondaryPurple.withValues(alpha: 0.12),
                   ),
                   child: Text(
                     "New",
@@ -589,7 +589,7 @@ class BrokerIcomingReqContainer extends StatelessWidget {
             ),
 
             const SizedBox(height: 10),
-            Divider(height: 1, color: Colors.grey.withOpacity(0.12)),
+            Divider(height: 1, color: Colors.grey.withValues(alpha: 0.12)),
             const SizedBox(height: 10),
 
             // -------- Weight / item type / date --------
@@ -645,7 +645,7 @@ class BrokerIcomingReqContainer extends StatelessWidget {
                         child: OutlinedButton(
                           style: OutlinedButton.styleFrom(
                             foregroundColor: Colors.red[700],
-                            side: BorderSide(color: Colors.red.withOpacity(0.4)),
+                            side: BorderSide(color: Colors.red.withValues(alpha: 0.4)),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(19),
                             ),

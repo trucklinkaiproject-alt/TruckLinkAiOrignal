@@ -33,8 +33,9 @@ export const Brokers: React.FC = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
 
-  const { adminProfile } = useAuth();
-  const adminEmail = adminProfile?.email || 'admin@trucklink.ai';
+  const { adminProfile, currentUser } = useAuth();
+  const adminEmail = currentUser?.email || adminProfile?.email || 'admin@trucklink.ai';
+  const adminId = currentUser?.uid || adminProfile?.uid || 'admin';
 
   useEffect(() => {
     const unsub = subscribeBrokers((data) => {
@@ -47,7 +48,7 @@ export const Brokers: React.FC = () => {
   const handleToggleVerify = async (broker: BrokerProfile) => {
     setActionLoading(true);
     try {
-      await verifyBroker(broker.id, !broker.isVerified, adminEmail);
+      await verifyBroker(broker.id, !broker.isVerified, adminId, adminEmail);
     } catch (err) {
       console.error('Failed to update verification:', err);
     } finally {
@@ -59,7 +60,7 @@ export const Brokers: React.FC = () => {
     const newStatus = broker.status === 'blocked' ? 'active' : 'blocked';
     setActionLoading(true);
     try {
-      await updateBrokerStatus(broker.id, newStatus, adminEmail);
+      await updateBrokerStatus(broker.id, newStatus, adminId, adminEmail);
     } catch (err) {
       console.error('Failed to update status:', err);
     } finally {
@@ -71,7 +72,7 @@ export const Brokers: React.FC = () => {
     if (!selectedBroker) return;
     setActionLoading(true);
     try {
-      await deleteBrokerDoc(selectedBroker.id, adminEmail);
+      await deleteBrokerDoc(selectedBroker.id, adminId, adminEmail);
       setIsDeleteModalOpen(false);
       setSelectedBroker(null);
     } catch (err) {

@@ -77,7 +77,7 @@ class _ShipperProfilePageState extends State<ShipperProfilePage> {
                 children: [
                   CircleAvatar(
                     radius: 50,
-                    backgroundColor: Appcolors.primaryBlue.withOpacity(0.1),
+                    backgroundColor: Appcolors.primaryBlue.withValues(alpha: 0.1),
                     child: Icon(
                       Icons.person,
                       size: 50,

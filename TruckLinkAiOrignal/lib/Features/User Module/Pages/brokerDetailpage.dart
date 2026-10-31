@@ -587,7 +587,7 @@ class _BrokerDetailPageState extends State<BrokerDetailPage> {
                             borderRadius: BorderRadius.circular(18),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.04),
+                                color: Colors.black.withValues(alpha: 0.04),
                                 blurRadius: 10,
                                 offset: const Offset(0, 3),
                               ),
@@ -657,7 +657,7 @@ class _BrokerDetailPageState extends State<BrokerDetailPage> {
                             width: double.infinity,
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
-                              color: Appcolors.secondaryPurple.withOpacity(0.1),
+                              color: Appcolors.secondaryPurple.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(18),
                             ),
                             child: Row(
@@ -711,12 +711,38 @@ class _BrokerDetailPageState extends State<BrokerDetailPage> {
 
                         SizedBox(height: isMobile ? 26 : 32),
 
-                        BlocBuilder<CreateReqCubit, CreateReqState>(
+                        BlocConsumer<CreateReqCubit, CreateReqState>(
+                          listener: (context, state) {
+                            if (state is CreateReqSuccessState) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(state.successMessage),
+                                  backgroundColor: Appcolors.tertiaryGreen,
+                                  duration: const Duration(seconds: 3),
+                                ),
+                              );
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const ShipperBottomNavBar(),
+                                ),
+                                (route) => false,
+                              );
+                            } else if (state is CreateReqErrorState) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(state.errorMessage),
+                                  backgroundColor: Colors.red.shade700,
+                                  duration: const Duration(seconds: 4),
+                                ),
+                              );
+                            }
+                          },
                           builder: (context, state) {
                             final bool loading = state is CreateReqLoadingState;
 
                             return ContinueButton(
-                              text: "Send Request",
+                              text: loading ? "Sending Request..." : "Send Request",
                               clr: Appcolors.primaryBlue,
                               isLoading: loading,
                               onTap: loading
@@ -724,19 +750,7 @@ class _BrokerDetailPageState extends State<BrokerDetailPage> {
                                   : () async {
                                       await context
                                           .read<CreateReqCubit>()
-                                          .createRequestToBroker(
-                                            brokerId,
-                                          );
-
-                                      if (!mounted) return;
-
-                                      Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              const ShipperBottomNavBar(),
-                                        ),
-                                      );
+                                          .createRequestToBroker(brokerId);
                                     },
                             );
                           },
@@ -781,7 +795,7 @@ class _BrokerDetailPageState extends State<BrokerDetailPage> {
                                   borderRadius: BorderRadius.circular(18),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.04),
+                                      color: Colors.black.withValues(alpha: 0.04),
                                       blurRadius: 10,
                                       offset: const Offset(0, 3),
                                     ),
@@ -821,7 +835,7 @@ class _BrokerDetailPageState extends State<BrokerDetailPage> {
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
                               itemCount: docs.length,
-                              separatorBuilder: (_, __) =>
+                              separatorBuilder: (_, _) =>
                                   const SizedBox(height: 12),
                               itemBuilder: (context, index) {
                                 final rData =
@@ -901,7 +915,7 @@ class _DetailRow extends StatelessWidget {
             width: 30,
             height: 30,
             decoration: BoxDecoration(
-              color: Appcolors.primaryBlue.withOpacity(0.1),
+              color: Appcolors.primaryBlue.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(9),
             ),
             child: Icon(icon, size: 15, color: Appcolors.primaryBlue),
@@ -958,7 +972,7 @@ class _ReviewCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),

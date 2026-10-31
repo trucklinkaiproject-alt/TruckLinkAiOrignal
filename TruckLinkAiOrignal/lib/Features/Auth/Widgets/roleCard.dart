@@ -10,6 +10,7 @@ class RoleCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const RoleCard({
+    super.key,
     required this.icon,
     required this.title,
     required this.subtitle,
@@ -27,10 +28,10 @@ class RoleCard extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
         decoration: BoxDecoration(
-          color: selected ? color.withOpacity(0.08) : Colors.white,
+          color: selected ? color.withValues(alpha: 0.08) : Colors.white,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: selected ? color : Colors.grey.withOpacity(0.25),
+            color: selected ? color : Colors.grey.withValues(alpha: 0.25),
             width: selected ? 1.6 : 1,
           ),
         ),

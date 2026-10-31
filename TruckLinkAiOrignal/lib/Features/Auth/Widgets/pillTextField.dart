@@ -11,6 +11,7 @@ class PillTextField extends StatelessWidget {
   final Widget? suffixIcon;
 
   const PillTextField({
+    super.key,
     required this.controller,
     required this.hintText,
     this.keyboardType,
@@ -46,7 +47,7 @@ class PillTextField extends StatelessWidget {
           borderRadius: BorderRadius.circular(28),
           borderSide: filled
               ? BorderSide.none
-              : BorderSide(color: Colors.grey.withOpacity(0.3)),
+              : BorderSide(color: Colors.grey.withValues(alpha: 0.3)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(28),

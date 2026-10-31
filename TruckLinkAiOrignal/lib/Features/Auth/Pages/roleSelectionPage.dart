@@ -45,14 +45,12 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                  
-                  Container(
+                  SizedBox(
                     width: logoSize,
                     height: logoSize,
-                    
                     child: Image.asset(
                       "assets/Images/Only Logo.png",
                       fit: BoxFit.fill,
-                     
                     ),
                   ),
 

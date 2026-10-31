@@ -60,7 +60,6 @@ class _SignUpPageState extends State<SignUpPage> {
             MaterialPageRoute(
               builder: (context) => VerifyEmailPage(
                 email: emailController.text,
-                password: passwordController.text,
               ),
             ),
           );
@@ -110,14 +109,12 @@ class _SignUpPageState extends State<SignUpPage> {
                       Center(
                         child: Column(
                           children: [
-                            Container(
+                            SizedBox(
                               width: logoSize,
                               height: logoSize,
-                              
                               child: Image.asset(
                                 "assets/Images/TruckLink AI.png",
                                 fit: BoxFit.contain,
-                                
                               ),
                             ),
                             const SizedBox(height: 16),
@@ -234,7 +231,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Appcolors.primaryBlue,
                                 disabledBackgroundColor:
-                                    Appcolors.primaryBlue.withOpacity(0.6),
+                                    Appcolors.primaryBlue.withValues(alpha: 0.6),
                                 elevation: 0,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(28),
@@ -254,6 +251,32 @@ class _SignUpPageState extends State<SignUpPage> {
                                               .isNotEmpty) {
                                         if (passwordController.text ==
                                             confirmPasswordController.text) {
+                                          if (passwordController.text.length < 8) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  "Password must be at least 8 characters long",
+                                                ),
+                                              ),
+                                            );
+                                            return;
+                                          }
+                                          if (!RegExp(
+                                            r'^[\w\.-]+@[\w\.-]+\.\w{2,}$',
+                                          ).hasMatch(emailController.text.trim())) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  "Please enter a valid email address",
+                                                ),
+                                              ),
+                                            );
+                                            return;
+                                          }
                                           if (!RegExp(
                                             r'^03[0-9]{9}$',
                                           ).hasMatch(phoneController.text)) {

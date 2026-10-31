@@ -1,0 +1,37 @@
+{
+  "model_type": "RandomForestClassifier",
+  "library": "scikit-learn",
+  "trained_at_utc": "2026-10-30T22:10:30.269959+00:00",
+  "train_samples": 3608,
+  "test_samples": 912,
+  "feature_count": 17,
+  "features": [
+    "nearest_driver_distance_km",
+    "active_drivers_count",
+    "broker_rating",
+    "broker_acceptance_rate",
+    "broker_completion_rate",
+    "broker_cancellation_rate",
+    "total_requests",
+    "distance_decay_score",
+    "broker_quality_index",
+    "vehicle_truck",
+    "vehicle_van",
+    "vehicle_trailer",
+    "vehicle_container",
+    "vehicle_pickup_truck",
+    "vehicle_shahzore",
+    "vehicle_loader_rickshaw",
+    "vehicle_other"
+  ],
+  "evaluation_metrics": {
+    "roc_auc": 0.9962,
+    "average_precision": 0.9102,
+    "precision": 0.7966,
+    "recall": 1.0,
+    "f1": 0.8868,
+    "precision@3": 0.3481,
+    "ndcg@3": 1.0
+  },
+  "target_definition": "1 if broker accepted and completed shipment with eligible active driver nearby; 0 otherwise."
+}
