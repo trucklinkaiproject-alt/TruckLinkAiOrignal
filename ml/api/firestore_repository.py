@@ -127,7 +127,7 @@ class FirestoreRepository:
 
         try:
             # 1. DriverNetwork subcollection
-            subcol = self.db.collection("Broker").doc(broker_id).collection("DriverNetwork").stream()
+            subcol = self.db.collection("Broker").document(broker_id).collection("DriverNetwork").stream()
             for doc in subcol:
                 d = doc.to_dict() or {}
                 d_id = doc.id
