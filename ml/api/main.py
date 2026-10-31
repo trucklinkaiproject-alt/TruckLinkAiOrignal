@@ -203,4 +203,5 @@ if __name__ == "__main__":
     # Render and Heroku bind to dynamic $PORT
     port = int(os.getenv("PORT", "8000"))
     logger.info(f"Starting TruckLink AI API server on 0.0.0.0:{port}...")
-    uvicorn.run("api.main:app", host="0.0.0.0", port=port, reload=False)
+    app_target = "ml.api.main:app" if os.path.exists("ml") else "api.main:app"
+    uvicorn.run(app_target, host="0.0.0.0", port=port, reload=False)
