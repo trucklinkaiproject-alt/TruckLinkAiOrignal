@@ -86,16 +86,28 @@ class FcmTokenService {
     _currentRole = role;
 
     try {
-      // On platforms where FCM push is supported (Android, iOS, Web)
+      // 1. Check notification permissions first. If denied or blocked, skip token registration silently.
+      try {
+        final settings = await _messaging.getNotificationSettings();
+        if (settings.authorizationStatus == AuthorizationStatus.denied) {
+          debugPrint('[FcmTokenService] Notifications declined by user. Silent mode active.');
+          return;
+        }
+      } catch (_) {
+        // Querying settings may not be supported on all desktop/web platforms, continue safely
+      }
+
+      // 2. Safely attempt to retrieve token
       String? token;
       try {
         token = await _messaging.getToken();
       } catch (e) {
-        debugPrint('[FcmTokenService] FCM getToken error: $e');
+        // Handle blocked permission or unsupported platform gracefully without throwing
+        debugPrint('[FcmTokenService] Push notifications unavailable on this device.');
+        return;
       }
 
       if (token == null || token.isEmpty) {
-        debugPrint('[FcmTokenService] No FCM token available for device');
         return;
       }
 
@@ -119,11 +131,10 @@ class FcmTokenService {
         'last_seen_at': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
 
-      debugPrint('[FcmTokenService] Successfully registered FCM token for $role: $uid (Doc: $docId)');
-
+      debugPrint('[FcmTokenService] Registered FCM token for $role: $uid');
       _startTokenRefreshListener();
     } catch (e) {
-      debugPrint('[FcmTokenService] Failed to register FCM token: $e');
+      debugPrint('[FcmTokenService] Notice: Token registration skipped: $e');
     }
   }
 

@@ -44,17 +44,23 @@ class PushNotificationService {
 
     try {
       // 1. Request notification permissions
-      await requestPermissions();
+      final bool isAuthorized = await requestPermissions();
+      if (!isAuthorized) {
+        debugPrint('[PushNotificationService] Notification permission not granted. Running in silent mode.');
+        return;
+      }
 
-      // 2. Configure Foreground Presentation Options
-      try {
-        await _messaging.setForegroundNotificationPresentationOptions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
-      } catch (e) {
-        debugPrint('[PushNotificationService] setForegroundNotificationPresentationOptions error: $e');
+      // 2. Configure Foreground Presentation Options (iOS / macOS only)
+      if (!kIsWeb && (Platform.isIOS || Platform.isMacOS)) {
+        try {
+          await _messaging.setForegroundNotificationPresentationOptions(
+            alert: true,
+            badge: true,
+            sound: true,
+          );
+        } catch (e) {
+          debugPrint('[PushNotificationService] setForegroundNotificationPresentationOptions notice: $e');
+        }
       }
 
       // 3. Initialize Flutter Local Notifications (Mobile only)
@@ -71,18 +77,22 @@ class PushNotificationService {
         NotificationNavigationService().handleNotificationTap(message.data);
       });
 
-      // 6. Check for initial message from terminated state
-      final RemoteMessage? initialMessage = await _messaging.getInitialMessage();
-      if (initialMessage != null) {
-        debugPrint('[PushNotificationService] App launched from terminated notification tap');
-        NotificationNavigationService().setPendingNotification(initialMessage.data);
+      // 6. Check for initial message from terminated state (Mobile only)
+      if (!kIsWeb) {
+        try {
+          final RemoteMessage? initialMessage = await _messaging.getInitialMessage();
+          if (initialMessage != null) {
+            debugPrint('[PushNotificationService] App launched from terminated notification tap');
+            NotificationNavigationService().setPendingNotification(initialMessage.data);
+          }
+        } catch (_) {}
       }
     } catch (e) {
-      debugPrint('[PushNotificationService] Initialization error: $e');
+      debugPrint('[PushNotificationService] Safe initialization notice: $e');
     }
   }
 
-  /// Request Notification Permissions (Handles Android 13+ & iOS)
+  /// Request Notification Permissions (Handles Android 13+, iOS & Web)
   Future<bool> requestPermissions() async {
     try {
       final settings = await _messaging.requestPermission(
@@ -98,7 +108,7 @@ class PushNotificationService {
       final isAuthorized = settings.authorizationStatus == AuthorizationStatus.authorized ||
           settings.authorizationStatus == AuthorizationStatus.provisional;
 
-      if (!kIsWeb && Platform.isAndroid) {
+      if (!kIsWeb && Platform.isAndroid && isAuthorized) {
         final androidImplementation =
             _localNotifications.resolvePlatformSpecificImplementation<
                 AndroidFlutterLocalNotificationsPlugin>();
@@ -108,7 +118,7 @@ class PushNotificationService {
       debugPrint('[PushNotificationService] Notification permission status: ${settings.authorizationStatus}');
       return isAuthorized;
     } catch (e) {
-      debugPrint('[PushNotificationService] Request permission error: $e');
+      debugPrint('[PushNotificationService] Request permission notice: $e');
       return false;
     }
   }

@@ -30,10 +30,20 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // Register top-level background FCM message handler
-  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  if (!kIsWeb) {
+    try {
+      FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    } catch (e) {
+      AppLogger.warn("Failed to register FCM background handler: $e", "Main");
+    }
+  }
 
   // Initialize Push Notification Service (Channels, Local notifications, Permissions)
-  await PushNotificationService().initialize();
+  try {
+    await PushNotificationService().initialize();
+  } catch (e) {
+    AppLogger.warn("Push notification initialization non-fatal notice: $e", "Main");
+  }
 
   if (kIsWeb) {
     try {
