@@ -8,6 +8,7 @@ serviceAccountKey.json
 *.key
 *.cert
 *.p12
+backups/
 
 # Python
 __pycache__/
@@ -42,4 +43,3 @@ desktop.ini
 *.tmp
 crash_*.log
 hs_err_pid*.log
-

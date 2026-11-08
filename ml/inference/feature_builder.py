@@ -151,12 +151,12 @@ def build_candidate_row(
     active_drivers_count: int,
     required_vehicle_type: str,
 ) -> Dict[str, Any]:
-    """Builds a single candidate dictionary ready for feature transformation."""
-    rating = float(broker.get("rating") or broker.get("overall_rating") or 4.5)
-    acceptance_rate = float(broker.get("acceptance_rate") or 85.0)
-    completion_rate = float(broker.get("completion_rate") or 90.0)
-    cancellation_rate = float(broker.get("cancellation_rate") or 10.0)
-    total_requests = int(broker.get("total_requests") or 25)
+    """Builds a single candidate dictionary ready for feature transformation with safe bounds."""
+    rating = float(np.clip(float(broker.get("rating") or broker.get("overall_rating") or 4.5), 1.0, 5.0))
+    acceptance_rate = float(np.clip(float(broker.get("acceptance_rate") or 85.0), 0.0, 100.0))
+    completion_rate = float(np.clip(float(broker.get("completion_rate") or 90.0), 0.0, 100.0))
+    cancellation_rate = float(np.clip(float(broker.get("cancellation_rate") or 10.0), 0.0, 100.0))
+    total_requests = max(0, int(broker.get("total_requests") or 25))
 
     return {
         "broker_id": broker.get("id") or broker.get("broker_id") or "",

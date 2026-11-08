@@ -117,7 +117,7 @@ class FirestoreRepository:
         """
         Fetches all registered drivers for a broker from:
         1. /Broker/{broker_id}/DriverNetwork subcollection
-        2. /Driver collection where broker_id == broker_id
+        2. /Driver collection where broker_id == broker_id OR brokerId == broker_id
         """
         if not self.is_connected or not broker_id:
             return []
@@ -135,17 +135,20 @@ class FirestoreRepository:
                 seen_driver_ids.add(d_id)
                 drivers.append(d)
 
-            # 2. Driver root collection where broker_id == broker_id
-            root_drivers = self.db.collection("Driver").where("broker_id", "==", broker_id).stream()
-            for doc in root_drivers:
-                if doc.id not in seen_driver_ids:
-                    d = doc.to_dict() or {}
-                    d["id"] = doc.id
-                    seen_driver_ids.add(doc.id)
-                    drivers.append(d)
+            # 2. Driver root collection where broker_id == broker_id or brokerId == broker_id
+            for query_field in ("broker_id", "brokerId"):
+                try:
+                    root_drivers = self.db.collection("Driver").where(query_field, "==", broker_id).stream()
+                    for doc in root_drivers:
+                        if doc.id not in seen_driver_ids:
+                            d = doc.to_dict() or {}
+                            d["id"] = doc.id
+                            seen_driver_ids.add(doc.id)
+                            drivers.append(d)
+                except Exception as q_err:
+                    logger.debug(f"Query Driver on {query_field} notice: {q_err}")
 
             return drivers
         except Exception as e:
             logger.error(f"Error fetching drivers for broker {broker_id}: {e}")
             return []
-
